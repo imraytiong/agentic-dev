@@ -28,3 +28,4 @@ Welcome to your central command for AI Agent development. As your Technical Lead
 
 ---
 *Tip: When you're ready to design an agent, let me know and we can draft an architecture spec together using our approved chassis.*
+- 🤖 **[[Agentic Coding Playbook]]** - How to direct AI coding agents (Antigravity/Gemini CLI) to build our architecture safely.

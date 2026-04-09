@@ -23,3 +23,5 @@
 **State/Memory:** Postgres `JSONB` for flexible state. `pgvector` with segregated tables for semantic memory.
 **RAG:** Decoupled. Unstructured.io for ingestion, custom Python/pgvector for retrieval.
 **Workflows:** Hybrid Routing (Semantic + LLM), Dynamic Re-planning, and HITL Evaluator loop with Fast-Fail.
+
+**Development Paradigm:** We practice "Agent-Driven Development". Human engineers act as Technical Directors who write specifications and provide constrained context to AI Coding Agents (like Antigravity CLI or Gemini CLI). The architecture (BaseAgentChassis, strict Pydantic models, externalized prompts) is specifically designed to act as guardrails that prevent AI coding tools from hallucinating infrastructure or breaking system contracts. We enforce Context Scoping, Layer-by-Layer generation, and Test-Driven Defense (TDD) when prompting coding agents.

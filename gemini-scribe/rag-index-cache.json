@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "storeName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-  "lastSync": 1775742998725,
+  "lastSync": 1775743658082,
   "files": {
     "Welcome.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -10,8 +10,8 @@
     },
     "00 - Dashboard.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "c5df880a77ccc1bb166b48899e0da748e6cf62bfa198d0898c1d3d9251a729d1",
-      "lastIndexed": 1775742998725
+      "contentHash": "6c77c79657971e4f210e98e33170a832219cb3fde967a1bf5d3f5a9b1784f827",
+      "lastIndexed": 1775743658082
     },
     "06 - Templates/Agent Architecture Spec.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -67,6 +67,11 @@
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
       "contentHash": "2ade0fcdc64c4a3f35534525e12ac5f413924f46bc24872272b472812f8a88eb",
       "lastIndexed": 1775742942918
+    },
+    "03 - Architecture & Patterns/Agentic Coding Playbook.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "0e919a83e93d22f94b5d1d5f87a91ca72867059b5b53ed745cbb271e2ad21dc9",
+      "lastIndexed": 1775743656238
     }
   },
   "indexingInProgress": false,
