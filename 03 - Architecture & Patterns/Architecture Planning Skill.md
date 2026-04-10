@@ -3,7 +3,7 @@
 This skill provides a structured, iterative workflow for designing complex system architectures, identifying technical gaps, and making strategic engineering decisions.
 
 ## 📝 Note on Origin
-This exact pattern was used to architect the Google ADK Distributed Microservice Chassis, which culminated in the creation of the `[[Developer Guide]]`. This process ensures that high-level abstract decisions are rigorously stress-tested and translated into a clean Developer Experience (DX).
+This exact pattern was used to architect the Google ADK Distributed Microservice Chassis, which culminated in the creation of the `[Developer Guide](Developer%20Guide.md)`. This process ensures that high-level abstract decisions are rigorously stress-tested and translated into a clean Developer Experience (DX).
 
 ## Step-by-Step Workflow
 

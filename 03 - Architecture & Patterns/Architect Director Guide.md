@@ -21,7 +21,7 @@ Do not let the AI guess what a chassis is. You must constrain it strictly to our
 **Your Action:**
 1. Open your Gemini CLI.
 2. Type: `load adk-core-builder`
-3. The CLI will initialize and ask for the spec. Copy the contents of `[[Universal Core Architecture Spec]]` (from the `06 - Templates` folder) and paste it into the prompt.
+3. The CLI will initialize and ask for the spec. Copy the contents of `[Universal Core Architecture Spec](Universal%20Core%20Architecture%20Spec.md)` (from the `06 - Templates` folder) and paste it into the prompt.
 
 ## 2. THINK: The Conductor Plan
 Instruct the CLI: *"Use Conductor to map out the execution plan based on the skill instructions and the spec."*

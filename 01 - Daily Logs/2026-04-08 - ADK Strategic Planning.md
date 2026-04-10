@@ -57,13 +57,13 @@ To keep our agents robust, we will enforce:
 ### F. Agent Lifecycle & Process Management
 - **The Gap:** How do we handle cold starting, graceful shutdowns, health checks, and interrupting runaway agents?
 - **Complementary Pattern:** Leverage ADK's built-in FastAPI wrapper (`get_fast_api_app`) and standard Python `asynccontextmanager` for lifespan events. Use ADK's native `before/after` callbacks for state flushing, and OpenTelemetry for lifecycle tracing.
-- **Decision:** Documented in `[[Agent Lifecycle Management]]`. We will rely on FastAPI lifespan hooks for initialization/shutdown and ADK's native `/health` endpoints for probes.
+- **Decision:** Documented in `[Agent Lifecycle Management](Agent%20Lifecycle%20Management.md)`. We will rely on FastAPI lifespan hooks for initialization/shutdown and ADK's native `/health` endpoints for probes.
 
 ### G. Deployment Strategy: Distributed-First Cluster
 - **Strategic Decision:** We are adopting a **Distributed-First (Microservices)** architecture from day one.
 - **Rationale:** While a monolith is easier to start with, AI agents suffer from unpredictable "Blast Radiuses" (one agent's memory leak or infinite tool loop crashes the whole fleet), resource asymmetry (a routing agent needs fast CPU, a data agent needs massive RAM), and dependency conflicts.
 - **Implementation:** We will build a reusable Python `BaseAgentChassis` component. This shared library will abstract away the distributed plumbing (FastAPI lifecycle, OpenTelemetry, health checks, networking) so the developer only focuses on writing the specific ADK logic (prompts, tools, models). 
-- **See full breakdown:** [[Agent Fleet Deployment Infrastructure]]
+- **See full breakdown:** [Agent Fleet Deployment Infrastructure](Agent%20Fleet%20Deployment%20Infrastructure.md)
 
 ### H. Infrastructure Target: Lightweight & Cloud-Agnostic
 - **Strategic Decision:** We are optimizing for a single developer on a Mac Mini, scaling up to small bare-metal Linux clusters. We will avoid cloud-vendor lock-in (no Vertex AI/Cloud Run dependency).

@@ -21,7 +21,7 @@ The Agent Developers need the `BaseAgentChassis` immediately so they can start t
 Now that the team is coding, you focus on the real infrastructure.
 1. Open your AI CLI (Gemini CLI / Conductor).
 2. Type: `load adk-infra-builder`
-3. Provide the AI with the **`[[Fleet Infrastructure Spec]]`** (found in your `06 - Templates` folder).
+3. Provide the AI with the **`[Fleet Infrastructure Spec](Fleet%20Infrastructure%20Spec.md)`** (found in your `06 - Templates` folder).
 
 The AI CLI is programmed to read the Spec and understand that it only needs to generate the missing Adapters (Postgres, Message Broker, OTel) in the `adapters/` folder and the Docker manifests. It will NOT touch `core/chassis.py`.
 
@@ -31,7 +31,7 @@ The AI will generate the `docker-compose.yml`, `Dockerfile`, `fleet.yaml`, and t
 You must verify the network works:
 1.  **The Spin-Up Test:** Run your deployment command (see "Container Engine Resilience" below). Do Postgres, the Message Broker, and Phoenix start cleanly?
 2.  **The Health Check Test:** Curl the `/health` and `/ready` endpoints of the Chassis to ensure FastAPI is reporting correctly.
-3.  **The Hello World Test:** Deploy `[[Hello Chassis Reference Agent]]` (Sparky) into your network with `mock_infrastructure=False` and verify the telemetry traces appear in Arize Phoenix.
+3.  **The Hello World Test:** Deploy `[Hello Chassis Reference Agent](Hello%20Chassis%20Reference%20Agent)` (Sparky) into your network with `mock_infrastructure=False` and verify the telemetry traces appear in Arize Phoenix.
 
 ---
 

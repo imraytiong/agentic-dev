@@ -15,7 +15,7 @@ require_confirmation:
   - delete_files
   - external_calls
 accessed_files:
-  - "[[.gitignore]]"
+  - "[.gitignore](.gitignore)"
 metadata:
   autoLabeled: true
 ---

@@ -1,7 +1,7 @@
 ---
 links:
-  - "[[Developer Guide]]"
-  - "[[Agent Directing Guide]]"
+  - "[Developer Guide](Developer%20Guide.md)"
+  - "[Agent Directing Guide](Agent%20Directing%20Guide.md)"
 ---
 # Conceptual Guide: Building Agents in Our Ecosystem
 

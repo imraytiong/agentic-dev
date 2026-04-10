@@ -13,14 +13,14 @@ By using `chassis.run_local(mock_infrastructure=True)`, your agent will use in-m
 To get up to speed quickly without being overwhelmed, please read these documents in the following exact order:
 
 ### 1. The Theory
-*   **[[Conceptual Guide - What is an Agent]]**: Read this first. It explains the paradigm shift from traditional software to autonomous agents in simple, non-jargon terms. It covers what you are responsible for vs. what the platform handles for you.
+*   **[Conceptual Guide - What is an Agent](Conceptual%20Guide%20-%20What%20is%20an%20Agent.md)**: Read this first. It explains the paradigm shift from traditional software to autonomous agents in simple, non-jargon terms. It covers what you are responsible for vs. what the platform handles for you.
 
 ### 2. The Code
-*   **[[Developer Guide]]**: This is your daily blueprint. It shows you the exact developer experience (DX), directory structures, and the incredibly clean `agent.py` code you will be generating.
+*   **[Developer Guide](Developer%20Guide.md)**: This is your daily blueprint. It shows you the exact developer experience (DX), directory structures, and the incredibly clean `agent.py` code you will be generating.
 
 ### 3. The Workflow
-*   **[[Agentic Coding Playbook]]**: Understand our "Agent-Driven Development" philosophy. We are Directors, not Typists.
-*   **[[Agent Directing Guide]]**: Learn the explicit *Observe -> Think -> Act -> Verify* loop for managing your AI CLI (Gemini/Antigravity) so it writes compliant code without hallucinating.
+*   **[Agentic Coding Playbook](Agentic%20Coding%20Playbook.md)**: Understand our "Agent-Driven Development" philosophy. We are Directors, not Typists.
+*   **[Agent Directing Guide](Agent%20Directing%20Guide.md)**: Learn the explicit *Observe -> Think -> Act -> Verify* loop for managing your AI CLI (Gemini/Antigravity) so it writes compliant code without hallucinating.
 
 ### 4. The Action
 *   **Load the Skill**: Fire up your CLI and type `load adk-agent-builder`.

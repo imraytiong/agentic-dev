@@ -1,7 +1,7 @@
 ---
 links:
-  - "[[Conceptual Guide - What is an Agent]]"
-  - "[[Agent Directing Guide]]"
+  - "[Conceptual Guide - What is an Agent](Conceptual%20Guide%20-%20What%20is%20an%20Agent.md)"
+  - "[Agent Directing Guide](Agent%20Directing%20Guide.md)"
 ---
 # AI Agent Developer Guide: Building with the BaseAgentChassis
 
@@ -11,7 +11,7 @@ links:
 Welcome to the fleet. This guide demonstrates the Developer Experience (DX) for creating a new agent in our distributed architecture. 
 
 > **💡 Architecture Methodology:** 
-> The architecture and design patterns outlined in this guide were developed using a rigorous, iterative process. If you need to design new systems, extend this architecture, or understand the meta-process we used to arrive at these decisions, refer to the `[[Architecture Planning Skill]]` document.
+> The architecture and design patterns outlined in this guide were developed using a rigorous, iterative process. If you need to design new systems, extend this architecture, or understand the meta-process we used to arrive at these decisions, refer to the `[Architecture Planning Skill](Architecture%20Planning%20Skill.md)` document.
 
 Because the `BaseAgentChassis` handles all the distributed plumbing (FastAPI, Redis, PostgreSQL, OpenTelemetry, and K3s Health Checks), your job as an Agent Developer is strictly focused on **Business Logic**: Prompts, Tools, and State.
 
@@ -48,7 +48,7 @@ research_agent/
 
 This file is specific to the agent you are building. It defines the agent's identity and capabilities. 
 
-> **Curious about defaults?** Database URIs, Redis endpoints, models, and telemetry settings are handled automatically by a global `fleet.yaml` file that is merged at runtime. If you want to understand how this deep merging works, see the `[[BaseAgentChassis Internals]]` guide.
+> **Curious about defaults?** Database URIs, Redis endpoints, models, and telemetry settings are handled automatically by a global `fleet.yaml` file that is merged at runtime. If you want to understand how this deep merging works, see the `[BaseAgentChassis Internals](BaseAgentChassis%20Internals.md)` guide.
 
 ```yaml
 # config.yaml
