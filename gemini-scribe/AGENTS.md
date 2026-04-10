@@ -25,3 +25,6 @@
 **Workflows:** Hybrid Routing (Semantic + LLM), Dynamic Re-planning, and HITL Evaluator loop with Fast-Fail.
 
 **Development Paradigm:** We practice "Agent-Driven Development". Human engineers act as Technical Directors who write specifications and provide constrained context to AI Coding Agents (like Antigravity CLI or Gemini CLI). The architecture (BaseAgentChassis, strict Pydantic models, externalized prompts) is specifically designed to act as guardrails that prevent AI coding tools from hallucinating infrastructure or breaking system contracts. We enforce Context Scoping, Layer-by-Layer generation, and Test-Driven Defense (TDD) when prompting coding agents.
+
+- **Current Status:** The vault is officially "Hackathon Ready". We have a complete, documented architecture based on Google ADK, Python, K3s, and PostgreSQL. We have defined the `BaseAgentChassis`, created developer onboarding guides, and built custom skills (`adk-agent-builder`) to constrain AI CLIs during generation.
+- **Reference Agent:** We designed "Sparky" (`Hello Chassis Reference Agent`) to serve as the baseline test for the platform's infrastructure.

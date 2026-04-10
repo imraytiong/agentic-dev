@@ -4,43 +4,30 @@ tags:
   - architecture
 status: Draft
 ---
-# Agent Name: {{title}}
+# Agent Spec: {{title}}
 
-## 1. Core Objective
-*What is the primary goal of this agent? What problem does it solve?*
+*Note: The `BaseAgentChassis` handles all infrastructure. You only need to define the business logic here. Leave optional fields blank to use safe fleet defaults.*
 
-## 2. Persona & System Prompt
-*How should this agent behave? What are its core instructions and constraints?*
-*(Note: Keep Python code strictly for logic. Externalize prompt configuration where possible.)*
+## 1. Identity & Config
+*   **Name:** {{title}}
+*   **Model:** (Optional - Defaults to fleet `config.models.default`)
+*   **Skills to Load:** (Optional - e.g., `web_scraper`, `sql_analyst`)
 
-## 3. ADK Architecture & Patterns
-*Which ADK primitives are used? (e.g., `LlmAgent`, `SequentialAgent`, `ParallelAgent`, `LoopAgent`)*
+## 2. Triggers & Routing
+*   **Queue Name:** (Optional - Defaults to `{{title}}_jobs`)
+*   **Priority:** (Optional - Defaults to standard async execution)
 
-### 3.1 Tools & External Integrations
-*List standard `FunctionTool` implementations and MCP integrations.*
-- [ ] Tool 1 (Python function): *Description*
-- [ ] Tool 2 (External API/MCP): *Description*
+## 3. The Contracts (Pydantic Models)
+*   **Incoming Payload:** (Required - Describe the data this agent receives)
+*   **State Model (JSONB):** (Optional - Defaults to a simple `AgentState` with `status: str`)
+*   **Final Output:** (Required - Describe the final JSON response)
 
-### 3.2 State & Memory Management
-*How does this agent persist state across sessions? (e.g., PostgreSQL/SQLAlchemy for metadata, pgvector for semantic memory)*
+## 4. Prompts (`prompts/`)
+*   **Core Directive:** (Required - What is the agent's main objective and persona?)
+*   **Template Variables:** (Optional - List dynamic variables to inject. `user_id`, `session_id`, `tenant_id` are auto-injected by the Chassis).
 
-### 3.3 Advanced RAG Approach
-*Does this agent retrieve documents? If so, how is LlamaIndex (or custom retriever) wrapped inside an ADK tool?*
+## 5. Custom Tools (`tools.py`)
+*   (Optional - List any custom Python functions this agent needs to execute).
 
-### 3.4 Lifecycle & Observability
-*How is this agent initialized? What OpenTelemetry metrics are critical to trace? Are there specific `before_agent_prompt` or `after_agent_callback` hooks?*
-
-## 4. Testing & Evaluation
-*How do we assert correctness?*
-- [ ] Unit tests written for tools (`pytest`)
-- [ ] Agent eval criteria defined (e.g., DeepEval for faithfulness)
-
-## 5. Development Log & Tasks
-- [ ] Define initial prompt configuration
-- [ ] Implement tools with Pydantic validation
-- [ ] Wire up ADK Runner and FastAPI lifespan
-- [ ] Test edge cases
-
----
-## Notes & Iterations
-*Log your testing results and prompt tweaks here.*
+## 6. Testing & Evaluation
+*   (Optional - Defaults to `pytest` with mocked `execute_task` and `mock_infrastructure=True`).

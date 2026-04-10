@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "storeName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-  "lastSync": 1775743658082,
+  "lastSync": 1775791838155,
   "files": {
     "Welcome.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -10,13 +10,13 @@
     },
     "00 - Dashboard.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "6c77c79657971e4f210e98e33170a832219cb3fde967a1bf5d3f5a9b1784f827",
-      "lastIndexed": 1775743658082
+      "contentHash": "a044d82f4c59ebe56e3e09eec3697a0fb781c0a4890a22b54d8653276147e94b",
+      "lastIndexed": 1775791282736
     },
     "06 - Templates/Agent Architecture Spec.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "baaca63e5663d00abcc186bfefa2a39d05aecc903c26f1f7ca3eb52dcb5a720c",
-      "lastIndexed": 1775692580916
+      "contentHash": "cf9d71f340bc97486c82af9398c37a1a0a3e51984fb51fc59e0ff08d5bcfac76",
+      "lastIndexed": 1775790724245
     },
     "01 - Daily Logs/2026-04-08 - ADK Strategic Planning.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -55,8 +55,8 @@
     },
     "03 - Architecture & Patterns/Developer Guide.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "4ed0b192b426e65a77d6928ba52d1965b718ad75820de55b01dcfa73ed0a6268",
-      "lastIndexed": 1775742963604
+      "contentHash": "c3b263db7eb4b674b7f2cc9c924ecf6e05e58646c7199bdcddee9760c37819e0",
+      "lastIndexed": 1775789097107
     },
     "03 - Architecture & Patterns/Architecture Planning Skill.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -72,6 +72,21 @@
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
       "contentHash": "0e919a83e93d22f94b5d1d5f87a91ca72867059b5b53ed745cbb271e2ad21dc9",
       "lastIndexed": 1775743656238
+    },
+    "07 - Operations & Planning/Hackathon Execution Strategy.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "ee79f0255ab3571961ec35d2ace5dce8164b31083597dbfde2340b7fff7a5312",
+      "lastIndexed": 1775744017535
+    },
+    "03 - Architecture & Patterns/Conceptual Guide - What is an Agent.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "f4bdfbd099ebd4f4d87985f2eb7ffdf2e89eb0446fbd1401e7351e04e8123977",
+      "lastIndexed": 1775791611544
+    },
+    "03 - Architecture & Patterns/Agent Directing Guide.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "1a09eadd2a1f3b4d5f05efdc9cbc80debd5faa78cf96e336c2f48a4f2d76cf00",
+      "lastIndexed": 1775791838155
     }
   },
   "indexingInProgress": false,

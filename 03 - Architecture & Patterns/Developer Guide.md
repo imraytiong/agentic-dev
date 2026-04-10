@@ -1,3 +1,8 @@
+---
+links:
+  - "[[Conceptual Guide - What is an Agent]]"
+  - "[[Agent Directing Guide]]"
+---
 # AI Agent Developer Guide: Building with the BaseAgentChassis
 
 **Tags:** #developer-guide #python #adk #chassis
