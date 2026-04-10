@@ -171,3 +171,8 @@ status: Active
 **Context:** Many configuration values (Database URIs, Redis Endpoints, Telemetry URLs, Default Model Aliases) are universal across the entire fleet of agents. Requiring developers to copy-paste these into every single agent's `config.yaml` violates DRY principles and makes rotating credentials difficult.
 **Decision:** We will implement a **Hierarchical Configuration Pattern**. The `BaseAgentChassis` will automatically read a global `/app/fleet.yaml` file (mounted to all containers) and deeply merge it with the local `/app/config.yaml` file.
 **Rationale:** This allows 99% of agents to have a tiny `config.yaml` containing only their specific name, skills, and tools. If an agent *needs* to override a global default (e.g., pointing to a specific isolated database), they simply define it in their local `config.yaml`, which takes precedence over the fleet config.
+## Decision #35: Database Interface Segregation (Repository Pattern)
+**Date:** 2026-04-10
+**Context:** Tying the `BaseAgentChassis` universal core directly to `asyncpg` or Postgres-specific JSONB features creates a massive blast radius if the infrastructure environment changes (e.g., corporate mandates MongoDB or Pinecone). 
+**Decision:** We enforce the Abstract Repository Pattern. We removed `self.db_pool` and replaced it with `self.state_store_client` and `self.vector_store_client`.
+**Rationale:** The Universal Core must only speak in Pydantic models and standard Python types. The Operational Adapters handle translating these Python objects into the specific database queries. This guarantees that if Postgres is ripped out, zero agent business logic needs to be rewritten.

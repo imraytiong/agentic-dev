@@ -9,16 +9,23 @@ Welcome to your central command for AI Agent development. As your Technical Lead
   - 🐕 **[[Hello Chassis Reference Agent]]** - "Sparky", our Hello World reference agent.
 - **[[03 - Architecture & Patterns/]]** - Deep dives into agentic patterns, infrastructure, and our foundational chassis.
   - 🏛️ **[[Architectural Decision Log]]** - Master tracker for all technical decisions and open questions.
-  - 🧠 **[[Conceptual Guide - What is an Agent]]** - High-level conceptual overview for onboarding new developers.
-  - 📖 **[[Developer Guide]]** - The definitive guide for writing agent code on top of our chassis.
-  - ⚙️ **[[BaseAgentChassis Reference]]** - The Python skeleton for our distributed microservice chassis.
-  - 🪄 **[[BaseAgentChassis Internals]]** - The underlying magic of configuration deep merging, auto-initialization, and state management.
   - 🔄 **[[Standard Agentic Workflows]]** - Our approved patterns (Supervisor, Plan-and-Execute, Evaluator-Optimizer).
-  - 🏗️ **[[Agent Fleet Deployment Infrastructure]]** - Docker Compose/K3s deployment architecture.
-  - ⚖️ **[[Monolithic vs Distributed Agent Architecture]]** - Rationale for our microservice approach.
-  - ♻️ **[[Agent Lifecycle Management]]** - Startup, shutdown, and health checks.
-  - 🤖 **[[Agentic Coding Playbook]]** - How to direct AI coding agents.
-  - 🎬 **[[Agent Directing Guide]]** - How to wield Gemini CLI + Conductor to build the codebase.
+  
+  - 🧑‍💻 **Agent Developers (Start Here)**
+    - 🚦 **[[00 - Start Here]]** - Index and learning path for Agent Developers.
+    - 🧠 **[[Conceptual Guide - What is an Agent]]** - High-level conceptual overview.
+    - 📖 **[[Developer Guide]]** - The definitive guide for writing agent code.
+    - 🤖 **[[Agentic Coding Playbook]]** - How to direct AI coding agents.
+    - 🎬 **[[Agent Directing Guide]]** - How to wield Gemini CLI + Conductor to build the codebase.
+    
+  - ⚙️ **Platform Engineers**
+    - 🚦 **[[Infrastructure Director Guide]]** - How to direct CLIs to build the platform spine.
+    - 🧱 **[[BaseAgentChassis Reference]]** - The Python skeleton for our distributed microservice chassis.
+    - 🪄 **[[BaseAgentChassis Internals]]** - The underlying magic of config merging and state management.
+    - 🏗️ **[[Agent Fleet Deployment Infrastructure]]** - Docker Compose/K3s deployment architecture.
+    - ⚖️ **[[Monolithic vs Distributed Agent Architecture]]** - Rationale for our microservice approach.
+    - ♻️ **[[Agent Lifecycle Management]]** - Startup, shutdown, and health checks.
+
 - **[[04 - Tooling & Infrastructure/]]** - Notes on LLMs, frameworks, and deployment environments.
 - **[[05 - Research & References/]]** - Academic papers, articles, and inspiration.
 - **[[06 - Templates/]]** - Standardized formats for your notes.
