@@ -29,8 +29,8 @@ Instead of manually prompting the AI with all of our architectural rules, we hav
 
 **Your Action:**
 Before opening Conductor or writing any code, load the custom skill into your CLI:
-1. Command your CLI to load the **`adk-agent-builder`** skill.
-2. Feed the CLI the specific `[Agent Architecture Spec](Agent%20Architecture%20Spec.md)` for the agent you are building (or use the skill's interactive brain-dump mode to generate one!).
+1. Command your CLI to load the **[adk-agent-builder](../../08%20-%20AI%20CLI%20Skills/adk-agent-builder.md)** skill.
+2. Feed the CLI the specific `[Agent Architecture Spec](../../06%20-%20Templates/Agent%20Architecture%20Spec.md)` for the agent you are building (or use the skill's interactive brain-dump mode to generate one!).
 
 **What the Skill Does:**
 You no longer need to write massive explicit prompts. The skill automatically forces the AI to read the `BaseAgentChassis Reference`, forbids it from writing raw infrastructure code, and mandates the use of our decorators (`@chassis.consume_task`) and security contexts.
@@ -107,7 +107,9 @@ If you are new to this architecture, we recommend reading these guides in the fo
 2. **[Developer Guide](Developer%20Guide.md):** Move here to see the actual Python code and the 5-step workflow.
 3. **[Agent Directing Guide](Agent%20Directing%20Guide.md):** Read this when you are ready to use Gemini CLI to actually generate the code.
 4. **[Agentic Coding Playbook](Agentic%20Coding%20Playbook.md):** The meta-rules for team collaboration and architecture defense.
-## 4. The MAS Threshold: When to Split an Agent
+
+---
+## 6. The MAS Threshold: When to Split an Agent
 
 Knowing exactly *when* to break a single agent into a Multi-Agent System (MAS) is the hallmark of a great Director. Do not split agents prematurely (which adds unnecessary network latency), but do not wait until a "God Agent" collapses under its own weight.
 

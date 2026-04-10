@@ -6,7 +6,7 @@ status: Active
 ---
 # Fleet Infrastructure Spec (The Blueprint)
 
-*Provide this document to the `adk-infra-builder` skill to bootstrap the cluster's operational adapters.*
+*Provide this document to the [adk-infra-builder](../08%20-%20AI%20CLI%20Skills/adk-infra-builder.md) skill to bootstrap the cluster's operational adapters.*
 
 ## 1. Core Runtime
 *   **Python Version:** 3.11-slim

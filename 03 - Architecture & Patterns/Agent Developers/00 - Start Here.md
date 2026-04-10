@@ -23,7 +23,7 @@ To get up to speed quickly without being overwhelmed, please read these document
 *   **[Agent Directing Guide](Agent%20Directing%20Guide.md)**: Learn the explicit *Observe -> Think -> Act -> Verify* loop for managing your AI CLI (Gemini/Antigravity) so it writes compliant code without hallucinating.
 
 ### 4. The Action
-*   **Load the Skill**: Fire up your CLI and type `load adk-agent-builder`.
+*   **Load the Skill**: Fire up your CLI and type `load [adk-agent-builder](../../08%20-%20AI%20CLI%20Skills/adk-agent-builder.md)`.
 *   **Grab a Spec**: Go to `06 - Templates`, grab the `Agent Architecture Spec`, fill out your business logic, and hand it to the CLI to start building!
 
 ---

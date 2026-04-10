@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "storeName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-  "lastSync": 1775856604427,
+  "lastSync": 1775857444827,
   "files": {
     "Welcome.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -10,8 +10,8 @@
     },
     "00 - Dashboard.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "f8548ec23b94e92d988a669cd635430e4f9d6a7e24ed28e076a3361939c2bb0c",
-      "lastIndexed": 1775856602788
+      "contentHash": "ed0c0ac1a707b9924aa98824e704ef5d07c58bd12693c23e5f5e737817854cd2",
+      "lastIndexed": 1775857164045
     },
     "06 - Templates/Agent Architecture Spec.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -20,8 +20,8 @@
     },
     "01 - Daily Logs/2026-04-08 - ADK Strategic Planning.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "3f1e2d7071724155a1f792e31f698ab576227c815fa891b301759abc48583963",
-      "lastIndexed": 1775856570531
+      "contentHash": "ee5d5477c82b770e62a59347f134146b68c904eadc8e75bf4d4588e06b5fec64",
+      "lastIndexed": 1775857388199
     },
     "03 - Architecture & Patterns/Monolithic vs Distributed Agent Architecture.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -40,8 +40,8 @@
     },
     "03 - Architecture & Patterns/Architecture Planning Skill.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "d1c36aa05379d9d8539d35c5901d239f915e00e649658372c7be094ee85bd0d0",
-      "lastIndexed": 1775856577598
+      "contentHash": "03cfd80139eab72fcd584e1e0f084e8bfba8c7b3e0a5597a5ac48276f14b3e92",
+      "lastIndexed": 1775857424493
     },
     "07 - Operations & Planning/Hackathon Execution Strategy.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -55,18 +55,18 @@
     },
     "03 - Architecture & Patterns/Agent Developers/Developer Guide.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "fb80bda22ad55a9a38fe0ffc749ccb0623ca45a6dd80557eb11eae466a838c50",
-      "lastIndexed": 1775856581079
+      "contentHash": "382f32b6762abf5400b838ea6f0c13fd0f4a83cc2a39b57db0ad6a1e84aad082",
+      "lastIndexed": 1775857364442
     },
     "03 - Architecture & Patterns/Agent Developers/Agent Directing Guide.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "b20c9c7836fd375c5bbe004411bce2358f1e73aa136473092393f8ef599f7ec8",
-      "lastIndexed": 1775856583024
+      "contentHash": "3f5162b6d063f46483bcd5332cb2ee80a7c816153171e46d1e3cb804f5dcca80",
+      "lastIndexed": 1775857333211
     },
     "03 - Architecture & Patterns/Agent Developers/Agentic Coding Playbook.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "fcd168391050957fcef1cebc1e76cc570e4d1b4d9d32fe9820fa28b7e96df12a",
-      "lastIndexed": 1775856584662
+      "contentHash": "12a6f9d33570da753434c2f45803de575b7407fa7e4d5c3de7c0654a65e560f6",
+      "lastIndexed": 1775857297582
     },
     "03 - Architecture & Patterns/Platform Engineers/BaseAgentChassis Reference.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -75,8 +75,8 @@
     },
     "03 - Architecture & Patterns/Platform Engineers/BaseAgentChassis Internals.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "a3a638912bdeb07840b26b63d7b2db9495c3a00956ab8bf7f5e6d0d9e94079aa",
-      "lastIndexed": 1775856589681
+      "contentHash": "90854ad50f00141eae03e62bf65ab814c0325fd12b1555a9dd9674db5ef56689",
+      "lastIndexed": 1775857256001
     },
     "03 - Architecture & Patterns/Platform Engineers/Agent Fleet Deployment Infrastructure.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -90,18 +90,18 @@
     },
     "03 - Architecture & Patterns/Agent Developers/00 - Start Here.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "87cc852ce9c8130c4039eaba2acbe0329f59b9d090fee69941ecf30e804ca53a",
-      "lastIndexed": 1775856586198
+      "contentHash": "2ffd9247505eb560f20393c6ed2886ac871b2f6c460ac19bdd6b2ca4f6b48e46",
+      "lastIndexed": 1775857274126
     },
     "03 - Architecture & Patterns/Platform Engineers/Infrastructure Director Guide.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "b5075feb3fc448161eba555f752c4b2fa179868cf7bf3f66be5d4e3025a968fa",
-      "lastIndexed": 1775856594902
+      "contentHash": "5089b395c9b41ac6dd318891a57dadf0a20b63a2da944a0c3d25bd2a5db25396",
+      "lastIndexed": 1775857234599
     },
     "06 - Templates/Fleet Infrastructure Spec.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "cc246dc0e1c48f13d5e8e670a268dc41e051e2e45dd6fe3b6f288fe32ca0febb",
-      "lastIndexed": 1775856599203
+      "contentHash": "4c956fc5a31372b19d2d3460b6cfee2024551a6f4b52e5ddf238833f116c3387",
+      "lastIndexed": 1775857064000
     },
     "06 - Templates/Universal Core Architecture Spec.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -110,8 +110,38 @@
     },
     "03 - Architecture & Patterns/Architect Director Guide.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "b1381b05e0fb1f0ee19e7f79e3b26a70dca8bf48739f1311821e79f5239123b5",
-      "lastIndexed": 1775856596329
+      "contentHash": "df68d26baec8012826ec4f174ebf6e8d5d0744bc4f4593afa48c8a0bb6935afb",
+      "lastIndexed": 1775857444827
+    },
+    "08 - AI CLI Skills/adk-agent-builder.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "dbd9132bf20a7e9e340784a18ed476a51e2620f8bb8dce313904c86d0996d92e",
+      "lastIndexed": 1775856940860
+    },
+    "08 - AI CLI Skills/adk-infra-builder.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "98df4f419386fc76a39c2a1a85c984dd7fa5cf2b71f86c10bd833aedac314d9b",
+      "lastIndexed": 1775856942975
+    },
+    "08 - AI CLI Skills/adk-core-builder.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "b66028d98572a254313247328c8bcb31464e68a3248e27073b78a5c5660f76ee",
+      "lastIndexed": 1775856944500
+    },
+    "08 - AI CLI Skills/architecture-planning.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "03cfd80139eab72fcd584e1e0f084e8bfba8c7b3e0a5597a5ac48276f14b3e92",
+      "lastIndexed": 1775857412161
+    },
+    "08 - AI CLI Skills/adr-manager.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "08feb8cae06182db12deb7d82d0be23c4f326ab2cf319179dbc94526f2ba0c7b",
+      "lastIndexed": 1775856947980
+    },
+    "02 - Agent Projects/Hello Chassis Reference Agent.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "92b25933ebc23f1accbdf2715504c542964ba6cf180e7f94ac514ef2dcc00102",
+      "lastIndexed": 1775857172340
     }
   },
   "indexingInProgress": false,
