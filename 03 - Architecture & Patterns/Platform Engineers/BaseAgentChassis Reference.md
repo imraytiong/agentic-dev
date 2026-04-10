@@ -7,26 +7,35 @@ status: Approved
 **Tags:** #architecture #python #chassis #adk
 **Status:** Active Reference
 
-This document outlines the Python skeleton for the `BaseAgentChassis`. It is divided into two parts: The **Universal Core** (which is pre-built and environment-agnostic) and the **Operational Adapters** (which the Infrastructure Team builds to connect to Docker/K3s).
+This document outlines the Python skeleton for the `BaseAgentChassis`. To enforce True Inversion of Control (IoC), the codebase is split into two directories: `core/` (which is sealed and pre-built) and `adapters/` (which the Infrastructure Team builds). Adapters are dynamically loaded at runtime via `fleet.yaml`.
 
-## The Python Skeleton (`chassis.py`)
+## Directory Structure
+```text
+adk_chassis_lib/
+├── core/
+│   ├── chassis.py       # SEALED: The Universal Core logic only
+│   ├── interfaces.py    # SEALED: Abstract Base Classes (e.g., BaseStateStore)
+├── adapters/
+│   ├── postgres.py      # INFRA: Implements BaseStateStore
+│   ├── redis.py         # INFRA: Implements BaseMessageBroker
+│   └── telemetry.py     # INFRA: Arize Phoenix OTel setup
+```
+
+## 1. The Universal Core (`core/chassis.py`)
 
 ```python
 import os
 import yaml
-import functools
 import importlib
-import asyncio
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional, Type, List, Callable
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ValidationError
+from fastapi import FastAPI
+from pydantic import BaseModel
 from jinja2 import Environment, FileSystemLoader
 
-# Google ADK Imports
-from google_adk.server import get_fast_api_app
-from google_adk.agent import BaseAgent, LlmAgent
+from google_adk.agent import LlmAgent
+from core.interfaces import BaseStateStore, BaseVectorStore, BaseMessageBroker
 
 class AgentContext(BaseModel):
     user_id: str
@@ -43,89 +52,69 @@ class BaseAgentChassis:
         prompts_dir: str = "/app/prompts",
         skills_dir: str = "/app/skills"
     ):
-        # === UNIVERSAL CORE (PRE-BUILT) ===
         self.config = self._deep_merge_config(fleet_config_path, config_path)
         self.agent_name = self.config.get("agent", {}).get("name", "unnamed_agent")
         self.jinja_env = Environment(loader=FileSystemLoader(prompts_dir))
         self.skills_dir = skills_dir
         
-        # === OPERATIONAL ADAPTERS (TO BE IMPLEMENTED) ===
-        self.state_store_client = None
-        self.vector_store_client = None
-        self.message_broker_client = None
-        self.tracer, self.meter = self._setup_telemetry()
+        # === DYNAMIC ADAPTER LOADING (PLUGIN PATTERN) ===
+        infra_config = self.config.get("infrastructure", {})
+        self.state_store_client: BaseStateStore = self._load_adapter(infra_config.get("state_store"))
+        self.vector_store_client: BaseVectorStore = self._load_adapter(infra_config.get("vector_store"))
+        self.message_broker_client: BaseMessageBroker = self._load_adapter(infra_config.get("message_broker"))
         
-        # === UNIVERSAL CORE (PRE-BUILT) ===
         self.build_adk_agent()
 
-    # =========================================================================
-    # UNIVERSAL CORE: Pre-built Logic (No external dependencies)
-    # =========================================================================
-    def _deep_merge_config(self, fleet_path: str, local_path: str) -> Dict:
-        """Merges global fleet.yaml with local config.yaml."""
+    def _load_adapter(self, module_path: str) -> Any:
+        """Dynamically imports and instantiates an adapter class from a string."""
+        if not module_path:
+            return None
+        module_name, class_name = module_path.rsplit(".", 1)
+        module = importlib.import_module(module_name)
+        adapter_class = getattr(module, class_name)
+        return adapter_class(self.config)
+
+    # ... [Rest of Universal Core methods: execute_task, ask_structured, consume_task] ...
+```
+
+## 2. The Interfaces (`core/interfaces.py`)
+
+```python
+from typing import Optional, List, Type
+from pydantic import BaseModel
+
+class BaseStateStore:
+    async def save_state(self, key: str, value: BaseModel): pass
+    async def load_state(self, key: str, target_model: Type[BaseModel]) -> Optional[BaseModel]: pass
+
+class BaseVectorStore:
+    async def semantic_search(self, query: str, limit: int = 5) -> List[BaseModel]: pass
+
+class BaseMessageBroker:
+    async def publish(self, queue_name: str, payload: BaseModel): pass
+    async def consume(self, queue_name: str): pass
+```
+
+## 3. The Operational Adapters (`adapters/`)
+
+These are built by the Infrastructure Team (Track A). They implement the base classes and handle all serialization/deserialization, ensuring the Core only ever sees Pydantic models.
+
+```python
+# adapters/postgres.py
+from core.interfaces import BaseStateStore
+from pydantic import BaseModel
+from typing import Type, Optional
+
+class PostgresStateStore(BaseStateStore):
+    def __init__(self, config: dict):
+        self.uri = config.get("database", {}).get("uri")
+        # Initialize asyncpg pool logic here
+
+    async def save_state(self, key: str, value: BaseModel):
+        # Serialize Pydantic model to JSONB and upsert
         pass
 
-    def build_adk_agent(self, model_alias: str = "default"):
-        """Automatically initializes the ADK agent, equips skills, and loads tools based on config."""
-        pass
-
-    def equip_skill(self, skill_name: str):
-        """Loads Jinja instructions and appends to system prompt."""
-        pass
-
-    def register_tool(self, tool_func: Callable):
-        """Registers a Python tool with ADK and wraps it in OTel."""
-        pass
-
-    async def execute_task(self, template: str, template_vars: Dict[str, Any], response_model: Type[BaseModel], context: AgentContext) -> BaseModel:
-        """Mega-Abstraction: Auto-injects context variables, loads Jinja, and calls ask_structured."""
-        pass
-
-    async def ask_structured(self, prompt: str, response_model: Type[BaseModel], max_retries: int = 3) -> BaseModel:
-        """Forces strict JSON output with auto-correction loops for ValidationErrors."""
-        pass
-
-    def consume_task(self, queue_name: str, state_model: Optional[Type[BaseModel]] = None, max_retries: int = 3):
-        """
-        Decorator: Handles background listening, state injection, and DLQ routing.
-        If mock_infrastructure=True, uses asyncio.Queue. Otherwise uses Message Broker Adapter.
-        """
-        pass
-
-    async def run_local(self, prompt: str, mock_infrastructure: bool = True):
-        """Bypasses FastAPI and real DBs/Queues for instant terminal testing."""
-        pass
-
-    # =========================================================================
-    # OPERATIONAL ADAPTERS: To be built by Infrastructure Team (Track A)
-    # =========================================================================
-    def _setup_telemetry(self):
-        """ADAPTER: Configure OpenTelemetry to export to Arize Phoenix."""
-        pass
-
-    @asynccontextmanager
-    async def lifespan(self, app: FastAPI):
-        """ADAPTER: Initialize state/vector store clients and message broker client."""
-        pass
-
-    async def publish_async_task(self, queue_name: str, payload: BaseModel, context: AgentContext):
-        """ADAPTER: Push serialized payload to the configured message broker."""
-        pass
-
-    @with_retry(max_attempts=3)
-    async def call_agent_sync(self, target_agent: str, endpoint: str, payload: BaseModel, context: AgentContext) -> Dict[str, Any]:
-        """ADAPTER: Make HTTP REST call to target agent using internal K3s/Docker DNS."""
-        pass
-
-    async def semantic_search(self, query: str, context: AgentContext, limit: int = 5) -> List[Dict[str, Any]]:
-        """ADAPTER: Embed query and execute semantic search via vector_store_client. Returns standard Python lists."""
-        pass
-
-    async def save_state(self, key: str, value: BaseModel, context: AgentContext):
-        """ADAPTER: Serialize and upsert Pydantic model into state_store_client."""
-        pass
-
-    async def load_state(self, key: str, target_model: Type[BaseModel], context: AgentContext) -> Optional[BaseModel]:
-        """ADAPTER: Retrieve from state_store_client and validate into the target Pydantic model."""
+    async def load_state(self, key: str, target_model: Type[BaseModel]) -> Optional[BaseModel]:
+        # Fetch JSONB, parse into target_model
         pass
 ```

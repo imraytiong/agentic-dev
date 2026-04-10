@@ -176,3 +176,6 @@ status: Active
 **Context:** Tying the `BaseAgentChassis` universal core directly to `asyncpg` or Postgres-specific JSONB features creates a massive blast radius if the infrastructure environment changes (e.g., corporate mandates MongoDB or Pinecone). 
 **Decision:** We enforce the Abstract Repository Pattern. We removed `self.db_pool` and replaced it with `self.state_store_client` and `self.vector_store_client`.
 **Rationale:** The Universal Core must only speak in Pydantic models and standard Python types. The Operational Adapters handle translating these Python objects into the specific database queries. This guarantees that if Postgres is ripped out, zero agent business logic needs to be rewritten.
+### 36. True Inversion of Control (Dynamic Adapter Loading)
+* **Decision:** The Universal Core and Operational Adapters are physically separated into `core/` and `adapters/` directories. Adapters are dynamically loaded at runtime via strings in `fleet.yaml` (The Plugin Pattern).
+* **Rationale:** Enforces the Open-Closed Principle. The Universal Core is sealed. Infrastructure developers can hot-swap databases or message brokers simply by changing a YAML string, without touching any agent business logic or core chassis code.

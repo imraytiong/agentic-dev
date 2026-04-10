@@ -1,8 +1,12 @@
 # Agent Developer Workspace: Start Here
 
-Welcome to the Agent Developer track! If you are tasked with building the "Brains" and "Hands" of our agents (e.g., The Supervisor, The Deep Researcher, The Data Analyst), you are in the right place. 
+Welcome to the Agent Developer track (Role 3)! If you are tasked with building the "Brains" and "Hands" of our agents (e.g., The Supervisor, The Deep Researcher, The Data Analyst), you are in the right place. 
 
-Our platform is designed so that you **never have to write infrastructure code**. You will focus 100% of your time on business logic, prompts, and Python tools.
+Our platform is designed so that you **never have to write infrastructure code**. You will focus 100% of your time on business logic, prompts, and Python tools. The Universal Core is provided by the Architect (Role 1), and the operational environment is mapped by the Infrastructure Leads (Role 2).
+
+## The "Mock First" Paradigm (Why you aren't blocked)
+You do **not** need to wait for the Infrastructure Leads to finish setting up Docker, Postgres, or Redis. You can start generating brains immediately!
+By using `chassis.run_local(mock_infrastructure=True)`, your agent will use in-memory dictionaries and queues. Once the Infra team is ready, you simply turn off the mock and your agent connects to the real databases without rewriting a single line of business logic.
 
 ## Your Progressive Learning Path
 

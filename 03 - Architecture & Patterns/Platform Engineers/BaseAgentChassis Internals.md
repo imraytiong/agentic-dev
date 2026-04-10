@@ -24,14 +24,9 @@ models:
   default: "gemini-1.5-pro"
   fast: "gemini-1.5-flash"
 
-database:
-  uri: "postgresql+asyncpg://user:pass@postgres:5432/agent_db"
-
-redis:
-  uri: "redis://redis:6379/0"
-
-telemetry:
-  endpoint: "http://arize-phoenix:4317"
+infrastructure:
+  state_store: "adapters.postgres.PostgresStateStore"
+  message_broker: "adapters.redis.RedisBroker"
 ```
 
 ### B. The Local Agent Config (`/app/config.yaml`)
@@ -47,9 +42,10 @@ The `BaseAgentChassis.__init__()` method does a massive amount of heavy lifting 
 
 **What happens during initialization:**
 1. **Config Merge:** It merges `fleet.yaml` and `config.yaml` as described above.
-2. **ADK Bootstrapping:** It automatically initializes the underlying Google ADK Agent using the model alias defined in `config.get("models", {}).get("default")`.
-3. **Skill Equipping:** It iterates over `config.get("skills", [])`, locates the corresponding Jinja instruction files in the `skills/` directory, and appends them to the core System Prompt.
-4. **Tool Registration:** It uses Python's `importlib` to dynamically load the agent's `tools.py` file. It then iterates through `config.get("tools", [])`, automatically wrapping each function in OpenTelemetry tracing spans and registering it with the ADK agent.
+2. **Dynamic Adapter Loading (IoC):** The chassis reads the `infrastructure` block from `fleet.yaml` and uses `importlib` to dynamically load the operational adapters (e.g., Postgres, Redis) from the `adapters/` directory. The Core remains completely sealed and agnostic to the database type.
+3. **ADK Bootstrapping:** It automatically initializes the underlying Google ADK Agent using the model alias defined in `config.get("models", {}).get("default")`.
+4. **Skill Equipping:** It iterates over `config.get("skills", [])`, locates the corresponding Jinja instruction files in the `skills/` directory, and appends them to the core System Prompt.
+5. **Tool Registration:** It uses Python's `importlib` to dynamically load the agent's `tools.py` file. It then iterates through `config.get("tools", [])`, automatically wrapping each function in OpenTelemetry tracing spans and registering it with the ADK agent.
 
 ---
 
@@ -71,25 +67,14 @@ This guarantees that every prompt has access to the user's identity (e.g., `{{ u
 
 The `@chassis.consume_task(queue_name="jobs", state_model=MyState)` decorator is the most powerful abstraction in the chassis. 
 
-**When a message arrives on the Redis queue, the decorator executes this exact lifecycle:**
+**When a message arrives on the configured message broker, the decorator executes this exact lifecycle:**
 
-1. **Deserialization:** It parses the JSON payload from Redis into the expected Pydantic model.
+1. **Deserialization:** It parses the JSON payload into the expected Pydantic model.
 2. **Context Extraction:** It extracts the `AgentContext` (trace IDs, user IDs) from the message headers.
 3. **State Loading:** 
-   * It connects to the PostgreSQL database (`pgvector`).
-   * It queries the `JSONB` state payload for this specific `session_id`.
-   * It parses the JSONB into the developer's requested `state_model` Pydantic class.
+   * It calls the dynamically loaded `state_store_client`.
+   * The adapter fetches the raw data (e.g., JSONB from Postgres) and parses it into the developer's requested `state_model` Pydantic class.
 4. **Execution:** It calls the developer's Python function, injecting the `payload`, `context`, and `state`.
-5. **State Saving (On Exit):** When the developer's function finishes (or crashes), the decorator catches the exit, serializes the modified `state` object back to JSONB, and upserts it into PostgreSQL.
+5. **State Saving (On Exit):** When the developer's function finishes (or crashes), the decorator catches the exit and passes the modified `state` object back to the `state_store_client` for serialization and upsert.
 6. **Auto-Reply (Webhooks):** If the developer's function `return`s a Pydantic model, the decorator automatically serializes it and fires an HTTP POST request to the `context.reply_to` webhook URL.
 7. **Dead Letter Queue (DLQ):** If the function throws an unhandled exception, the decorator increments the retry counter. If it exceeds `max_retries`, it routes the original payload to `{queue_name}_dlq` and emits a critical OpenTelemetry alert.
-
----
-
-## 5. OpenTelemetry & Tracing Integration
-
-The chassis natively wraps the Google ADK. Because we standardized on Arize Phoenix for observability, the chassis automatically configures the OpenTelemetry SDK on startup. 
-
-*   It points the OTel exporter to the `telemetry.endpoint` defined in the hierarchical config.
-*   It ensures that every time `execute_task` or a registered tool is called, a new span is created as a child of the `trace_id` provided in the `AgentContext`.
-*   This ensures that a single user request can be traced visually across the Router Agent, the Redis Queue, and the Worker Agent in the Arize Phoenix UI.

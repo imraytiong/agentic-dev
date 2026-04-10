@@ -1,20 +1,20 @@
 # Infrastructure Director Guide
 
-**Target Audience:** Platform Engineers (Hackathon Track A)  
+**Target Audience:** Infrastructure Leads / Platform Engineers (Role 2)  
 **Goal:** Using AI CLIs to generate the Operational Adapters, Docker networks, K3s manifests, and OpenTelemetry configurations.
 
-While the Agent Developers are building the "Brains" using the `adk-agent-builder` skill, your job is to build the "Spine" of the system. 
+While the Agent Developers (Role 3) are building the "Brains" using the `adk-agent-builder` skill, your job is to build the "Spine" of the system. 
 
-We use a **Hexagonal Architecture (Ports and Adapters)** approach. You are *not* building the `BaseAgentChassis` from scratch. The "Universal Core" (decorators, LLM loops, mock engines) is pre-built. Your job is to build the **Operational Adapters** that connect that core to the real world.
+We use a **Hexagonal Architecture (Ports and Adapters)** approach with **True Inversion of Control (IoC)**. You are *not* building the `BaseAgentChassis` from scratch. The "Universal Core" (`core/chassis.py`) is sealed, pre-built, and strictly owned by **The Architect (Role 1)**. Your job is to build the **Operational Adapters** in the `adapters/` directory that connect that core to the real world.
 
 ## The Interface-First Bootstrap Protocol
 
 To completely unblock the rest of the hackathon team, you will follow this 3-phase protocol:
 
 ### Phase 1: The Immediate Handoff (Minute 1)
-The Agent Developers (Tracks B & C) need the `BaseAgentChassis` immediately so they can start testing their prompts and logic.
-1. Take the pre-built `chassis.py` file (which contains the Universal Core and `mock_infrastructure=True` logic).
-2. Hand it directly to the Agent Developers. 
+The Agent Developers need the `BaseAgentChassis` immediately so they can start testing their prompts and logic.
+1. Take the pre-built `core/chassis.py` file (which contains the Universal Core and `mock_infrastructure=True` logic) and `core/interfaces.py` provided by the Architect.
+2. Hand these directly to the Agent Developers. 
 3. **Result:** They are now 100% unblocked and can build agents in their Mac terminals.
 
 ### Phase 2: Generating the Adapters (OBSERVE & THINK)
@@ -23,10 +23,10 @@ Now that the team is coding, you focus on the real infrastructure.
 2. Type: `load adk-infra-builder`
 3. Provide the AI with the **`[[Fleet Infrastructure Spec]]`** (found in your `06 - Templates` folder).
 
-The AI CLI is programmed to read the Spec and understand that it only needs to generate the missing Adapters (Postgres, Redis, OTel) and the Docker manifests.
+The AI CLI is programmed to read the Spec and understand that it only needs to generate the missing Adapters (Postgres, Message Broker, OTel) in the `adapters/` folder and the Docker manifests. It will NOT touch `core/chassis.py`.
 
 ### Phase 3: Execution & Verification (ACT & VERIFY)
-The AI will generate the `docker-compose.yml`, `Dockerfile`, `fleet.yaml`, and the adapter code for `chassis.py`.
+The AI will generate the `docker-compose.yml`, `Dockerfile`, `fleet.yaml`, and the adapter files (e.g., `adapters/postgres.py`).
 
 You must verify the network works:
 1.  **The Spin-Up Test:** Run your deployment command (see "Container Engine Resilience" below). Do Postgres, the Message Broker, and Phoenix start cleanly?

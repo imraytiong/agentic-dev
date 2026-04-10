@@ -27,10 +27,18 @@ status: Active
 *   **Database URI:** `postgresql+asyncpg://agent:hackathon@postgres:5432/agent_db`
 *   **Message Broker URI:** `amqp://...` or `redis://...` *(Depends on the chosen broker)*
 *   **Telemetry Endpoint:** `http://arize-phoenix:4317`
+*   **Infrastructure Plugin Mapping:**
+    ```yaml
+    infrastructure:
+      state_store: "adapters.postgres.PostgresStateStore"
+      vector_store: "adapters.postgres.PgVectorStore"
+      message_broker: "adapters.redis.RedisBroker"
+      telemetry: "adapters.telemetry.ArizePhoenixAdapter"
+    ```
 
-## 4. Operational Adapters to Build
-The `BaseAgentChassis` Universal Core is already provided. The AI CLI must implement the following adapters inside `chassis.py` to replace the mock infrastructure:
+## 4. Operational Adapters to Build (`adapters/`)
+The `BaseAgentChassis` Universal Core (`core/chassis.py`) is sealed. The AI CLI must implement the following adapters in the `adapters/` directory to replace the mock infrastructure:
 
-1.  **State Store & Vector Store Adapters:** Implement `self.state_store_client` and `self.vector_store_client`. Connect `self.save_state()` and `self.load_state()` to read/write to the state store using Pydantic models. Connect `self.semantic_search()` to execute semantic queries against the vector store.
-2.  **Message Broker Adapter:** Implement the connection client for the chosen broker. Connect `self.publish_async_task()` to push to the queue. Update the `@consume_task` background loop to pull from the queue.
+1.  **State Store & Vector Store Adapters:** Implement classes inheriting from `BaseStateStore` and `BaseVectorStore`. Connect `save_state()` and `load_state()` to read/write to the state store using Pydantic models. Connect `semantic_search()` to execute semantic queries against the vector store.
+2.  **Message Broker Adapter:** Implement a class inheriting from `BaseMessageBroker`. Connect `publish()` and `consume()` to interface with the chosen broker.
 3.  **OpenTelemetry Adapter:** Configure the OTel SDK to export traces to the Arize Phoenix gRPC endpoint defined in `fleet.yaml`.

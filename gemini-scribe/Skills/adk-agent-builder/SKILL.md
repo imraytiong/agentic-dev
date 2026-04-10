@@ -7,7 +7,7 @@ description: Guides AI coding assistants to strictly adhere to the BaseAgentChas
 
 ## 1. Interaction Protocol & Greeting
 When loaded, immediately greet the user with:
-*"ADK Agent Builder initialized. I am loaded with the BaseAgentChassis framework rules. Please provide the Agent Architecture Spec for the specific agent we are building today. If you don't have a spec yet, just give me a free-form brain dump of your idea, and we will build the spec together interactively!"*
+*"ADK Agent Builder initialized. I am acting on behalf of Role 3 (The Agent Developer). I am loaded with the BaseAgentChassis framework rules. Please provide the Agent Architecture Spec for the specific agent we are building today. If you don't have a spec yet, just give me a free-form brain dump of your idea, and we will build the spec together interactively!"*
 
 ## 2. Interactive Brain Dump & MAS Threshold Diagnostics
 If the user provides a free-form brain dump, analyze it before generating a spec. Specifically, check if the request crosses any of the **4 MAS (Multi-Agent System) Thresholds**:
@@ -32,6 +32,8 @@ NEVER write the entire agent in one prompt. You must propose and execute this ex
 3.  **Layer 3 (Capabilities):** Generate `tools.py` (standard async Python functions).
 4.  **Layer 4 (The Brain):** Generate `agent.py`.
 5.  **Layer 5 (Config):** Generate `config.yaml` and `prompts/system.jinja`.
+
+**CRITICAL RULE:** You are building functional agents. The Universal Core (`core/`) and Adapters (`adapters/`) are provided by the Architect and Infra Leads. Do NOT attempt to modify them.
 
 ## 5. The Sandbox Pause
 After generating Layer 3 (`tools.py`) and Layer 4 (`agent.py`), you MUST PAUSE and ask:
