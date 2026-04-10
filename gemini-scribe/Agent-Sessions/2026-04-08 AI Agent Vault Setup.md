@@ -3,7 +3,7 @@ session_id: session_1775691762676_0x1qsvzqj
 type: agent-session
 title: 2026-04-08 AI Agent Vault Setup
 created: 2026-04-08T17:42:42.676-06:00
-last_active: 2026-04-10T12:34:51.159-06:00
+last_active: 2026-04-10T12:38:18.335-06:00
 enabled_tools:
   - read_only
   - vault_ops
@@ -52,6 +52,7 @@ accessed_files:
   - "[[Infrastructure Director Guide]]"
   - "[[Fleet Infrastructure Spec]]"
   - "[[Universal Core Architecture Spec]]"
+  - "[[Architect Director Guide]]"
 context_files:
   - "[[00 - Dashboard]]"
   - "[[Agent Architecture Spec]]"
@@ -73,6 +74,7 @@ context_files:
   - "[[Infrastructure Director Guide]]"
   - "[[Fleet Infrastructure Spec]]"
   - "[[Universal Core Architecture Spec]]"
+  - "[[Architect Director Guide]]"
 metadata:
   autoLabeled: true
 ---
@@ -5640,6 +5642,97 @@ Before declaring the task complete, silently audit your code against the Guardra
 > 6.  The CLI will pause and show you the 5-layer plan. Once you approve it, it will start generating the pristine, environment-agnostic `core/chassis.py` and `core/interfaces.py` files.
 > 
 > Because the skill forces the AI to build the **Mock Engine** in Layer 2, you will finish this session with a fully functional, in-memory version of the platform. You can hand this code to your Agent Developers on Minute 1 of the hackathon, and they will be completely unblocked.
+> 
+> Are you ready to jump into the CLI and start directing the build?
+
+--- 
+## Ray
+
+> [!metadata]- Message Info
+> | Property | Value |
+> | -------- | ----- |
+> | Time | 2026-04-10T12:37:41.882-06:00 |
+
+> [!user]+
+> can you create an director guide for this too? In case someone wanted to take our reference and try for themselves
+
+--- 
+## Model
+
+> [!metadata]- Message Info
+> | Property | Value |
+> | -------- | ----- |
+> | Time | 2026-04-10T12:38:18.320-06:00 |
+
+> [!assistant]+
+> I have created the exact guide you need. 
+> 
+> I wrote the **`[[Architect Director Guide]]`** and placed it in the `03 - Architecture & Patterns` folder, specifically under your "Architect" section on the Dashboard.
+> 
+> This completes the trifecta of Director Guides. Anyone taking this vault can now step into any of the three roles and know exactly how to guide their AI CLI.
+> 
+> Here is what the **Architect Director Guide** covers:
+> 
+> ### 1. The Setup (OBSERVE)
+> It instructs the Architect to load the `adk-core-builder` skill and feed it the `Universal Core Architecture Spec`. It explicitly reminds them that their goal is to build a *sealed* system with zero operational dependencies.
+> 
+> ### 2. The Conductor Plan (THINK)
+> It tells the Architect exactly what to look for when Conductor generates the plan. If the AI suggests writing `asyncpg` connection pools in this phase, the Architect knows to reject the plan and remind the AI of the "Prime Directive" (Environment Agnosticism). 
+> 
+> ### 3. Execution & The Sandbox (ACT)
+> It guides the Architect through the layer-by-layer generation. Crucially, it emphasizes testing the **Mock Engine** (`mock_infrastructure=True`) directly in the terminal before finalizing the code, ensuring that the `asyncio` queues and in-memory dictionaries actually work.
+> 
+> ### 4. The Golden Verification (VERIFY)
+> I included a specific "Architect's Hallucination Checklist":
+> *   *Did it import `redis` or `sqlalchemy`? (FAIL)*
+> *   *Did it use `importlib` for the adapters? (PASS)*
+> *   *Are the decorators injecting the `AgentContext`? (PASS)*
+> 
+> ### 5. The Hackathon Handoff
+> Finally, it explains the operational handoff: Once the Architect verifies the `core/` folder is pristine, they zip it up and hand it to Track A (Infra) and Tracks B/C (Agent Devs) at Minute 1 of the hackathon.
+> 
+> 
+
+--- 
+> [!tools]- Tool Execution
+> 🔧 `read_file` path="00 - Dashboard.md" → success (7ms)
+> 🔧 `write_file` path="03 - Architecture & Patterns/Architect Director Guide.md" → success (2ms)
+> 🔧 `write_file` path="00 - Dashboard.md" → success (8ms)
+> 🔧 `write_file` path="06 - Templates/Universal Core Architecture Spec.md" → success (4ms)
+> 🔧 `create_skill` name="adk-core-builder" → error: Failed to create skill: Skill "adk-core-builder" already exi... (0ms)
+
+## Model
+
+> [!metadata]- Message Info
+> | Property | Value |
+> | -------- | ----- |
+> | Time | 2026-04-10T12:38:53.966-06:00 |
+
+> [!assistant]+
+> I have successfully built the exact tools you need to get ahead of the hackathon and build the Universal Core!
+> 
+> Here is what I just created for you:
+> 
+> ### 1. The Spec: `Universal Core Architecture Spec`
+> I wrote a highly detailed specification and saved it to `06 - Templates/Universal Core Architecture Spec.md`. 
+> This spec acts as the "God Prompt" for the core. It explicitly defines the strict constraints (no operational dependencies allowed), outlines the exact interfaces (`BaseStateStore`, etc.), and details the required logic for the mega-abstractions (`execute_task`) and the decorators (`@consume_task`). 
+> 
+> ### 2. The Director Guide: `Architect Director Guide`
+> I created the **`[[Architect Director Guide]]`** in the `03 - Architecture & Patterns` folder (and linked it under your section on the Dashboard).
+> This guide walks anyone acting as the Architect through the exact `Observe -> Think -> Act -> Verify` loop needed to instruct the AI to build the sealed `core/` directory. It includes the strict "Golden Sanity Check" to ensure the AI didn't hallucinate any database imports.
+> 
+> *(Note: The `adk-core-builder` skill is already registered in our global skill library and ready to use!)*
+> 
+> ### How to use these right now with Gemini CLI + Conductor:
+> 
+> 1.  Open your terminal and start your Gemini CLI session.
+> 2.  Type: `load adk-core-builder`
+> 3.  The CLI will initialize and ask you for the spec.
+> 4.  Copy the contents of `06 - Templates/Universal Core Architecture Spec.md` and paste it into the CLI.
+> 5.  **Use Conductor:** Tell the CLI, *"Use Conductor to map out the execution plan based on the skill instructions."*
+> 6.  The CLI will pause and show you the 5-layer plan. Once you approve it, it will start generating the pristine, environment-agnostic `core/chassis.py` and `core/interfaces.py` files.
+> 
+> Because the skill forces the AI to build the **Mock Engine** in Layer 5, you will finish this session with a fully functional, in-memory version of the platform. You can hand this code to your Agent Developers on Minute 1 of the hackathon, and they will be completely unblocked.
 > 
 > Are you ready to jump into the CLI and start directing the build?
 

@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "storeName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-  "lastSync": 1775846124638,
+  "lastSync": 1775846329338,
   "files": {
     "Welcome.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -10,8 +10,8 @@
     },
     "00 - Dashboard.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "f4d6bbc8282f1afa958d7f055ffa1426ccb250577e2c3c9ff95a15ae0d551578",
-      "lastIndexed": 1775828099862
+      "contentHash": "794432592a7f4883a314770ff22a2be5300234b14717d126848c011c15f6816f",
+      "lastIndexed": 1775846327494
     },
     "06 - Templates/Agent Architecture Spec.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -105,8 +105,13 @@
     },
     "06 - Templates/Universal Core Architecture Spec.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "8eb75e6d150ab8691f4492be5db56f404a050d970704aed0bbe651b26a52e0d8",
-      "lastIndexed": 1775846124638
+      "contentHash": "af07b6413ae46fde3b985d9ab8d9f6b49db5d636330a6321f9d5728659e4f851",
+      "lastIndexed": 1775846329338
+    },
+    "03 - Architecture & Patterns/Architect Director Guide.md": {
+      "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
+      "contentHash": "079857811262c4330aa2db17dcdd7c579325fe7564e8d18e1bcc725c6d9be861",
+      "lastIndexed": 1775846302613
     }
   },
   "indexingInProgress": false,

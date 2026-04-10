@@ -11,6 +11,7 @@ Welcome to your central command for AI Agent development. As your Technical Lead
 - **[[03 - Architecture & Patterns/]]** - Deep dives into agentic patterns, infrastructure, and our foundational chassis. Organized by team role:
 
   - 👑 **The Architect (Ray)**
+    - 🚦 **[[Architect Director Guide]]** - How to direct CLIs to build the Universal Core.
     - 🏛️ **[[Architectural Decision Log]]** - Master tracker for all technical decisions and open questions.
     - 🔄 **[[Standard Agentic Workflows]]** - Our approved patterns (Supervisor, Plan-and-Execute, Evaluator-Optimizer).
   
@@ -34,6 +35,7 @@ Welcome to your central command for AI Agent development. As your Technical Lead
 - **[[06 - Templates/]]** - Standardized formats for your notes.
   - 📋 **[[Agent Architecture Spec]]** - Use this when designing a new agent.
   - 📋 **[[Fleet Infrastructure Spec]]** - Use this to bootstrap the environment.
+  - 📋 **[[Universal Core Architecture Spec]]** - Use this to build the pristine base chassis logic.
 - **[[07 - Operations & Planning/]]** - Strategic execution plans and team workflows.
   - 🚀 **[[Hackathon Execution Strategy]]** - Division of labor and milestones for the upcoming hackathon.
 
