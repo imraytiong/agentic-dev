@@ -13,8 +13,8 @@
 - [x] Task: Generate `src/agents/hello_sparky/agent.py` using `BaseAgentChassis` (012a58c)
 
 ## Layer 5: Configuration & Prompts
-- [ ] Task: Generate `src/agents/hello_sparky/config.yaml`
-- [ ] Task: Generate `src/agents/hello_sparky/prompts/system_prompt.jinja`
+- [x] Task: Generate `src/agents/hello_sparky/config.yaml` (da7c163)
+- [x] Task: Generate `src/agents/hello_sparky/prompts/system_prompt.jinja` (da7c163)
 
 ## Final Validation
 - [ ] Task: Run `pytest` and verify local execution with mock infrastructure.
