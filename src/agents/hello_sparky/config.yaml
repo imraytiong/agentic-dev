@@ -1,0 +1,17 @@
+agent:
+  name: "hello_chassis"
+  description: "The official Hello World reference agent for the BaseAgentChassis platform."
+  model: "gemini-1.5-flash"
+  temperature: 0.7
+
+# Infrastructure configuration
+# Note: For local development with mock_infrastructure=True, these values are bypassed.
+# When running in production, the fleet.yaml should override this section to provide 
+# the actual paths to the Postgres and Redis adapters in the Universal Core.
+infrastructure:
+  state_store: "src.universal_core.mock_adapters.MockStateStore"
+  message_broker: "src.universal_core.mock_adapters.MockMessageBroker"
+  vector_store: "src.universal_core.mock_adapters.MockVectorStore"
+  file_storage: "src.universal_core.mock_adapters.MockFileStorage"
+  telemetry: "src.universal_core.mock_adapters.MockTelemetry"
+  mcp_server: "src.universal_core.mock_adapters.MockMCPServer"
