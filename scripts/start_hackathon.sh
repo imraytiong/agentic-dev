@@ -5,6 +5,29 @@ echo "================================================================="
 echo "🚀 Bootstrapping Hackathon Environment..."
 echo "================================================================="
 
+echo ""
+echo "🔍 Step 0: Checking Prerequisites..."
+
+# Check Python 3
+if command -v python3 &> /dev/null; then
+    PY_VERSION=$(python3 --version)
+    echo "✅ Python 3 found: $PY_VERSION"
+else
+    echo "❌ ERROR: python3 is not installed or not in PATH."
+    echo "Please install Python 3 before running this script."
+    exit 1
+fi
+
+# Check Gemini CLI
+if command -v gemini &> /dev/null; then
+    GEM_VERSION=$(gemini --version 2>/dev/null || echo "installed")
+    echo "✅ Gemini CLI found: $GEM_VERSION"
+else
+    echo "❌ ERROR: gemini CLI is not installed or not in PATH."
+    echo "Please install the Gemini CLI (e.g., npm install -g @google/generative-ai-cli or your corporate equivalent) before running this script."
+    exit 1
+fi
+
 # 1. Prompt for and validate Gemini API Key
 echo ""
 echo "🔑 Step 1: Gemini API Key Setup"
