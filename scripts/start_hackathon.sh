@@ -104,8 +104,9 @@ fi
 # Activate and install
 source venv/bin/activate
 echo "   Installing dependencies (this is safe to re-run)..."
-pip install -q -r requirements.txt
-echo "   Dependencies installed."
+echo "   (You will see download progress bars below)"
+pip install -r requirements.txt
+echo "   ✅ Dependencies installed successfully."
 
 # 5. Gemini CLI Initialization
 echo ""
