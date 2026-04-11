@@ -1,15 +1,30 @@
 import importlib
 import logging
-from typing import Dict, Any, Optional
+import json
+from typing import Dict, Any, Optional, Type, TypeVar
+from pydantic import BaseModel, ValidationError
+
+try:
+    import jinja2
+except ImportError:
+    jinja2 = None
+
+try:
+    from fastapi import FastAPI, UploadFile, File, HTTPException
+    from fastapi.responses import HTMLResponse, StreamingResponse
+except ImportError:
+    FastAPI = None
 
 # Assuming google_adk provides LlmAgent. Adjust import if needed based on actual adk module.
 try:
     from google_adk import LlmAgent
 except ImportError:
-    # Fallback/Mock for LlmAgent if google_adk is not fully installed or has a different path
+    # Fallback/Mock for LlmAgent
     class LlmAgent:
         def __init__(self, **kwargs):
             pass
+        async def generate_content(self, prompt: str) -> str:
+            return "{}"
 
 from .interfaces import (
     BaseStateStore,
@@ -17,10 +32,13 @@ from .interfaces import (
     BaseFileStorage,
     BaseMessageBroker,
     BaseTelemetry,
-    BaseMCPServer
+    BaseMCPServer,
+    AgentContext
 )
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar('T', bound=BaseModel)
 
 def _deep_merge_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
     """Recursively merge dict2 into dict1."""
@@ -72,6 +90,10 @@ class BaseAgentChassis:
 
         logger.info("BaseAgentChassis initialized with dynamic infrastructure.")
 
+        # 3. Initialize FastAPI App Embedded within the Chassis
+        self.app = FastAPI(title="BaseAgentChassis API")
+        self._register_routes()
+
     def _load_adapter(self, config_key: str, expected_type: type) -> Any:
         """
         Dynamically imports and instantiates an adapter class from a string path.
@@ -93,9 +115,115 @@ class BaseAgentChassis:
                     f"interface '{expected_type.__name__}'."
                 )
             
-            # Instantiate and return the adapter
-            return adapter_class()
+            # Instantiate and return the adapter with config
+            return adapter_class(config=self.config)
         
         except (ImportError, AttributeError) as e:
             logger.error(f"Failed to load adapter '{plugin_path}': {str(e)}")
             raise e
+
+    def _register_routes(self):
+        """Register all FastAPI routes for the chassis."""
+        if not FastAPI:
+            logger.warning("FastAPI not installed. Routes will not be available.")
+            return
+
+        @self.app.get("/studio", response_class=HTMLResponse)
+        async def get_studio():
+            """Returns the Agent Studio UI."""
+            return """
+            <html>
+                <head>
+                    <title>Agent Studio</title>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                </head>
+                <body class="bg-gray-100 h-screen flex flex-col items-center justify-center">
+                    <h1 class="text-3xl font-bold mb-4">Agent Studio</h1>
+                    <div class="bg-white p-6 rounded shadow-md w-1/2 h-1/2">
+                        <p class="text-gray-500">Embedded chat interface goes here.</p>
+                    </div>
+                </body>
+            </html>
+            """
+
+        @self.app.post("/upload")
+        async def upload_file(file: UploadFile = File(...)):
+            """Multimodal file upload."""
+            if not self.file_storage:
+                raise HTTPException(status_code=501, detail="File storage not configured.")
+            
+            content = await file.read()
+            file_id = await self.file_storage.save_file(file.filename, content)
+            return {"file_id": file_id, "filename": file.filename}
+
+        @self.app.get("/download/{file_id}")
+        async def download_file(file_id: str):
+            """Outbound file route."""
+            if not self.file_storage:
+                raise HTTPException(status_code=501, detail="File storage not configured.")
+            
+            try:
+                content = await self.file_storage.get_file(file_id)
+                # In a real app we'd stream this or return FileResponse
+                return {"file_id": file_id, "size": len(content)}
+            except Exception as e:
+                raise HTTPException(status_code=404, detail=str(e))
+
+        @self.app.get("/mcp/sse")
+        async def mcp_sse():
+            """MCP Server route."""
+            if not self.mcp_server:
+                raise HTTPException(status_code=501, detail="MCP Server not configured.")
+            
+            stream = await self.mcp_server.start_sse_stream()
+            return StreamingResponse(stream, media_type="text/event-stream")
+
+    async def ask_structured(self, prompt: str, response_model: Type[T], max_retries: int = 3) -> T:
+        """
+        Executes a prompt against the LLM and enforces a structured Pydantic response.
+        Includes a built-in retry loop for JSON healing.
+        """
+        schema = json.dumps(response_model.model_json_schema())
+        augmented_prompt = f"{prompt}\n\nPlease respond in pure JSON matching this schema:\n{schema}"
+        
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                response_text = await self.llm_agent.generate_content(augmented_prompt)
+                # Clean up potential markdown blocks
+                cleaned_text = response_text.strip()
+                if cleaned_text.startswith("```json"):
+                    cleaned_text = cleaned_text[7:]
+                if cleaned_text.startswith("```"):
+                    cleaned_text = cleaned_text[3:]
+                if cleaned_text.endswith("```"):
+                    cleaned_text = cleaned_text[:-3]
+                cleaned_text = cleaned_text.strip()
+                
+                data = json.loads(cleaned_text)
+                return response_model(**data)
+            except (json.JSONDecodeError, ValidationError) as e:
+                logger.warning(f"Attempt {attempt + 1} failed. Healing JSON...")
+                last_error = str(e)
+                augmented_prompt += f"\n\nYour previous response failed validation: {last_error}. Please fix it."
+        
+        raise ValueError(f"Failed to generate structured response after {max_retries} attempts. Last error: {last_error}")
+
+    async def execute_task(self, template_str: str, template_vars: dict, response_model: Type[T], context: AgentContext) -> T:
+        """
+        The core agentic loop.
+        Loads Jinja template, injects AgentContext, renders prompt, and calls ask_structured.
+        """
+        if not jinja2:
+            raise RuntimeError("jinja2 is required for execute_task.")
+        
+        env = jinja2.Environment()
+        template = env.from_string(template_str)
+        
+        # Inject standard AgentContext variables
+        template_vars['user_id'] = context.user_id
+        template_vars['session_id'] = context.session_id
+        template_vars['tenant_id'] = context.tenant_id
+        
+        rendered_prompt = template.render(**template_vars)
+        return await self.ask_structured(rendered_prompt, response_model)
