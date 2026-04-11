@@ -7,11 +7,11 @@ It is designed for **Agent-Driven Development**. If you are comfortable with Git
 
 ## Directory Structure
 
-*   **/developer_guides** — The core playbooks and instructions. This is where human developers learn how to build and direct agents.
-*   **/specs** — Technical specifications defining our architectural standards, the universal core (`BaseAgentChassis`), and fleet infrastructure.
-*   **/skills** — Pre-packaged AI CLI instructions (`SKILL.md` files). Load these into your AI coding assistant to enforce our architectural rules during code generation.
-*   **/agent_projects** — Active or reference agent implementations (e.g., our baseline test agent, `hello_chassis_reference_agent.md`).
-*   **/internal_ignore** — **Safe to ignore.** For the curious: this contains internal workspace files, architectural decision logs, and hackathon planning scratchpads for the core maintainers. 
+*   **[developer_guides/](developer_guides/)** — The core playbooks and instructions. This is where human developers learn how to build and direct agents.
+*   **[specs/](specs/)** — Technical specifications defining our architectural standards, the universal core (`BaseAgentChassis`), and fleet infrastructure.
+*   **[skills/](skills/)** — Pre-packaged AI CLI instructions (`SKILL.md` files). Load these into your AI coding assistant to enforce our architectural rules during code generation.
+*   **[agent_projects/](agent_projects/)** — Active or reference agent implementations (e.g., our baseline test agent, `hello_chassis_reference_agent.md`).
+*   **[internal_ignore/](internal_ignore/)** — **Safe to ignore.** For the curious: this contains internal workspace files, architectural decision logs, and hackathon planning scratchpads for the core maintainers. 
 
 ## Where to Start
 
