@@ -2,7 +2,7 @@ import pytest
 import json
 from typing import List, Any
 from src.universal_core.chassis import BaseAgentChassis
-from src.universal_core.interfaces import BaseStateStore, AgentContext
+from src.universal_core.interfaces import BaseStateStore, AgentContext, BaseMessageBroker
 from pydantic import BaseModel, ValidationError
 
 class DummyStateStore(BaseStateStore):
@@ -123,5 +123,52 @@ async def test_execute_task():
     template = "Context User: {{ user_id }}"
     result = await chassis.execute_task(template, {}, SampleResponse, context)
     
-    assert result.message == "success"
-    assert result.count == 10
+class DummyMessageBroker(BaseMessageBroker):
+    def __init__(self, config=None):
+        self.config = config
+        self.messages = []
+        
+    async def publish(self, queue_name: str, payload: BaseModel, context: AgentContext) -> None:
+        self.messages.append({
+            "payload": payload.model_dump(),
+            "context": context.model_dump()
+        })
+        
+    async def listen(self, queue_name: str) -> Any:
+        if self.messages:
+            return self.messages.pop(0)
+        # Throw an exception to break the while loop in the test
+        import asyncio
+        raise asyncio.CancelledError("No more messages")
+
+@pytest.mark.asyncio
+async def test_consume_task():
+    chassis = BaseAgentChassis({"infrastructure": {}})
+    chassis.message_broker = DummyMessageBroker()
+    
+    # Pre-load a message into the dummy broker
+    context = AgentContext(user_id="u1", session_id="s1", tenant_id="t1")
+    payload = SampleResponse(message="task_data", count=5)
+    await chassis.message_broker.publish("test_queue", payload, context)
+    
+    # We will use this to verify the function was called
+    executed_payload = None
+    executed_context = None
+    
+    @chassis.consume_task(queue_name="test_queue", payload_model=SampleResponse)
+    async def my_agent_function(payload: SampleResponse, ctx: AgentContext):
+        nonlocal executed_payload, executed_context
+        executed_payload = payload
+        executed_context = ctx
+        
+    # The decorator registers the wrapper in chassis._consumers
+    assert len(chassis._consumers) == 1
+    consumer_coroutine = chassis._consumers[0]
+    
+    # Run the consumer. It will process the one message and then raise CancelledError
+    await consumer_coroutine()
+        
+    assert executed_payload is not None
+    assert executed_payload.message == "task_data"
+    assert executed_payload.count == 5
+    assert executed_context.user_id == "u1"

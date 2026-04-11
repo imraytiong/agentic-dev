@@ -1,6 +1,7 @@
 import importlib
 import logging
 import json
+import asyncio
 from typing import Dict, Any, Optional, Type, TypeVar
 from pydantic import BaseModel, ValidationError
 
@@ -227,3 +228,54 @@ class BaseAgentChassis:
         
         rendered_prompt = template.render(**template_vars)
         return await self.ask_structured(rendered_prompt, response_model)
+
+    def consume_task(self, queue_name: str, payload_model: Type[T], max_retries: int = 3):
+        """
+        Decorator to continuously poll the message broker, deserialize payloads, and route to the wrapped function.
+        """
+        def decorator(func):
+            async def wrapper():
+                if not self.message_broker:
+                    logger.error(f"Cannot consume queue '{queue_name}' without a configured message_broker.")
+                    return
+                
+                logger.info(f"Starting consumer loop for queue: {queue_name}")
+                while True:
+                    try:
+                        # 1. Listen for raw message
+                        raw_message = await self.message_broker.listen(queue_name)
+                        if not raw_message:
+                            continue
+                            
+                        # Assuming the broker returns a dict with 'payload' and 'context'
+                        # In a real implementation, the BaseMessageBroker ABC should define this return type.
+                        payload_data = raw_message.get("payload", {})
+                        context_data = raw_message.get("context", {})
+                        
+                        # 2. Deserialize
+                        payload = payload_model(**payload_data)
+                        context = AgentContext(**context_data)
+                        
+                        logger.info(f"Processing task on {queue_name} for session {context.session_id}")
+                        
+                        # 3. Route to wrapped function
+                        await func(payload, context)
+                        
+                        # Note: DLQ routing and webhook response logic would go here, 
+                        # catching exceptions from func() and tracking retries.
+                        
+                    except ValidationError as ve:
+                        logger.error(f"Failed to deserialize payload for queue {queue_name}: {str(ve)}")
+                    except asyncio.CancelledError:
+                        logger.info(f"Consumer loop for {queue_name} cancelled.")
+                        break
+                    except Exception as e:
+                        logger.error(f"Error processing message from queue {queue_name}: {str(e)}")
+                        # Route to DLQ if max_retries exceeded...
+            
+            # We attach the wrapper to the chassis so it can be managed by the application lifecycle
+            if not hasattr(self, '_consumers'):
+                self._consumers = []
+            self._consumers.append(wrapper)
+            return wrapper
+        return decorator
