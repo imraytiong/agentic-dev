@@ -5,9 +5,50 @@ This repository is a framework and playbook for building distributed AI agents u
 
 It is designed for **Agent-Driven Development**. If you are comfortable with Git, the command line, and prompt engineering (using tools like Gemini CLI or Antigravity) but have zero familiarity with developing AI agents, this repo will kick-start that process. We provide the architectural guardrails, playbooks, and AI instructions needed to safely direct your AI assistants to write the code for you.
 
+## System Architecture
+
+The codebase relies on a Hexagonal (Ports & Adapters) architecture that allows us to maintain an open-source core while building proprietary logic safely on top of it.
+
+```mermaid
+flowchart TD
+    %% Styling
+    classDef core fill:#2b3a42,stroke:#3f5765,stroke-width:2px,color:#fff;
+    classDef public fill:#1e4620,stroke:#2e6b32,stroke-width:2px,color:#fff;
+    classDef private fill:#5c1e1e,stroke:#8a2e2e,stroke-width:2px,color:#fff;
+    classDef config fill:#4a4a4a,stroke:#666,stroke-width:2px,color:#fff;
+
+    %% Nodes
+    Config[YAML Configuration]:::config
+
+    subgraph CoreLayer [Universal Core]
+        Chassis(BaseAgentChassis):::core
+        Interfaces(Abstract Interfaces / Ports):::core
+        Chassis --> Interfaces
+    end
+
+    subgraph AgentLayer [Agent Microservices]
+        Sparky[Sparky Agent 🌐]:::public
+        CorpAgent[Internal Hackathon Agents 🔒]:::private
+    end
+
+    subgraph InfraLayer [Infrastructure Adapters]
+        PubAdapters[Public Adapters 🌐\nRedis, Postgres]:::public
+        PrivAdapters[Internal Adapters 🔒\nCorp Kafka, APIs]:::private
+    end
+
+    %% Connections
+    Config -. Injects dependencies .-> Chassis
+    Sparky -- Inherits --> Chassis
+    CorpAgent -- Inherits --> Chassis
+
+    Interfaces -. Implemented by .-> PubAdapters
+    Interfaces -. Implemented by .-> PrivAdapters
+```
+*(Legend: 🌐 = Open Source / Public Repository, 🔒 = Corporate Internal Repository)*
+
 ## Directory Structure
 
-*   **[src/agents/](src/agents/)** — Active or reference agent implementations (e.g., our baseline test agent, `hello_sparky.md`). Code for agents goes here.
+*   **[src/agents/](src/agents/)** — Active or reference agent implementations (e.g., our baseline test agent, `sparky_spec.md`). Code for agents goes here.
 *   **[src/infrastructure/](src/infrastructure/)** — Where the Hexagonal Adapters live (e.g., standard Redis, Postgres) and the `fleet_infrastructure_spec.md`. Code for infrastructure goes here.
 *   **[src/universal_core/](src/universal_core/)** — The sealed Universal Core (`BaseAgentChassis`), system contracts, boundaries, and the `universal_core_architecture_spec.md`.
 *   **[developer_guides/](developer_guides/)** — The core playbooks and instructions. This is where human developers learn how to build and direct agents.
