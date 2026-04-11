@@ -1,8 +1,8 @@
 # Implementation Plan: Base Agent Chassis
 
 ## Phase 1: Foundation (Domain Interfaces)
-- [ ] Task: Create `src/universal_core/interfaces.py` with all ABCs
-- [ ] Task: Define `AgentContext` and generic type variables
+- [x] Task: Create `src/universal_core/interfaces.py` with all ABCs (07f3205)
+- [x] Task: Define `AgentContext` and generic type variables (07f3205)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation (Domain Interfaces)' (Protocol in workflow.md)
 
 ## Phase 2: The Universal Chassis (Dependency Injection & Lifecycle)
