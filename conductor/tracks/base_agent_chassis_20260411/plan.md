@@ -16,7 +16,7 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Service Layer & Mega-Abstractions' (Protocol in workflow.md)
 
 ## Phase 4: Communication & Event Handling (Decorators & API)
-- [~] Task: Implement `@consume_task` decorator for message polling
+- [x] Task: Implement `@consume_task` decorator for message polling (ebe2f8a)
 - [x] Task: Implement FastAPI endpoints for file upload/download and MCP SSE (adb5c5e)
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Communication & Event Handling' (Protocol in workflow.md)
 
