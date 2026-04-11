@@ -1,11 +1,10 @@
 # Implementation Plan: Sparky Reference Agent
 
 ## Layer 1: Data
-- [ ] Task: Generate `src/agents/hello_sparky/models.py` (Request, State, Response schemas)
+- [x] Task: Generate `src/agents/hello_sparky/models.py` (Request, State, Response schemas) (98c820b)
 
 ## Layer 2: Defense (Testing)
-- [ ] Task: Generate `src/agents/hello_sparky/tests/test_tools.py`
-- [ ] Task: Generate `src/agents/hello_sparky/tests/test_agent.py`
+- [x] Task: Generate `tests/test_agents/test_sparky.py` (Test tools and agent logic) (105f91a)
 
 ## Layer 3: Capabilities (Tools)
 - [ ] Task: Generate `src/agents/hello_sparky/tools.py` (get_affirmation function)
