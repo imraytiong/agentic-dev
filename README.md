@@ -14,10 +14,9 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/agentic-dev/m
 *(Note: Ensure you have `python3` and `gemini` CLI installed before running).*
 
 **Next Steps:**
-```bash
-cd agentic-dev
-source venv/bin/activate
-gemini load skills/adk-agent-builder/SKILL.md
+The setup script will automatically drop you directly into the Gemini CLI. Once inside the CLI, load the agent builder skill to begin:
+```text
+> /load skills/adk-agent-builder/SKILL.md
 ```
 
 ## System Architecture

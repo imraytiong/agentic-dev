@@ -17,14 +17,10 @@ We have automated the entire environment setup. Open your terminal and run the b
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/agentic-dev/main/scripts/start_hackathon.sh)"
 ```
-*What this does: Clones the repo, copies your `.env`, builds your Python virtual environment, installs the dependencies, and initializes your AI CLI with the correct context.*
+*What this does: Clones the repo, copies your `.env`, builds your Python virtual environment, installs the dependencies, initializes your AI CLI with the correct context, and drops you directly into the Gemini CLI.*
 
-## Step 2: Activate the Environment
-Navigate into the repository and ensure your virtual environment is active before running the code:
-```bash
-cd agentic-dev
-source venv/bin/activate
-```
+## Step 2: Exit the CLI (For Now)
+Since we want to manually run the Sparky agent first, type `exit` in the Gemini CLI. You will still be inside the `agentic-dev` directory with your Python virtual environment activated!
 
 ## Step 3: Boot Sparky
 We are going to run Sparky using the `mock_infrastructure` flag. This bypasses the need for enterprise Redis/Postgres and spins everything up locally in memory.

@@ -100,15 +100,17 @@ if command -v gemini &> /dev/null; then
     echo "   Gemini CLI initialized and System Instructions pinned!"
 else
     echo "⚠️  Gemini CLI not found in PATH. Please ensure it is installed."
-    echo "   You can install it later and manually run: gemini context add SYSTEM_INSTRUCTIONS.md"
 fi
 
 echo ""
 echo "================================================================="
-echo "✅ Environment Ready! You are good to go."
+echo "✅ Environment Ready! Dropping you into the Gemini CLI..."
 echo "================================================================="
-echo "👉 Run the following commands to get started:"
-echo "   cd $REPO_DIR"
-echo "   source venv/bin/activate"
-echo "   gemini load skills/adk-agent-builder/SKILL.md"
-echo "================================================================="
+
+# Launch a new interactive shell so the user stays in the repo directory 
+# with the venv activated, and automatically start the Gemini CLI.
+if command -v gemini &> /dev/null; then
+    exec bash --init-file <(echo "source venv/bin/activate; gemini")
+else
+    exec bash --init-file <(echo "source venv/bin/activate")
+fi
