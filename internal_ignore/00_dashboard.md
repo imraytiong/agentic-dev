@@ -4,8 +4,8 @@ Welcome to your central command for AI Agent development. As your Technical Lead
 
 ## 🗂️ Workspace Organization
 
-- **[agent_projects/](../agent_projects/)** - Active and planned AI agents.
-  - 🐕 **[Hello Chassis Reference Agent](../agent_projects/hello_chassis_reference_agent.md)** - "Sparky", our Hello World reference agent.
+- **[src/agents/](../src/agents/)** - Active and planned AI agents.
+  - 🐕 **[Hello Sparky](../src/agents/hello_sparky.md)** - "Sparky", our Hello World reference agent.
 
 - **[developer_guides/](../developer_guides/)** - Developer guides for different roles:
   - 👑 **The Architect (Ray)**
@@ -40,7 +40,7 @@ Welcome to your central command for AI Agent development. As your Technical Lead
   - 🤖 **[architecture-planning](../skills/architecture-planning/SKILL.md)**
 
 ## 🚀 Active Projects
-- [Hello Chassis Reference Agent](../agent_projects/hello_chassis_reference_agent.md)
+- [Hello Sparky](../src/agents/hello_sparky.md)
 
 ---
 *Tip: When you're ready to design an agent, let me know and we can draft an architecture spec together using our approved chassis.*
