@@ -1,7 +1,7 @@
 ---
 links:
-  - "[Agentic Coding Playbook](Agentic%20Coding%20Playbook.md)"
-  - "[Developer Guide](Developer%20Guide.md)"
+  - "[Agentic Coding Playbook](agentic_coding_playbook.md)"
+  - "[Developer Guide](developer_guide.md)"
 tags:
   - agentic-coding
   - gemini-cli
@@ -29,11 +29,11 @@ Instead of manually prompting the AI with all of our architectural rules, we hav
 
 **Your Action:**
 Before opening Conductor or writing any code, load the custom skill into your CLI:
-1. Command your CLI to load the `adk-agent-builder` skill. (View the skill instructions here: **[adk-agent-builder](../../08%20-%20AI%20CLI%20Skills/adk-agent-builder.md)**).
-2. Feed the CLI the specific **[Agent Architecture Spec](../../06%20-%20Templates/Agent%20Architecture%20Spec.md)** for the agent you are building (or use the skill's interactive brain-dump mode to generate one!).
+1. Command your CLI to load the `adk-agent-builder` skill. (View the skill instructions here: **[adk-agent-builder](../../skills/adk-agent-builder/SKILL.md)**).
+2. Feed the CLI the specific **[Agent Architecture Spec](../../specs/agent_architecture_spec.md)** for the agent you are building (or use the skill's interactive brain-dump mode to generate one!).
 
 **What the Skill Does:**
-You no longer need to write massive explicit prompts. The skill automatically forces the AI to read the **[BaseAgentChassis Reference](../Platform%20Engineers/BaseAgentChassis%20Reference.md)**, forbids it from writing raw infrastructure code, and mandates the use of our decorators (`@chassis.consume_task`) and security contexts.
+You no longer need to write massive explicit prompts. The skill automatically forces the AI to read the **[BaseAgentChassis Reference](../infrastructure_developers/baseagentchassis_reference.md)**, forbids it from writing raw infrastructure code, and mandates the use of our decorators (`@chassis.consume_task`) and security contexts.
 
 ---
 
@@ -103,10 +103,10 @@ If `chassis.run_local(mock_infrastructure=True)` executes perfectly in your term
 ---
 ## Progressive Learning Path
 If you are new to this architecture, we recommend reading these guides in the following order:
-1. **[Conceptual Guide - What is an Agent](Conceptual%20Guide%20-%20What%20is%20an%20Agent.md):** Start here to understand the high-level theory without the code.
-2. **[Developer Guide](Developer%20Guide.md):** Move here to see the actual Python code and the 5-step workflow.
-3. **[Agent Directing Guide](Agent%20Directing%20Guide.md):** Read this when you are ready to use Gemini CLI to actually generate the code.
-4. **[Agentic Coding Playbook](Agentic%20Coding%20Playbook.md):** The meta-rules for team collaboration and architecture defense.
+1. **[Conceptual Guide - What is an Agent](conceptual_guide_-_what_is_an_agent.md):** Start here to understand the high-level theory without the code.
+2. **[Developer Guide](developer_guide.md):** Move here to see the actual Python code and the 5-step workflow.
+3. **[Agent Directing Guide](agent_directing_guide.md):** Read this when you are ready to use Gemini CLI to actually generate the code.
+4. **[Agentic Coding Playbook](agentic_coding_playbook.md):** The meta-rules for team collaboration and architecture defense.
 
 ---
 ## 6. The MAS Threshold: When to Split an Agent

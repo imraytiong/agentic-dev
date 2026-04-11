@@ -14,7 +14,7 @@ This playbook outlines how teams collaborate to instruct coding agents safely, e
 
 ### 1. Feed the Contract (Context Scoping)
 AI coding agents are eager to please and will invent infrastructure if you don't restrict them. 
-*   **The Rule:** Whenever you instruct an AI to create a new agent, you **must** load the appropriate skill ([adk-agent-builder](../../08%20-%20AI%20CLI%20Skills/adk-agent-builder.md) or [adk-infra-builder](../../08%20-%20AI%20CLI%20Skills/adk-infra-builder.md)) so it knows its boundaries.
+*   **The Rule:** Whenever you instruct an AI to create a new agent, you **must** load the appropriate skill ([adk-agent-builder](../../skills/adk-agent-builder/SKILL.md) or [adk-infra-builder](../../skills/adk-infra-builder/SKILL.md)) so it knows its boundaries.
 *   **The Prompt:** *"You are building a new agent. You must strictly use the methods provided in the BaseAgentChassis framework. Do not write raw Redis, FastAPI, or Postgres connection code."*
 
 ### 2. Generate in Layers (The Step-by-Step Workflow)
@@ -39,8 +39,8 @@ If Team A is building the Supervisor Agent and Team B is building the Data Agent
 When multiple engineers are using AI to build agents in the same cluster, coordination happens at the **Specification Layer**, not the Code Layer. We divide the team into three distinct roles:
 
 1.  **The Architect (Ray):** Owns the "Universal Core" (`core/` directory) and the global Pydantic contracts. Resolves any disputes and ensures the core remains completely sealed and environment-agnostic.
-2.  **The Infrastructure Leads:** Focus exclusively on the `adapters/` directory and deployment manifests (`fleet.yaml`, `docker-compose.yml`). They map the environment dependencies (like Colima or Podman) to the Universal Core using the [adk-infra-builder](../../08%20-%20AI%20CLI%20Skills/adk-infra-builder.md) skill.
-3.  **The Agent Developers:** Focus exclusively on building functional agents (`agent.py`, `tools.py`, `prompts/`). They rely on the Universal Core provided by the Architect and use `mock_infrastructure=True` to build rapidly without waiting for the Infra Leads to finish the adapters. They wield the [adk-agent-builder](../../08%20-%20AI%20CLI%20Skills/adk-agent-builder.md) skill.
+2.  **The Infrastructure Leads:** Focus exclusively on the `adapters/` directory and deployment manifests (`fleet.yaml`, `docker-compose.yml`). They map the environment dependencies (like Colima or Podman) to the Universal Core using the [adk-infra-builder](../../skills/adk-infra-builder/SKILL.md) skill.
+3.  **The Agent Developers:** Focus exclusively on building functional agents (`agent.py`, `tools.py`, `prompts/`). They rely on the Universal Core provided by the Architect and use `mock_infrastructure=True` to build rapidly without waiting for the Infra Leads to finish the adapters. They wield the [adk-agent-builder](../../skills/adk-agent-builder/SKILL.md) skill.
 
 By isolating the AI CLIs into these three distinct zones (`core/`, `adapters/`, and `agents/`), we prevent the AI from hallucinating cross-boundary breaking changes.
 

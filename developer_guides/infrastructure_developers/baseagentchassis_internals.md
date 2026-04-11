@@ -5,7 +5,7 @@
 
 This guide is for platform engineers, architects, or curious agent developers who want to understand exactly what happens *under the hood* of the `BaseAgentChassis`. 
 
-If you just want to build an agent, see the `[Developer Guide](../Agent%20Developers/Developer%20Guide.md)`. If you need to debug the chassis, extend its capabilities, or understand how it abstracts away infrastructure, read on.
+If you just want to build an agent, see the `[Developer Guide](../agent_developers/Developer_Guide.md)`. If you need to debug the chassis, extend its capabilities, or understand how it abstracts away infrastructure, read on.
 
 ---
 
