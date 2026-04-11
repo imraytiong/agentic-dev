@@ -20,6 +20,53 @@ Because the `BaseAgentChassis` handles all the distributed plumbing (FastAPI, Re
 ## Quick Start & Core Concepts
 **The Golden Rule:** The `BaseAgentChassis` handles all distributed plumbing (Networking, Lifecycles, Observability). You *only* write Business Logic.
 
+```mermaid
+flowchart TD
+    %% Styling
+    classDef devDomain fill:#e6f3ff,stroke:#0066cc,stroke-width:2px,color:#333;
+    classDef chassis fill:#f9f9f9,stroke:#666,stroke-width:2px,stroke-dasharray: 5 5,color:#333;
+    classDef infra fill:#fff0e6,stroke:#cc5200,stroke-width:2px,color:#333;
+
+    subgraph UserSpace [1. Your Business Logic (What you build)]
+        direction TB
+        C[config.yaml<br/>Identity & Skills]
+        M[models.py<br/>Strict Schemas]
+        P[prompts/<br/>Jinja Templates]
+        T[tools.py<br/>Python Functions]
+        
+        A{{agent.py<br/>The Brain}}
+        
+        C --> A
+        M --> A
+        P --> A
+        T --> A
+    end
+
+    subgraph ChassisSpace [2. BaseAgentChassis (The abstracted plumbing)]
+        direction TB
+        Decorators[@chassis.consume_task<br/>Queue & State Mgmt]
+        Execute[chassis.execute_task<br/>LLM orchestration]
+        
+        A ===> Decorators
+        A ===> Execute
+    end
+
+    subgraph InfraSpace [3. Fleet Infrastructure (You don't worry about this)]
+        direction TB
+        Redis[(Redis<br/>Async Queues)]
+        PG[(PostgreSQL<br/>JSONB State)]
+        LLM[LiteLLM / Vertex<br/>Model Routing]
+        
+        Decorators -.-> Redis
+        Decorators -.-> PG
+        Execute -.-> LLM
+    end
+
+    class UserSpace devDomain;
+    class ChassisSpace chassis;
+    class InfraSpace infra;
+```
+
 **The 5-Step Developer Workflow:**
 1. **Configure (`config.yaml`):** Define your agent's name, model aliases, and which skills/tools to load.
 2. **Define Schemas (`models.py`):** Create strict Pydantic models for your REST payloads and JSONB State.

@@ -7,6 +7,33 @@ While the Agent Developers (Role 3) are building the "Brains" using the `adk-age
 
 We use a **Hexagonal Architecture (Ports and Adapters)** approach with **True Inversion of Control (IoC)**. You are *not* building the `BaseAgentChassis` from scratch. The "Universal Core" (`src/universal_core/chassis.py`) is sealed, pre-built, and strictly owned by **The Architect (Role 1)**. Your job is to build the **Operational Adapters** in the `src/infrastructure/` directory that connect that core to the real world.
 
+### Why We Use Adapters (The "Open Core" Model)
+Adapters allow our Universal Core to remain completely agnostic to the environment it runs in. This is crucial for our dual-remote setup: we can use standard open-source tools on our local machines, but instantly swap to proprietary corporate systems during the hackathon *without changing a single line of the core agent code*. You just update the YAML config!
+
+```mermaid
+flowchart LR
+    subgraph "🛡️ Universal Core (Sealed)"
+        Chassis[BaseAgentChassis] -->|Defines Needs| Port[interfaces.py<br/>(e.g., BaseMessageQueue)]
+    end
+
+    subgraph "🔌 Infrastructure Layer (Adapters)"
+        Port -.->|Public Config| Redis[public_adapters/ <br/> RedisAdapter]
+        Port -.->|Corporate Config| Kafka[internal_adapters/ <br/> CorpKafkaAdapter]
+    end
+
+    subgraph "🌍 External Systems"
+        Redis --> LiveRedis[(Standard Redis)]
+        Kafka --> LiveKafka[(Secure Corp Kafka)]
+    end
+    
+    style Chassis fill:#2d3748,stroke:#4fd1c5,color:#fff
+    style Port fill:#2d3748,stroke:#fc8181,color:#fff
+    style Redis fill:#2b6cb0,stroke:#63b3ed,color:#fff
+    style Kafka fill:#805ad5,stroke:#b794f4,color:#fff
+    style LiveRedis fill:#4a5568,color:#fff
+    style LiveKafka fill:#4a5568,color:#fff
+```
+
 ## The Interface-First Bootstrap Protocol
 
 To completely unblock the rest of the hackathon team, you will follow this 3-phase protocol:
