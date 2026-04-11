@@ -101,15 +101,30 @@ python agent.py
 If `chassis.run_local(mock_infrastructure=True)` executes perfectly in your terminal, the agent is ready for the Docker/K3s cluster. You have successfully directed the AI.
 
 ---
-## Progressive Learning Path
-If you are new to this architecture, we recommend reading these guides in the following order:
-1. **[Conceptual Guide](conceptual_guide.md):** Start here to understand the high-level theory without the code.
-2. **[Developer Guide](developer_guide.md):** Move here to see the actual Python code and the 5-step workflow.
-3. **[Agent Directing Guide](agent_directing_guide.md):** Read this when you are ready to use Gemini CLI to actually generate the code.
-4. **[Agentic Coding Playbook](agentic_coding_playbook.md):** The meta-rules for team collaboration and architecture defense.
+
+## 6. Testing Your Agents (The Out-of-the-Box Experience)
+
+As a Director, you need to test what the AI has built. Our `BaseAgentChassis` is wired to provide an incredible "out-of-the-box" testing experience without requiring you to build a custom frontend.
+
+### The "Agent Studio" (Local Web UI)
+When you run the agent with `mock_infrastructure=True` (or standard `python agent.py`), the Chassis bypasses the heavy enterprise infrastructure and automatically spins up an embedded web application.
+*   **How to access it:** Open your browser to `http://localhost:8000/studio`.
+*   **What you see:** A slick, ChatGPT-like interface served directly from the agent's FastAPI backend.
+*   **Multimodal Testing:** Click the paperclip icon in the UI to drop PDFs, code files, or paste links to instantly test the agent's file-handling capabilities.
+
+### The MCP Server (IDE Integration)
+If you want to test the agent directly against your local codebase, use the built-in MCP (Model Context Protocol) server.
+*   **How it works:** The Chassis automatically exposes a `GET /mcp/sse` endpoint.
+*   **The Workflow:** Connect an MCP-compatible IDE (like Cursor or Windsurf) to `http://localhost:8000/mcp/sse`. You can now highlight code in your editor and ask your custom agent to process it directly in your IDE chat.
+
+### Outbound Files (Downloading)
+If your agent generates files (like a CSV report or a modified image), ensure it outputs a markdown link (e.g., `[Download Report](/download/12345)`). 
+*   In the **Agent Studio**, this renders as a beautiful, clickable download button.
+*   In **MCP clients**, it allows you to save the file directly into your local workspace.
 
 ---
-## 6. The MAS Threshold: When to Split an Agent
+
+## 7. The MAS Threshold: When to Split an Agent
 
 Knowing exactly *when* to break a single agent into a Multi-Agent System (MAS) is the hallmark of a great Director. Do not split agents prematurely (which adds unnecessary network latency), but do not wait until a "God Agent" collapses under its own weight.
 
@@ -130,3 +145,12 @@ Watch for these **Four Thresholds**. If your agent crosses any of them, it is ti
 ### Threshold 4: The "Context Window Blowout"
 *   **The Symptom:** The agent needs to read 50 massive PDFs to answer a question. If you try to stuff all 50 PDFs into one prompt, the LLM hits its token limit or suffers from "Lost in the Middle" syndrome (forgetting the middle of the text).
 *   **The Split:** Create the **Map-Reduce Pattern**. Spin up 50 "Worker Agents" that each read exactly one PDF and extract the facts. Send those 50 tiny summaries to one "Synthesizer Agent" to write the final report.
+
+---
+
+## Progressive Learning Path
+If you are new to this architecture, we recommend reading these guides in the following order:
+1. **[Conceptual Guide](conceptual_guide.md):** Start here to understand the high-level theory without the code.
+2. **[Developer Guide](developer_guide.md):** Move here to see the actual Python code and the 5-step workflow.
+3. **[Agent Directing Guide](agent_directing_guide.md):** Read this when you are ready to use Gemini CLI to actually generate the code.
+4. **[Agentic Coding Playbook](agentic_coding_playbook.md):** The meta-rules for team collaboration and architecture defense.

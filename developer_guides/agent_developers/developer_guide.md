@@ -1,7 +1,7 @@
 ---
 links:
-  - "[Conceptual Guide](conceptual_guide.md)"
-  - "[Agent Directing Guide](agent_directing_guide.md)"
+  - "[[conceptual_guide]]"
+  - "[[agent_directing_guide]]"
 ---
 # AI Agent Developer Guide: Building with the BaseAgentChassis
 
@@ -11,7 +11,7 @@ links:
 Welcome to the fleet. This guide demonstrates the Developer Experience (DX) for creating a new agent in our distributed architecture. 
 
 > **💡 Architecture Methodology:** 
-> The architecture and design patterns outlined in this guide were developed using a rigorous, iterative process. If you need to design new systems, extend this architecture, or understand the meta-process we used to arrive at these decisions, refer to the `[Architecture Planning Skill](../../skills/architecture-planning/SKILL.md)` document.
+> The architecture and design patterns outlined in this guide were developed using a rigorous, iterative process. If you need to design new systems, extend this architecture, or understand the meta-process we used to arrive at these decisions, refer to the `[[../../skills/architecture-planning/SKILL.md|Architecture Planning Skill]]` document.
 
 Because the `BaseAgentChassis` handles all the distributed plumbing (FastAPI, Redis, PostgreSQL, OpenTelemetry, and K3s Health Checks), your job as an Agent Developer is strictly focused on **Business Logic**: Prompts, Tools, and State.
 
@@ -48,7 +48,7 @@ research_agent/
 
 This file is specific to the agent you are building. It defines the agent's identity and capabilities. 
 
-> **Curious about defaults?** Database URIs, Redis endpoints, models, and telemetry settings are handled automatically by a global `fleet.yaml` file that is merged at runtime. If you want to understand how this deep merging works, see the `[BaseAgentChassis Internals](../infrastructure_developers/baseagentchassis_internals.md)` guide.
+> **Curious about defaults?** Database URIs, Redis endpoints, models, and telemetry settings are handled automatically by a global `fleet.yaml` file that is merged at runtime. If you want to understand how this deep merging works, see the `[[../infrastructure_developers/baseagentchassis_internals|BaseAgentChassis Internals]]` guide.
 
 ```yaml
 # config.yaml
@@ -206,7 +206,7 @@ if __name__ == "__main__":
     test_context = AgentContext(user_id="dev_1", session_id="test_sess", trace_id="123")
     test_payload = ResearchTaskPayload(topic="Quantum Computing", max_sources=2, requires_speed=True)
     
-    # Runs the logic in the terminal instantly
+    # Runs the logic instantly using the Mock Engine and Agent Studio
     asyncio.run(chassis.run_local(
         func=process_research_job,
         payload=test_payload,
@@ -215,28 +215,44 @@ if __name__ == "__main__":
     ))
 ```
 
-## 7. Running & Deploying the Agent
-Now that the agent is wired up, you have three ways to execute it depending on your current development phase.
+## 7. Testing & Interacting with your Agent
 
-### A. Local Terminal Testing (Fastest Iteration)
-Because we built `mock_infrastructure=True` into the Chassis, you can test the core reasoning, tool usage, and prompt logic without spinning up Postgres, Redis, or OpenTelemetry. Just run the Python file directly:
-```bash
-# Ensure your virtual environment is active
-python agent.py
-```
-*This executes the `if __name__ == "__main__":` block, running the agent locally and outputting the execution trace directly to your console.*
+Once you've built your agent, you need to test it. Because we built the `BaseAgentChassis` with an "Open Core" philosophy, we provide two incredibly powerful ways to interact with your agent locally *without* needing a frontend developer. Both natively support **Multimodal inputs (File Uploads & Links)**!
 
-### B. Local Fleet Orchestration (Docker Compose)
-When you need to test how the agent interacts with PostgreSQL, Redis, or other agents, you spin up the local fleet. The chassis automatically exposes the FastAPI app.
+### A. The "Agent Studio" (Local Web UI)
+When you run `python agent.py` with `mock_infrastructure=True`, the Chassis automatically spins up the **Agent Studio**. 
+This is an embedded, single-page web application served directly from FastAPI. 
+
+1. Run `python agent.py`
+2. Open your browser to `http://localhost:8000/studio`
+3. **The Wow Factor:** You will instantly see a slick, dark-mode chat interface. 
+4. **Files & Links:** Click the paperclip icon to upload PDFs, images, or code files, or just paste a URL. The FastAPI backend automatically parses the files and passes the content directly into the ADK state for the LLM to process!
+
+### B. The IDE Integration (MCP Server)
+The ultimate "cheat code" for testing is the **Model Context Protocol (MCP)**. Your `BaseAgentChassis` automatically exposes an MCP Server endpoint. This means your IDE can become the user interface!
+
+1. Run `python agent.py` (either mocked or with full infrastructure).
+2. Open an MCP-compatible IDE like **Cursor** or **Windsurf**.
+3. Add a new MCP Server pointing to `http://localhost:8000/mcp/sse`.
+4. **Files & Links:** You don't even need an upload button. Just highlight code in your IDE, use `@Files` to attach PDFs/documents, or paste a link. The IDE reads the file context and streams it securely to the running Python agent over MCP!
+
+### C. Sending Files Back to the User (Outbound Multimodal)
+Often, your agent will need to generate a report, a CSV, or modify an image and send it back to the user.
+1. **The Tool:** You write a standard Python tool in `tools.py` that uses the Chassis's `BaseFileStorage` adapter (e.g., `chassis.file_storage.save_file(filename, data)`). This saves the file to local disk (Mac Mini) or an S3 bucket (Corporate K3s) and returns a `file_id`.
+2. **The Response:** The agent simply responds with a Markdown link: `Here is your report: [Download Report](/download/12345)`.
+3. **The Client:** 
+   - **Agent Studio:** Automatically renders the Markdown link as a clickable download button that hits the Chassis's native `GET /download/{file_id}` FastAPI route.
+   - **MCP (IDE):** The IDE parses the link, allowing the user to click it and download the file directly into their workspace.
+
+### D. Fleet Orchestration (Docker Compose)
+When you are done testing logic and need to test how the agent interacts with PostgreSQL, Redis, or other agents, you spin up the local fleet.
 ```bash
-# Builds the container and starts the distributed fleet via Colima/Podman
 docker compose up --build research_agent
 ```
-*Note: Because our architecture is strictly OCI-compliant, the `docker compose` command will seamlessly route through Colima (Apple native virtualization) on macOS, or Podman on corporate environments, without changing the command or the YAML file. The agent is now running as a microservice. It is listening for synchronous REST calls on `http://localhost:8000` and asynchronously consuming tasks from the Redis `research_jobs` queue.*
+*Note: The agent is now running as a microservice, listening for synchronous REST calls on `http://localhost:8000` and asynchronously consuming tasks from the Redis queues.*
 
-### C. Production Deployment (K3s / Linux Cluster)
+### E. Production Deployment (K3s / Linux Cluster)
 Because the `BaseAgentChassis` strictly adheres to OCI container standards and exposes standard `/health` and `/ready` endpoints, deploying to your K3s cluster requires zero code changes.
 ```bash
 kubectl apply -f k8s/research-agent-deployment.yaml
 ```
-*K3s will automatically handle load balancing, monitor the chassis health probes, and restart the pod if the agent enters an unrecoverable state.*
