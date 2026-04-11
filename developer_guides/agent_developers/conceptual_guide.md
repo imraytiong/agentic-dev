@@ -45,6 +45,55 @@ Here is the fundamental difference between a simple Prompt and an Agent:
 
 When you are tasked with building a new Agent, you are acting as the "Brain Architect" and the "Toolsmith." You will focus entirely on business logic. 
 
+Here is a visual breakdown of what you own versus what the platform handles:
+
+```mermaid
+flowchart TD
+    %% Styling
+    classDef devDomain fill:#e6f3ff,stroke:#0066cc,stroke-width:2px,color:#333;
+    classDef chassis fill:#f9f9f9,stroke:#666,stroke-width:2px,stroke-dasharray: 5 5,color:#333;
+    classDef infra fill:#fff0e6,stroke:#cc5200,stroke-width:2px,color:#333;
+
+    subgraph UserSpace ["1. Your Business Logic (What you build)"]
+        direction TB
+        C[config.yaml<br/>Identity & Skills]
+        M[models.py<br/>Strict Schemas]
+        P[prompts/<br/>Jinja Templates]
+        T[tools.py<br/>Python Functions]
+        
+        A{{agent.py<br/>The Brain}}
+        
+        C --> A
+        M --> A
+        P --> A
+        T --> A
+    end
+
+    subgraph ChassisSpace ["2. BaseAgentChassis (The abstracted plumbing)"]
+        direction TB
+        Decorators[@chassis.consume_task<br/>Queue & State Mgmt]
+        Execute[chassis.execute_task<br/>LLM orchestration]
+        
+        A ==> Decorators
+        A ==> Execute
+    end
+
+    subgraph InfraSpace ["3. Fleet Infrastructure (You don't worry about this)"]
+        direction TB
+        Redis[(Redis<br/>Async Queues)]
+        PG[(PostgreSQL<br/>JSONB State)]
+        LLM[LiteLLM / Vertex<br/>Model Routing]
+        
+        Decorators -.-> Redis
+        Decorators -.-> PG
+        Execute -.-> LLM
+    end
+
+    class UserSpace devDomain;
+    class ChassisSpace chassis;
+    class InfraSpace infra;
+```
+
 You will build four conceptual pieces:
 
 ### A. The Identity (Configuration)

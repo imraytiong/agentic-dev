@@ -18,7 +18,7 @@ Welcome to your central command for AI Agent development. As your Technical Lead
 
   - 🧑‍💻 **Agent Developers (App Engineers)**
     - 🚦 **[00 - Start Here](../developer_guides/agent_developers/00_start_here.md)** - Index and learning path for Agent Developers.
-    - 🧠 **[Conceptual Guide - What is an Agent](../developer_guides/agent_developers/conceptual_guide_-_what_is_an_agent.md)** - High-level conceptual overview.
+    - 🧠 **[Conceptual Guide](../developer_guides/agent_developers/conceptual_guide.md)** - High-level conceptual overview.
     - 📖 **[Developer Guide](../developer_guides/agent_developers/developer_guide.md)** - The definitive guide for writing agent code.
     - 🤖 **[Agentic Coding Playbook](../developer_guides/agent_developers/agentic_coding_playbook.md)** - How to direct AI coding agents.
     - 🎬 **[Agent Directing Guide](../developer_guides/agent_developers/agent_directing_guide.md)** - How to wield Gemini CLI + Conductor to build the codebase.

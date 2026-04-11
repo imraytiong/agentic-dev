@@ -103,7 +103,7 @@ If `chassis.run_local(mock_infrastructure=True)` executes perfectly in your term
 ---
 ## Progressive Learning Path
 If you are new to this architecture, we recommend reading these guides in the following order:
-1. **[Conceptual Guide - What is an Agent](conceptual_guide_-_what_is_an_agent.md):** Start here to understand the high-level theory without the code.
+1. **[Conceptual Guide](conceptual_guide.md):** Start here to understand the high-level theory without the code.
 2. **[Developer Guide](developer_guide.md):** Move here to see the actual Python code and the 5-step workflow.
 3. **[Agent Directing Guide](agent_directing_guide.md):** Read this when you are ready to use Gemini CLI to actually generate the code.
 4. **[Agentic Coding Playbook](agentic_coding_playbook.md):** The meta-rules for team collaboration and architecture defense.

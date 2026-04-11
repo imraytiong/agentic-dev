@@ -63,7 +63,7 @@ Depending on what you want to build, choose your role and follow the entry point
 ### 1. Agent Developers
 *Your focus: Writing business logic, tools, and prompts. You do not need to worry about infrastructure.*
 *   **Start Here:** [00_start_here.md](developer_guides/agent_developers/00_start_here.md)
-*   **Concepts:** [Conceptual Guide - What is an Agent](developer_guides/agent_developers/conceptual_guide_-_what_is_an_agent.md)
+*   **Concepts:** [Conceptual Guide](developer_guides/agent_developers/conceptual_guide.md)
 
 ### 2. Infrastructure Developers
 *Your focus: Deployments, containers, adapters, and mapping the environment (Docker/K3s).*

@@ -13,17 +13,17 @@ Adapters allow our Universal Core to remain completely agnostic to the environme
 ```mermaid
 flowchart LR
     subgraph "🛡️ Universal Core (Sealed)"
-        Chassis[BaseAgentChassis] -->|Defines Needs| Port[interfaces.py<br/>(e.g., BaseMessageQueue)]
+        Chassis["BaseAgentChassis"] -->|Defines Needs| Port["interfaces.py<br/>(e.g., BaseMessageQueue)"]
     end
 
     subgraph "🔌 Infrastructure Layer (Adapters)"
-        Port -.->|Public Config| Redis[public_adapters/ <br/> RedisAdapter]
-        Port -.->|Corporate Config| Kafka[internal_adapters/ <br/> CorpKafkaAdapter]
+        Port -.->|Public Config| Redis["public_adapters/ <br/> RedisAdapter"]
+        Port -.->|Corporate Config| Kafka["internal_adapters/ <br/> CorpKafkaAdapter"]
     end
 
     subgraph "🌍 External Systems"
-        Redis --> LiveRedis[(Standard Redis)]
-        Kafka --> LiveKafka[(Secure Corp Kafka)]
+        Redis --> LiveRedis[("(Standard Redis)")]
+        Kafka --> LiveKafka[("(Secure Corp Kafka)")]
     end
     
     style Chassis fill:#2d3748,stroke:#4fd1c5,color:#fff
