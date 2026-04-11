@@ -21,6 +21,6 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Communication & Event Handling' (Protocol in workflow.md)
 
 ## Phase 5: Developer Experience & Validation (Mock Engine & Agent Studio)
-- [~] Task: Implement mock adapters for all interfaces
-- [x] Task: Implement `run_local()` and the embedded Agent Studio UI (adb5c5e)
+- [x] Task: Implement mock adapters for all interfaces (66e23f3)
+- [x] Task: Implement `run_local()` and the embedded Agent Studio UI (66e23f3)
 - [ ] Task: Conductor - User Manual Verification 'Phase 5: Developer Experience & Validation' (Protocol in workflow.md)
