@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-echo "================================================================="
+echo "======================================================================"
 echo "🚀 Bootstrapping Hackathon Environment..."
-echo "================================================================="
+echo "======================================================================"
 
 echo ""
 echo "🔍 Step 0: Checking Prerequisites..."
@@ -24,7 +24,7 @@ if command -v gemini &> /dev/null; then
     echo "✅ Gemini CLI found: $GEM_VERSION"
 else
     echo "❌ ERROR: gemini CLI is not installed or not in PATH."
-    echo "Please install the Gemini CLI (e.g., npm install -g @google/generative-ai-cli or your corporate equivalent) before running this script."
+    echo "Please install the Gemini CLI before running this script."
     exit 1
 fi
 
@@ -55,18 +55,38 @@ while true; do
     if [ "$STATUS_CODE" -eq 200 ]; then
         echo "✅ API Key is valid!"
         VALID_KEY="$api_key"
+        
+        # Export it temporarily so any gemini commands in this script work
+        export GEMINI_API_KEY="$api_key"
         break
     else
         echo "❌ Invalid API Key (HTTP Status: $STATUS_CODE). Please check your key and try again."
     fi
 done
 
-# 2. Clone or Pull Repo
+# 2. Optional Extensions (Conductor)
+echo ""
+echo "🔌 Step 2: Optional Extensions"
+while true; do
+    read -p "Hackathon assumes we will be using the conductor extension. Install it now? [y/N]: " install_conductor
+    case $install_conductor in
+        [Yy]* ) 
+            echo "⏳ Installing Conductor extension in non-interactive mode..."
+            yes | gemini extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
+            break;;
+        [Nn]* | "" ) 
+            echo "Skipping Conductor installation."
+            break;;
+        * ) echo "Please answer y or n.";;
+    esac
+done
+
+# 3. Clone or Pull Repo
 REPO_URL="https://github.com/imraytiong/agentic-dev.git"
 REPO_DIR="agentic-dev"
 
 echo ""
-echo "📂 Step 2: Fetching Repository..."
+echo "📂 Step 3: Fetching Repository..."
 if [ -d "$REPO_DIR" ]; then
     echo "   Directory $REPO_DIR already exists. Pulling latest changes..."
     cd "$REPO_DIR"
@@ -77,9 +97,9 @@ else
     cd "$REPO_DIR"
 fi
 
-# 3. Environment Variables
+# 4. Environment Variables
 echo ""
-echo "⚙️  Step 3: Setting up environment variables..."
+echo "⚙️  Step 4: Setting up environment variables..."
 if [ ! -f .env ]; then
     cp .env.example .env
     echo "   Created .env from .env.example"
@@ -91,9 +111,9 @@ echo "GEMINI_API_KEY=$VALID_KEY" >> .env.tmp
 mv .env.tmp .env
 echo "   Injected validated Gemini API Key into .env"
 
-# 4. Python Virtual Environment
+# 5. Python Virtual Environment
 echo ""
-echo "🐍 Step 4: Setting up Python Virtual Environment..."
+echo "🐍 Step 5: Setting up Python Virtual Environment..."
 if [ ! -d "venv" ]; then
     python3 -m venv venv
     echo "   Created new virtual environment."
@@ -108,38 +128,24 @@ echo "   (You will see download progress bars below)"
 pip install -r requirements.txt
 echo "   ✅ Dependencies installed successfully."
 
-# 5. Gemini CLI Initialization
+# 6. Gemini CLI Initialization
 echo ""
-echo "🤖 Step 5: Initializing Gemini CLI and Context..."
+echo "🤖 Step 6: Initializing Gemini CLI and Context..."
 if command -v gemini &> /dev/null; then
-    # We pipe 'yes' into these commands so if the CLI pauses to ask 
-    # an interactive question (e.g. "Directory exists, overwrite? [y/N]"), 
-    # it automatically answers 'yes' and prevents the bash script from hanging.
-    
-    # Initialize workspace (idempotent)
     yes | gemini init || true
-    
-    # Initialize Git tracking for the CLI (idempotent)
     yes | gemini git init || true
-    
-    # Pin the global guardrails (idempotent)
     yes | gemini context add SYSTEM_INSTRUCTIONS.md || true
-
-    # Pin the Agent Builder skill so it is ALWAYS loaded by default
     yes | gemini context add skills/adk-agent-builder/SKILL.md || true
-    
     echo "   Gemini CLI initialized and Agent Builder skill loaded by default!"
 else
     echo "⚠️  Gemini CLI not found in PATH. Please ensure it is installed."
 fi
 
 echo ""
-echo "================================================================="
+echo "======================================================================"
 echo "✅ Environment Ready! Dropping you into the Gemini CLI..."
-echo "================================================================="
+echo "======================================================================"
 
-# Launch a new interactive shell so the user stays in the repo directory 
-# with the venv activated, and automatically start the Gemini CLI.
 if command -v gemini &> /dev/null; then
     exec bash --init-file <(echo "source venv/bin/activate; gemini")
 else
