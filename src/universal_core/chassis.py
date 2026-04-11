@@ -57,10 +57,11 @@ class BaseAgentChassis:
     Dynamically loads environment-specific infrastructure via Inversion of Control.
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any], mock_infrastructure: bool = False):
         """
         Initialize the Chassis. 
         `config` should be the merged configuration (e.g., fleet.yaml + config.yaml).
+        `mock_infrastructure` forces the chassis to use lightweight, in-memory adapters, bypassing the config.
         """
         self.config = config
         self.infrastructure_config = self.config.get("infrastructure", {})
@@ -68,32 +69,80 @@ class BaseAgentChassis:
         # 1. Instantiate the ADK LlmAgent
         agent_config = self.config.get("agent", {})
         self.llm_agent = LlmAgent(**agent_config)
+        
+        # Check environment variable override
+        import os
+        if os.getenv("MOCK_INFRASTRUCTURE", "").lower() in ("true", "1", "yes"):
+            mock_infrastructure = True
 
-        # 2. Dynamically load infrastructure adapters
-        self.state_store: Optional[BaseStateStore] = self._load_adapter(
-            "state_store", BaseStateStore
-        )
-        self.vector_store: Optional[BaseVectorStore] = self._load_adapter(
-            "vector_store", BaseVectorStore
-        )
-        self.file_storage: Optional[BaseFileStorage] = self._load_adapter(
-            "file_storage", BaseFileStorage
-        )
-        self.message_broker: Optional[BaseMessageBroker] = self._load_adapter(
-            "message_broker", BaseMessageBroker
-        )
-        self.telemetry: Optional[BaseTelemetry] = self._load_adapter(
-            "telemetry", BaseTelemetry
-        )
-        self.mcp_server: Optional[BaseMCPServer] = self._load_adapter(
-            "mcp_server", BaseMCPServer
-        )
+        # 2. Load infrastructure adapters
+        if mock_infrastructure:
+            logger.info("Initializing Chassis with MOCK infrastructure.")
+            from .mock_adapters import (
+                MockStateStore, MockMessageBroker, MockVectorStore, 
+                MockFileStorage, MockTelemetry, MockMCPServer
+            )
+            self.state_store = MockStateStore(self.config)
+            self.message_broker = MockMessageBroker(self.config)
+            self.vector_store = MockVectorStore(self.config)
+            self.file_storage = MockFileStorage(self.config)
+            self.telemetry = MockTelemetry(self.config)
+            self.mcp_server = MockMCPServer(self.config)
+        else:
+            self.state_store: Optional[BaseStateStore] = self._load_adapter(
+                "state_store", BaseStateStore
+            )
+            self.vector_store: Optional[BaseVectorStore] = self._load_adapter(
+                "vector_store", BaseVectorStore
+            )
+            self.file_storage: Optional[BaseFileStorage] = self._load_adapter(
+                "file_storage", BaseFileStorage
+            )
+            self.message_broker: Optional[BaseMessageBroker] = self._load_adapter(
+                "message_broker", BaseMessageBroker
+            )
+            self.telemetry: Optional[BaseTelemetry] = self._load_adapter(
+                "telemetry", BaseTelemetry
+            )
+            self.mcp_server: Optional[BaseMCPServer] = self._load_adapter(
+                "mcp_server", BaseMCPServer
+            )
 
-        logger.info("BaseAgentChassis initialized with dynamic infrastructure.")
+            logger.info("BaseAgentChassis initialized with dynamic infrastructure.")
 
         # 3. Initialize FastAPI App Embedded within the Chassis
         self.app = FastAPI(title="BaseAgentChassis API")
         self._register_routes()
+        self._background_tasks = []
+
+    async def start(self):
+        """
+        Start the chassis lifecycle:
+        1. Launch all consumers registered via @consume_task as background tasks.
+        """
+        if hasattr(self, '_consumers'):
+            for consumer in self._consumers:
+                task = asyncio.create_task(consumer())
+                self._background_tasks.append(task)
+            logger.info(f"Launched {len(self._consumers)} background consumers.")
+
+    def run_local(self, host: str = "0.0.0.0", port: int = 8000):
+        """
+        Boot the Uvicorn/FastAPI server to serve the chassis locally.
+        This is a blocking call and should be the entry point for running the application.
+        """
+        try:
+            import uvicorn
+        except ImportError:
+            raise RuntimeError("uvicorn is required to run the local server. Install with `pip install uvicorn`")
+        
+        # Attach the start method to FastAPI startup event
+        @self.app.on_event("startup")
+        async def startup_event():
+            await self.start()
+            
+        logger.info(f"Starting BaseAgentChassis on http://{host}:{port}")
+        uvicorn.run(self.app, host=host, port=port)
 
     def _load_adapter(self, config_key: str, expected_type: type) -> Any:
         """
