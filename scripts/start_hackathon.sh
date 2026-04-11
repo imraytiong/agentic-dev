@@ -111,17 +111,21 @@ echo "   Dependencies installed."
 echo ""
 echo "🤖 Step 5: Initializing Gemini CLI and Context..."
 if command -v gemini &> /dev/null; then
+    # We pipe 'yes' into these commands so if the CLI pauses to ask 
+    # an interactive question (e.g. "Directory exists, overwrite? [y/N]"), 
+    # it automatically answers 'yes' and prevents the bash script from hanging.
+    
     # Initialize workspace (idempotent)
-    gemini init || true
+    yes | gemini init || true
     
     # Initialize Git tracking for the CLI (idempotent)
-    gemini git init || true
+    yes | gemini git init || true
     
     # Pin the global guardrails (idempotent)
-    gemini context add SYSTEM_INSTRUCTIONS.md || true
+    yes | gemini context add SYSTEM_INSTRUCTIONS.md || true
 
     # Pin the Agent Builder skill so it is ALWAYS loaded by default
-    gemini context add skills/adk-agent-builder/SKILL.md || true
+    yes | gemini context add skills/adk-agent-builder/SKILL.md || true
     
     echo "   Gemini CLI initialized and Agent Builder skill loaded by default!"
 else
