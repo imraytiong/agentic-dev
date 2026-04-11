@@ -11,16 +11,16 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: The Universal Chassis' (Protocol in workflow.md)
 
 ## Phase 3: Service Layer & Mega-Abstractions
-- [ ] Task: Implement `ask_structured` with Pydantic retry loop
-- [ ] Task: Implement `execute_task` with Jinja2 template injection
+- [x] Task: Implement `ask_structured` with Pydantic retry loop (adb5c5e)
+- [x] Task: Implement `execute_task` with Jinja2 template injection (adb5c5e)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Service Layer & Mega-Abstractions' (Protocol in workflow.md)
 
 ## Phase 4: Communication & Event Handling (Decorators & API)
-- [ ] Task: Implement `@consume_task` decorator for message polling
-- [ ] Task: Implement FastAPI endpoints for file upload/download and MCP SSE
+- [~] Task: Implement `@consume_task` decorator for message polling
+- [x] Task: Implement FastAPI endpoints for file upload/download and MCP SSE (adb5c5e)
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Communication & Event Handling' (Protocol in workflow.md)
 
 ## Phase 5: Developer Experience & Validation (Mock Engine & Agent Studio)
-- [ ] Task: Implement mock adapters for all interfaces
-- [ ] Task: Implement `run_local()` and the embedded Agent Studio UI
+- [~] Task: Implement mock adapters for all interfaces
+- [x] Task: Implement `run_local()` and the embedded Agent Studio UI (adb5c5e)
 - [ ] Task: Conductor - User Manual Verification 'Phase 5: Developer Experience & Validation' (Protocol in workflow.md)
