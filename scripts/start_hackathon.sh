@@ -1,62 +1,114 @@
 #!/bin/bash
 set -e
 
-# ==========================================
-# Hackathon Bootstrap Script
-# ==========================================
-# This script handles the complete end-to-end setup for a hackathon participant.
+echo "================================================================="
+echo "🚀 Bootstrapping Hackathon Environment..."
+echo "================================================================="
 
-REPO_URL="https://github.com/imraytiong/agentic-dev.git" # Replace with your actual corporate Git URL
+# 1. Prompt for and validate Gemini API Key
+echo ""
+echo "🔑 Step 1: Gemini API Key Setup"
+echo "You need a valid Gemini API key to proceed."
+echo "Get one at: https://aistudio.google.com/app/apikey"
+VALID_KEY=""
+while true; do
+    read -s -p "Enter your Gemini API Key (or type 'q' to quit): " api_key
+    echo ""
+    
+    if [ "$api_key" = "q" ] || [ "$api_key" = "Q" ]; then
+        echo "Exiting setup."
+        exit 0
+    fi
+    
+    if [ -z "$api_key" ]; then
+        echo "❌ Key cannot be empty. Please try again."
+        continue
+    fi
+
+    echo "⏳ Validating key..."
+    # Test the key against the models endpoint
+    STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://generativelanguage.googleapis.com/v1beta/models?key=${api_key}")
+    
+    if [ "$STATUS_CODE" -eq 200 ]; then
+        echo "✅ API Key is valid!"
+        VALID_KEY="$api_key"
+        break
+    else
+        echo "❌ Invalid API Key (HTTP Status: $STATUS_CODE). Please check your key and try again."
+    fi
+done
+
+# 2. Clone or Pull Repo
+REPO_URL="https://github.com/imraytiong/agentic-dev.git"
 REPO_DIR="agentic-dev"
 
-echo "🚀 Bootstrapping Hackathon Environment..."
-
-# 1. Clone or Pull
+echo ""
+echo "📂 Step 2: Fetching Repository..."
 if [ -d "$REPO_DIR" ]; then
-    echo "📂 Directory $REPO_DIR already exists. Pulling latest changes..."
+    echo "   Directory $REPO_DIR already exists. Pulling latest changes..."
     cd "$REPO_DIR"
-    git pull
+    git pull origin main
 else
-    echo "📂 Cloning repository..."
+    echo "   Cloning repository..."
     git clone "$REPO_URL" "$REPO_DIR"
     cd "$REPO_DIR"
 fi
 
-# 2. Environment Variables
-echo "⚙️  Setting up environment variables..."
+# 3. Environment Variables
+echo ""
+echo "⚙️  Step 3: Setting up environment variables..."
 if [ ! -f .env ]; then
     cp .env.example .env
     echo "   Created .env from .env.example"
 fi
 
-# 3. Python Virtual Environment
-echo "🐍 Setting up Python Virtual Environment..."
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+# Inject the validated key into .env (works safely on Mac/Linux)
+grep -v "^GEMINI_API_KEY=" .env > .env.tmp || true
+echo "GEMINI_API_KEY=$VALID_KEY" >> .env.tmp
+mv .env.tmp .env
+echo "   Injected validated Gemini API Key into .env"
 
-# 4. Gemini CLI Initialization
-echo "🤖 Initializing Gemini CLI and Context..."
+# 4. Python Virtual Environment
+echo ""
+echo "🐍 Step 4: Setting up Python Virtual Environment..."
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
+    echo "   Created new virtual environment."
+else
+    echo "   Virtual environment already exists."
+fi
+
+# Activate and install
+source venv/bin/activate
+echo "   Installing dependencies (this is safe to re-run)..."
+pip install -q -r requirements.txt
+echo "   Dependencies installed."
+
+# 5. Gemini CLI Initialization
+echo ""
+echo "🤖 Step 5: Initializing Gemini CLI and Context..."
 if command -v gemini &> /dev/null; then
-    # Initialize workspace
-    gemini init
+    # Initialize workspace (idempotent)
+    gemini init || true
     
-    # Initialize Git tracking for the CLI
-    gemini git init
+    # Initialize Git tracking for the CLI (idempotent)
+    gemini git init || true
     
-    # Pin the global guardrails
-    gemini context add SYSTEM_INSTRUCTIONS.md
+    # Pin the global guardrails (idempotent)
+    gemini context add SYSTEM_INSTRUCTIONS.md || true
     
     echo "   Gemini CLI initialized and System Instructions pinned!"
 else
-    echo "⚠️  Gemini CLI not found in PATH. Please install it before proceeding."
+    echo "⚠️  Gemini CLI not found in PATH. Please ensure it is installed."
+    echo "   You can install it later and manually run: gemini context add SYSTEM_INSTRUCTIONS.md"
 fi
 
 echo ""
+echo "================================================================="
 echo "✅ Environment Ready! You are good to go."
-echo "=========================================="
+echo "================================================================="
 echo "👉 Run the following commands to get started:"
 echo "   cd $REPO_DIR"
 echo "   source venv/bin/activate"
 echo "   gemini load skills/adk-agent-builder/SKILL.md"
-echo "=========================================="
+echo "================================================================="
