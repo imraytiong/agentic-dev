@@ -6,8 +6,8 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation (Domain Interfaces)' (Protocol in workflow.md)
 
 ## Phase 2: The Universal Chassis (Dependency Injection & Lifecycle)
-- [ ] Task: Implement `BaseAgentChassis.__init__` with config merging
-- [ ] Task: Implement dynamic infrastructure loading logic via `importlib`
+- [x] Task: Implement `BaseAgentChassis.__init__` with config merging (eababc0)
+- [x] Task: Implement dynamic infrastructure loading logic via `importlib` (eababc0)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: The Universal Chassis' (Protocol in workflow.md)
 
 ## Phase 3: Service Layer & Mega-Abstractions
