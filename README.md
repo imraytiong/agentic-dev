@@ -29,13 +29,13 @@ To prevent AI coding assistants from hallucinating across boundaries and causing
 Depending on your role, start by reading your specific guides in the vault:
 
 *   **[Vault Dashboard](00%20-%20Dashboard.md)** - The central hub for all active agent projects and documentation.
-*   **[Agent Developers: Start Here](03%20-%20Architecture%20&%20Patterns/Agent%20Developers/00%20-%20Start%20Here.md)** - Learn how to write business logic, prompts, and tools without worrying about infrastructure.
-*   **[Platform Engineers: Director Guide](03%20-%20Architecture%20&%20Patterns/Platform%20Engineers/Infrastructure%20Director%20Guide.md)** - Learn the Bootstrap Protocol for generating the operational adapters and deployment manifests.
-*   **[Architect: Director Guide](03%20-%20Architecture%20&%20Patterns/Architect%20Director%20Guide.md)** - Learn how to build and maintain the sealed Universal Core.
+*   **[Agent Developers: Start Here](02%20-%20Architecture%20&%20Patterns/Agent%20Developers/00%20-%20Start%20Here.md)** - Learn how to write business logic, prompts, and tools without worrying about infrastructure.
+*   **[Platform Engineers: Director Guide](02%20-%20Architecture%20&%20Patterns/Platform%20Engineers/Infrastructure%20Director%20Guide.md)** - Learn the Bootstrap Protocol for generating the operational adapters and deployment manifests.
+*   **[Architect: Director Guide](02%20-%20Architecture%20&%20Patterns/Architect%20Director%20Guide.md)** - Learn how to build and maintain the sealed Universal Core.
 
 ## 🤖 AI CLI Skills
 
-This repository includes pre-programmed instructions (Skills) for your AI CLI. These skills enforce our architectural guardrails during code generation. You can find them in the `08 - AI CLI Skills/` directory:
+This repository includes pre-programmed instructions (Skills) for your AI CLI. These skills enforce our architectural guardrails during code generation. You can find them in the `07 - AI CLI Skills/` directory:
 
 *   `adk-agent-builder.md`: For Agent Developers.
 *   `adk-infra-builder.md`: For Platform Engineers.

@@ -3,7 +3,7 @@
 This skill defines the standard operating procedure for capturing, logging, and tracking architectural decisions within the agent development vault.
 
 ## 1. The Master Log
-Always maintain the `03 - Architecture & Patterns/Architectural Decision Log.md` file. This file acts as the single source of truth for:
+Always maintain the `02 - Architecture & Patterns/Architectural Decision Log.md` file. This file acts as the single source of truth for:
 - **Approved Decisions:** What we decided and why.
 - **Pending/Open Questions:** Topics that require deep dives before a decision is reached.
 

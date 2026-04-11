@@ -20,8 +20,8 @@ Do not let the AI guess what a chassis is. You must constrain it strictly to our
 
 **Your Action:**
 1. Open your Gemini CLI.
-2. Type: `load adk-core-builder` (view the skill instructions here: **[adk-core-builder](../08%20-%20AI%20CLI%20Skills/adk-core-builder.md)**)
-3. The CLI will initialize and ask for the spec. Copy the contents of **[Universal Core Architecture Spec](../06%20-%20Templates/Universal%20Core%20Architecture%20Spec.md)** (from the `06 - Templates` folder) and paste it into the prompt.
+2. Type: `load adk-core-builder` (view the skill instructions here: **[adk-core-builder](../07%20-%20AI%20CLI%20Skills/adk-core-builder.md)**)
+3. The CLI will initialize and ask for the spec. Copy the contents of **[Universal Core Architecture Spec](../05%20-%20Templates/Universal%20Core%20Architecture%20Spec.md)** (from the `05 - Templates` folder) and paste it into the prompt.
 
 ## 2. THINK: The Conductor Plan
 Instruct the CLI: *"Use Conductor to map out the execution plan based on the skill instructions and the spec."*
