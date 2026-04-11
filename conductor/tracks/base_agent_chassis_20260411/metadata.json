@@ -1,0 +1,8 @@
+{
+  "track_id": "base_agent_chassis_20260411",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-04-11T14:00:00Z",
+  "updated_at": "2026-04-11T14:00:00Z",
+  "description": "Implement the 5-layer execution plan for the BaseAgentChassis."
+}
