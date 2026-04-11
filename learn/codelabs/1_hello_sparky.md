@@ -12,17 +12,17 @@
 ---
 
 ## Step 1: The One-Click Setup
-We have automated the entire environment setup. Open your terminal, navigate to the root of the repository, and run the bootstrap script:
+We have automated the entire environment setup. Open your terminal and run the bootstrap script:
 
 ```bash
-chmod +x scripts/bootstrap.sh
-./scripts/bootstrap.sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/agentic-dev/main/scripts/start_hackathon.sh)"
 ```
-*What this does: Copies your `.env`, builds your Python virtual environment, installs the dependencies, and initializes your AI CLI with the correct context.*
+*What this does: Clones the repo, copies your `.env`, builds your Python virtual environment, installs the dependencies, and initializes your AI CLI with the correct context.*
 
 ## Step 2: Activate the Environment
-Always ensure your virtual environment is active before running the code:
+Navigate into the repository and ensure your virtual environment is active before running the code:
 ```bash
+cd agentic-dev
 source venv/bin/activate
 ```
 

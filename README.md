@@ -5,6 +5,21 @@ This repository is a framework and playbook for building distributed AI agents u
 
 It is designed for **Agent-Driven Development**. If you are comfortable with Git, the command line, and prompt engineering (using tools like Gemini CLI or Antigravity) but have zero familiarity with developing AI agents, this repo will kick-start that process. We provide the architectural guardrails, playbooks, and AI instructions needed to safely direct your AI assistants to write the code for you.
 
+## Quick Start (Hackathon Setup)
+To instantly set up your local environment, clone the repo, and initialize your AI CLI with the correct guardrails, run this single command in your terminal:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/agentic-dev/main/scripts/start_hackathon.sh)"
+```
+*(Note: Ensure you have `python3` and `gemini` CLI installed before running).*
+
+**Next Steps:**
+```bash
+cd agentic-dev
+source venv/bin/activate
+gemini load skills/adk-agent-builder/SKILL.md
+```
+
 ## System Architecture
 
 The codebase relies on a Hexagonal (Ports & Adapters) architecture that allows us to maintain an open-source core while building proprietary logic safely on top of it.

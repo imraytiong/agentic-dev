@@ -21,25 +21,22 @@ Before participants arrive on Day 1, they should ensure the following prerequisi
 ## 1. Day 1 Developer Onboarding (The "Zero to Hero" Script)
 When participants sit down on Day 1, they should not have to guess how to set up their environment. Instead of running 10 different commands to configure Python and the Gemini CLI, they just need to run our automated bootstrap script.
 
-Provide them with this exact copy/paste script in the kickoff presentation:
+Provide them with this exact copy/paste one-liner in the kickoff presentation:
 
 ```bash
-# 1. Clone the repository
-git clone <internal-repo-url>
-cd hackathon-repo
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/agentic-dev/main/scripts/start_hackathon.sh)"
+```
+*(Note: Update the URL above to point to the raw text of the script on your internal Git server).*
 
-# 2. Run the automated bootstrap script
-chmod +x scripts/bootstrap.sh
-./scripts/bootstrap.sh
-
-# 3. Activate the environment
+**After the script finishes, they simply run:**
+```bash
+cd agentic-dev
 source venv/bin/activate
-
-# 4. Load the Agent Builder skill to establish your guardrails
 gemini load skills/adk-agent-builder/SKILL.md
 ```
 
 ### What the Bootstrap Script Does Automatically:
+* Clones (or pulls) the repository.
 * Creates a local `.env` file from `.env.example`.
 * Builds the Python `venv` and installs all `requirements.txt`.
 * Runs `gemini init` to create the local workspace.
@@ -66,7 +63,7 @@ The hackathon structure is guided by four progressive codelabs. These take devel
 To keep the momentum going, the hackathon follows a structured 5-day timeline mapping directly to the codelabs and final capstone.
 
 * **Monday (Day 1): The Kickoff & Fundamentals**
-  * *Morning:* Kickoff presentation, environment setup, and running the `bootstrap.sh` script.
+  * *Morning:* Kickoff presentation, environment setup, and running the `start_hackathon.sh` script.
   * *Late Morning:* **Codelab 1 (Hello Sparky)** - Running the mock infrastructure and interacting with the UI.
   * *Afternoon:* **Codelab 2 (Upgrading Sparky)** - Introduction to Agent-Driven Development and modifying an agent via the CLI.
 * **Tuesday (Day 2): The Enterprise Challenge**
@@ -92,7 +89,7 @@ This file enforces that the AI:
 3. Adheres to our Hexagonal Architecture and never hallucinates infrastructure.
 4. Uses the AI Bridge Protocol (inbox files) to communicate with Gemini Scribe.
 
-**How it's enforced:** The `bootstrap.sh` script automatically runs `gemini context add SYSTEM_INSTRUCTIONS.md` (or the equivalent Conductor command), ensuring the AI never forgets the rules of the monorepo.
+**How it's enforced:** The `start_hackathon.sh` script automatically runs `gemini context add SYSTEM_INSTRUCTIONS.md` (or the equivalent Conductor command), ensuring the AI never forgets the rules of the monorepo.
 
 ## 5. Pre-Hackathon Checklist (For the Core Team)
 - [ ] **Universal Core Built:** The `BaseAgentChassis` must be fully coded, tested, and sealed in `src/universal_core/`.
