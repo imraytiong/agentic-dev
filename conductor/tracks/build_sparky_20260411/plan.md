@@ -10,7 +10,7 @@
 - [x] Task: Generate `src/agents/hello_sparky/tools.py` (get_affirmation function) (793f3fb)
 
 ## Layer 4: The Brain (Agent)
-- [ ] Task: Generate `src/agents/hello_sparky/agent.py` using `BaseAgentChassis`
+- [x] Task: Generate `src/agents/hello_sparky/agent.py` using `BaseAgentChassis` (012a58c)
 
 ## Layer 5: Configuration & Prompts
 - [ ] Task: Generate `src/agents/hello_sparky/config.yaml`
