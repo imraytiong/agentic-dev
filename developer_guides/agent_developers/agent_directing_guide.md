@@ -30,7 +30,7 @@ Instead of manually prompting the AI with all of our architectural rules, we hav
 **Your Action:**
 Before opening Conductor or writing any code, load the custom skill into your CLI:
 1. Command your CLI to load the `adk-agent-builder` skill. (View the skill instructions here: **[adk-agent-builder](../../skills/adk-agent-builder/SKILL.md)**).
-2. Feed the CLI the specific **[Agent Architecture Spec](../../specs/agent_architecture_spec.md)** for the agent you are building (or use the skill's interactive brain-dump mode to generate one!).
+2. Feed the CLI the specific **[Agent Spec Template](../../spec_templates/agent_spec_template.md)** for the agent you are building (or use the skill's interactive brain-dump mode to generate one!).
 
 **What the Skill Does:**
 You no longer need to write massive explicit prompts. The skill automatically forces the AI to read the **[BaseAgentChassis Reference](../infrastructure_developers/baseagentchassis_reference.md)**, forbids it from writing raw infrastructure code, and mandates the use of our decorators (`@chassis.consume_task`) and security contexts.
@@ -60,7 +60,7 @@ If your goal is to build a "Society of Minds" (e.g., a Supervisor and two Worker
 1. Give the AI your overarching MAS brain dump.
 2. The `adk-agent-builder` skill is programmed to automatically **Halt and Divide**. It will help you identify the distinct agents needed.
 3. **Lock the Inter-Agent Contracts:** Before building *any* agent, work with the CLI to define the Pydantic models that will be passed between them (e.g., the JSON payload the Supervisor sends to the Worker).
-4. **Build One by One:** Pick the first agent (usually the Supervisor or a core Worker), generate its specific `Agent Architecture Spec`, and run it through the Layer-by-Layer execution. Once Agent A is finished, restart the process for Agent B.
+4. **Build One by One:** Pick the first agent (usually the Supervisor or a core Worker), generate its specific `Agent Spec Template`, and run it through the Layer-by-Layer execution. Once Agent A is finished, restart the process for Agent B.
 
 ---
 

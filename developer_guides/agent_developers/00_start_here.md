@@ -24,7 +24,7 @@ To get up to speed quickly without being overwhelmed, please read these document
 
 ### 4. The Action
 *   **Load the Skill**: Fire up your CLI and type `load adk-agent-builder` (view the skill instructions here: **[adk-agent-builder](../../skills/adk-agent-builder/SKILL.md)**).
-*   **Grab a Spec**: Go to the **[specs](../../specs)** folder, grab the **[Agent Architecture Spec](../../specs/agent_architecture_spec.md)**, fill out your business logic, and hand it to the CLI to start building!
+*   **Grab a Spec**: Go to the **[spec_templates](../../spec_templates)** folder, grab the **[Agent Spec Template](../../spec_templates/agent_spec_template.md)**, fill out your business logic, and hand it to the CLI to start building!
 
 ---
 *Note: If you are ever curious about how the underlying databases, queues, and API wrappers actually work, you can peek over at the **[Infrastructure Developers](../infrastructure_developers)** folder (or specifically the **[BaseAgentChassis Internals](../infrastructure_developers/baseagentchassis_internals.md)**), but it is strictly optional for your day-to-day work!*

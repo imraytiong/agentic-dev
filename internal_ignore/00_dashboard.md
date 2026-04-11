@@ -5,7 +5,7 @@ Welcome to your central command for AI Agent development. As your Technical Lead
 ## 🗂️ Workspace Organization
 
 - **[src/agents/](../src/agents/)** - Active and planned AI agents.
-  - 🐕 **[Hello Sparky](../src/agents/hello_sparky.md)** - "Sparky", our Hello World reference agent.
+  - 🐕 **[Sparky Spec](../src/agents/sparky_spec.md)** - "Sparky", our Hello World reference agent.
 
 - **[developer_guides/](../developer_guides/)** - Developer guides for different roles:
   - 👑 **The Architect (Ray)**
@@ -24,10 +24,15 @@ Welcome to your central command for AI Agent development. As your Technical Lead
     - 🎬 **[Agent Directing Guide](../developer_guides/agent_developers/agent_directing_guide.md)** - How to wield Gemini CLI + Conductor to build the codebase.
     - 🔄 **[Standard Agentic Workflows](../developer_guides/agent_developers/standard_agentic_workflows.md)** - Our approved patterns (Supervisor, Plan-and-Execute, Evaluator-Optimizer).
 
-- **[specs/](../specs/)** - Standardized specification formats.
-  - 📋 **[Agent Architecture Spec](../specs/agent_architecture_spec.md)** - Use this when designing a new agent.
-  - 📋 **[Fleet Infrastructure Spec](../specs/fleet_infrastructure_spec.md)** - Use this to bootstrap the environment.
-  - 📋 **[Universal Core Architecture Spec](../specs/universal_core_architecture_spec.md)** - Use this to build the pristine base chassis logic.
+- **[spec_templates/](../spec_templates/)** - Standardized specification templates.
+  - 📋 **[Agent Spec Template](../spec_templates/agent_spec_template.md)** - Use this when designing a new agent.
+  - 📋 **[Adapter Spec Template](../spec_templates/adapter_spec_template.md)** - Use this when designing a new infrastructure adapter.
+
+- **[src/universal_core/](../src/universal_core/)** - The sealed Universal Core.
+  - 📋 **[Universal Core Architecture Spec](../src/universal_core/universal_core_architecture_spec.md)** - Use this to build the pristine base chassis logic.
+
+- **[src/infrastructure/](../src/infrastructure/)** - The Hexagonal Adapters.
+  - 📋 **[Fleet Infrastructure Spec](../src/infrastructure/fleet_infrastructure_spec.md)** - Use this to bootstrap the environment.
 
 - **[internal_ignore/](./)** - Internal planning and unpolished scratchpads.
   - 🚀 **[Hackathon Execution Strategy](hackathon_execution_strategy.md)** - Division of labor and milestones for the upcoming hackathon.
@@ -40,7 +45,7 @@ Welcome to your central command for AI Agent development. As your Technical Lead
   - 🤖 **[architecture-planning](../skills/architecture-planning/SKILL.md)**
 
 ## 🚀 Active Projects
-- [Hello Sparky](../src/agents/hello_sparky.md)
+- [Sparky Spec](../src/agents/sparky_spec.md)
 
 ---
 *Tip: When you're ready to design an agent, let me know and we can draft an architecture spec together using our approved chassis.*
