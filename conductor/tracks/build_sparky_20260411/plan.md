@@ -7,7 +7,7 @@
 - [x] Task: Generate `tests/test_agents/test_sparky.py` (Test tools and agent logic) (105f91a)
 
 ## Layer 3: Capabilities (Tools)
-- [ ] Task: Generate `src/agents/hello_sparky/tools.py` (get_affirmation function)
+- [x] Task: Generate `src/agents/hello_sparky/tools.py` (get_affirmation function) (793f3fb)
 
 ## Layer 4: The Brain (Agent)
 - [ ] Task: Generate `src/agents/hello_sparky/agent.py` using `BaseAgentChassis`
