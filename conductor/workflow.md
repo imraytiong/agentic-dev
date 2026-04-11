@@ -4,21 +4,17 @@
 
 To safely isolate code changes while maintaining synchronized communication, this project strictly adheres to a **Control Plane vs. Data Plane** Git branching strategy.
 
-1.  **Control Plane (`main` branch):** The `main` branch is the singular source of truth for planning, architecture, and communication.
-    *   All instructions and payloads are received here (e.g., via `internal_ignore/inbox_gemini_cli/`).
-    *   All status reports and replies MUST be written here (e.g., via `internal_ignore/inbox_scribe/`).
-    *   **Rule:** The `main` branch must never be used for active feature development or code modifications.
+1.  **Control Plane (`main` branch) - Planning & Setup:**
+    *   The `main` branch is the singular source of truth for planning, architecture, and initial communication.
+    *   **Track Initialization:** You must create the Conductor track artifacts (`tracks.md`, `plan.md`, etc.) while on the `main` branch.
+    *   **The Pre-flight Announcement:** After initializing a track, write a message to `internal_ignore/inbox_scribe/` announcing that the plan is created and stating the exact name of the feature branch you are about to create. Commit and push this message to `main`.
 
-2.  **Data Plane (`track/*` branches):** The Data Plane consists of temporary feature branches where all actual implementation occurs.
-    *   **Rule:** When beginning work on a Conductor track, you MUST create and checkout a new branch formatted as `track/<track-id>`.
+2.  **Data Plane (`track/*` branches) - Implementation:**
+    *   **Rule:** After the pre-flight announcement is pushed to `main`, you MUST create and checkout a new branch formatted as `track/<track-id>`.
     *   All code generation, testing, and incremental commits for the track must happen entirely on this isolated branch.
+    *   **Mid-Track Communication:** If you need to send updates to Scribe *during* implementation (e.g., Phase 1 complete), stay on the `track/*` branch, write to the inbox, and commit/push your `track/*` branch. Scribe will pull and review your active branch.
 
-3.  **The Communication Handoff:**
-    *   When a code task on the `track/*` branch is ready for review or requires human/architect feedback, commit the code to the track branch.
-    *   Checkout the `main` branch.
-    *   Write the status report into the appropriate inbox directory (e.g., `inbox_scribe/`) informing the user/architect of the track branch name so they can review it.
-    *   Commit the message to `main`.
-    *   **Merge Policy:** A `track/*` branch is only merged into `main` after explicit approval. If the direction is wrong, the branch can simply be discarded.
+3.  **Merge Policy:** A `track/*` branch is only merged into `main` after explicit approval.
 
 ## Guiding Principles
 
