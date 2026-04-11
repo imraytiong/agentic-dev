@@ -13,8 +13,9 @@
 ---
 
 ## Step 1: Initialize the AI Builder
-Ensure your terminal is in the root of the repository and your virtual environment is active. Load the Agent Builder skill into your AI CLI:
+Ensure your terminal is in the root of the repository and your virtual environment is active. *Note: If you used the `start_hackathon.sh` script, the `adk-agent-builder` skill is already pinned and loaded globally in your Gemini CLI!* 
 
+If you didn't use the script, you can load it manually:
 ```bash
 gemini load skills/adk-agent-builder/SKILL.md
 ```

@@ -96,8 +96,11 @@ if command -v gemini &> /dev/null; then
     
     # Pin the global guardrails (idempotent)
     gemini context add SYSTEM_INSTRUCTIONS.md || true
+
+    # Pin the Agent Builder skill so it is ALWAYS loaded by default
+    gemini context add skills/adk-agent-builder/SKILL.md || true
     
-    echo "   Gemini CLI initialized and System Instructions pinned!"
+    echo "   Gemini CLI initialized and Agent Builder skill loaded by default!"
 else
     echo "⚠️  Gemini CLI not found in PATH. Please ensure it is installed."
 fi
