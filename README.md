@@ -65,11 +65,18 @@ Depending on what you want to build, choose your role and follow the entry point
 *   **Concepts:** [1_agent_concepts.md](developer_guides/agent_developers/1_agent_concepts.md)
 *   **Start Building:** [2_agent_builder_playbook.md](developer_guides/agent_developers/2_agent_builder_playbook.md)
 *   **Code Reference:** [3_code_reference.md](developer_guides/agent_developers/3_code_reference.md)
+*   **Deep Topics (Homework):** [4_agent_deep_topics.md](developer_guides/agent_developers/4_agent_deep_topics.md)
 
 ### 2. Infrastructure Developers
 *Your focus: Deployments, containers, adapters, and mapping the environment (Docker/K3s).*
-*   **Start Here:** [Infrastructure Director Guide](developer_guides/infrastructure_developers/infrastructure_director_guide.md)
+*   **Concepts:** [1_infrastructure_concepts.md](developer_guides/infrastructure_developers/1_infrastructure_concepts.md)
+*   **Start Building:** [2_infrastructure_playbook.md](developer_guides/infrastructure_developers/2_infrastructure_playbook.md)
+*   **Code Reference:** [3_core_internals_reference.md](developer_guides/infrastructure_developers/3_core_internals_reference.md)
+*   **Deep Topics (Homework):** [4_infrastructure_deep_topics.md](developer_guides/infrastructure_developers/4_infrastructure_deep_topics.md)
 
 ### 3. Architecture Developers
 *Your focus: Maintaining the sealed Universal Core (`BaseAgentChassis`), system contracts, and boundaries.*
-*   **Start Here:** [Architect Director Guide](developer_guides/architecture_developers/architect_director_guide.md)
+*   **Concepts:** [1_architecture_concepts.md](developer_guides/architecture_developers/1_architecture_concepts.md)
+*   **Start Building:** [2_architecture_playbook.md](developer_guides/architecture_developers/2_architecture_playbook.md)
+*   **Code Reference:** [3_architecture_reference.md](developer_guides/architecture_developers/3_architecture_reference.md)
+*   **Deep Topics (Homework):** [4_architecture_deep_topics.md](developer_guides/architecture_developers/4_architecture_deep_topics.md)
