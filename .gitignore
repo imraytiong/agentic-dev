@@ -2,6 +2,8 @@
 .obsidian/workspace
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
+.obsidian/plugins/gemini-scribe/
+gemini-scribe/
 
 # OS generated files
 .DS_Store
@@ -9,3 +11,12 @@ Thumbs.db
 
 # Trash
 .trash/
+
+# Python Ignores (for our upcoming codebase!)
+__pycache__/
+*.py[cod]
+.env
+venv/
+.venv/
+.pytest_cache/
+
