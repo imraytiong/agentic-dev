@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "storeName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-  "lastSync": 1775857444827,
+  "lastSync": 1775858641124,
   "files": {
     "Welcome.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -60,8 +60,8 @@
     },
     "03 - Architecture & Patterns/Agent Developers/Agent Directing Guide.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "3f5162b6d063f46483bcd5332cb2ee80a7c816153171e46d1e3cb804f5dcca80",
-      "lastIndexed": 1775857333211
+      "contentHash": "ae86e0f8a58c9526a2ff4d716d2ca8a744faf09ec8278768f5e2b9104b3a8a4d",
+      "lastIndexed": 1775858641124
     },
     "03 - Architecture & Patterns/Agent Developers/Agentic Coding Playbook.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -90,13 +90,13 @@
     },
     "03 - Architecture & Patterns/Agent Developers/00 - Start Here.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "2ffd9247505eb560f20393c6ed2886ac871b2f6c460ac19bdd6b2ca4f6b48e46",
-      "lastIndexed": 1775857274126
+      "contentHash": "8f26d8c675e2b5208febfc55a64a8fe156f4643b93d908dc5850953270dccdf6",
+      "lastIndexed": 1775858566749
     },
     "03 - Architecture & Patterns/Platform Engineers/Infrastructure Director Guide.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "5089b395c9b41ac6dd318891a57dadf0a20b63a2da944a0c3d25bd2a5db25396",
-      "lastIndexed": 1775857234599
+      "contentHash": "e552b5c5f3b323db9b23dfdef3bcd4031490432892511d36b347e0656df43ce3",
+      "lastIndexed": 1775858560179
     },
     "06 - Templates/Fleet Infrastructure Spec.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
@@ -110,8 +110,8 @@
     },
     "03 - Architecture & Patterns/Architect Director Guide.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",
-      "contentHash": "df68d26baec8012826ec4f174ebf6e8d5d0744bc4f4593afa48c8a0bb6935afb",
-      "lastIndexed": 1775857444827
+      "contentHash": "58c341f41fe24dece53553554e3ddf490b57d0d745a9cb296c25bf7e0a4d9d01",
+      "lastIndexed": 1775858590697
     },
     "08 - AI CLI Skills/adk-agent-builder.md": {
       "resourceName": "fileSearchStores/obsidianagenticdevelopment-nnjtj1s2qxxe",

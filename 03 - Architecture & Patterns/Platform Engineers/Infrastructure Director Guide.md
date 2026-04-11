@@ -20,8 +20,8 @@ The Agent Developers need the `BaseAgentChassis` immediately so they can start t
 ### Phase 2: Generating the Adapters (OBSERVE & THINK)
 Now that the team is coding, you focus on the real infrastructure.
 1. Open your AI CLI (Gemini CLI / Conductor).
-2. Type: `load [adk-infra-builder](../../08%20-%20AI%20CLI%20Skills/adk-infra-builder.md)`
-3. Provide the AI with the **`[Fleet Infrastructure Spec](../../06%20-%20Templates/Fleet%20Infrastructure%20Spec.md)`** (found in your `06 - Templates` folder).
+2. Type: `load adk-infra-builder` (view the skill instructions here: **[adk-infra-builder](../../08%20-%20AI%20CLI%20Skills/adk-infra-builder.md)**)
+3. Provide the AI with the **[Fleet Infrastructure Spec](../../06%20-%20Templates/Fleet%20Infrastructure%20Spec.md)** (found in your `06 - Templates` folder).
 
 The AI CLI is programmed to read the Spec and understand that it only needs to generate the missing Adapters (Postgres, Message Broker, OTel) in the `adapters/` folder and the Docker manifests. It will NOT touch `core/chassis.py`.
 
@@ -31,7 +31,7 @@ The AI will generate the `docker-compose.yml`, `Dockerfile`, `fleet.yaml`, and t
 You must verify the network works:
 1.  **The Spin-Up Test:** Run your deployment command (see "Container Engine Resilience" below). Do Postgres, the Message Broker, and Phoenix start cleanly?
 2.  **The Health Check Test:** Curl the `/health` and `/ready` endpoints of the Chassis to ensure FastAPI is reporting correctly.
-3.  **The Hello World Test:** Deploy `[Hello Chassis Reference Agent](../../02%20-%20Agent%20Projects/Hello%20Chassis%20Reference%20Agent.md)` (Sparky) into your network with `mock_infrastructure=False` and verify the telemetry traces appear in Arize Phoenix.
+3.  **The Hello World Test:** Deploy **[Hello Chassis Reference Agent](../../02%20-%20Agent%20Projects/Hello%20Chassis%20Reference%20Agent.md)** (Sparky) into your network with `mock_infrastructure=False` and verify the telemetry traces appear in Arize Phoenix.
 
 ---
 
@@ -46,4 +46,4 @@ As the Infrastructure Director, you just need to ensure your local CLI matches y
 *   **If you are on the Mac Mini (Colima Preferred):**
     *   Start the engine: `colima start`
     *   Colima binds to the standard docker socket, so you can safely run `docker compose up --build`.
-*   **The AI CLI Guardrail:** Ensure the AI does *not* write Docker-Desktop specific features (like proprietary bind mounts) into the `docker-compose.yml`. The [adk-infra-builder](../../08%20-%20AI%20CLI%20Skills/adk-infra-builder.md) skill is already programmed to prevent this.
+*   **The AI CLI Guardrail:** Ensure the AI does *not* write Docker-Desktop specific features (like proprietary bind mounts) into the `docker-compose.yml`. The **[adk-infra-builder](../../08%20-%20AI%20CLI%20Skills/adk-infra-builder.md)** skill is already programmed to prevent this.

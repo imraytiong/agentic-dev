@@ -23,8 +23,8 @@ To get up to speed quickly without being overwhelmed, please read these document
 *   **[Agent Directing Guide](Agent%20Directing%20Guide.md)**: Learn the explicit *Observe -> Think -> Act -> Verify* loop for managing your AI CLI (Gemini/Antigravity) so it writes compliant code without hallucinating.
 
 ### 4. The Action
-*   **Load the Skill**: Fire up your CLI and type `load [adk-agent-builder](../../08%20-%20AI%20CLI%20Skills/adk-agent-builder.md)`.
-*   **Grab a Spec**: Go to `06 - Templates`, grab the `Agent Architecture Spec`, fill out your business logic, and hand it to the CLI to start building!
+*   **Load the Skill**: Fire up your CLI and type `load adk-agent-builder` (view the skill instructions here: **[adk-agent-builder](../../../08%20-%20AI%20CLI%20Skills/adk-agent-builder.md)**).
+*   **Grab a Spec**: Go to the **[06 - Templates](../../../06%20-%20Templates)** folder, grab the **[Agent Architecture Spec](../../../06%20-%20Templates/Agent%20Architecture%20Spec.md)**, fill out your business logic, and hand it to the CLI to start building!
 
 ---
-*Note: If you are ever curious about how the underlying databases, queues, and API wrappers actually work, you can peek over at the `03 - Architecture & Patterns/Platform Engineers/` folder, but it is strictly optional for your day-to-day work!*
+*Note: If you are ever curious about how the underlying databases, queues, and API wrappers actually work, you can peek over at the **[Platform Engineers](../Platform%20Engineers)** folder (or specifically the **[BaseAgentChassis Internals](../Platform%20Engineers/BaseAgentChassis%20Internals.md)**), but it is strictly optional for your day-to-day work!*

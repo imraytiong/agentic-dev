@@ -30,10 +30,10 @@ Instead of manually prompting the AI with all of our architectural rules, we hav
 **Your Action:**
 Before opening Conductor or writing any code, load the custom skill into your CLI:
 1. Command your CLI to load the **[adk-agent-builder](../../08%20-%20AI%20CLI%20Skills/adk-agent-builder.md)** skill.
-2. Feed the CLI the specific `[Agent Architecture Spec](../../06%20-%20Templates/Agent%20Architecture%20Spec.md)` for the agent you are building (or use the skill's interactive brain-dump mode to generate one!).
+2. Feed the CLI the specific **[Agent Architecture Spec](../../06%20-%20Templates/Agent%20Architecture%20Spec.md)** for the agent you are building (or use the skill's interactive brain-dump mode to generate one!).
 
 **What the Skill Does:**
-You no longer need to write massive explicit prompts. The skill automatically forces the AI to read the `BaseAgentChassis Reference`, forbids it from writing raw infrastructure code, and mandates the use of our decorators (`@chassis.consume_task`) and security contexts.
+You no longer need to write massive explicit prompts. The skill automatically forces the AI to read the **[BaseAgentChassis Reference](../Platform%20Engineers/BaseAgentChassis%20Reference.md)**, forbids it from writing raw infrastructure code, and mandates the use of our decorators (`@chassis.consume_task`) and security contexts.
 
 ---
 
