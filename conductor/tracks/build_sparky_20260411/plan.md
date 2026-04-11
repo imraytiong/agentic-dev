@@ -17,4 +17,4 @@
 - [x] Task: Generate `src/agents/hello_sparky/prompts/system_prompt.jinja` (da7c163)
 
 ## Final Validation
-- [ ] Task: Run `pytest` and verify local execution with mock infrastructure.
+- [x] Task: Run `pytest` and verify local execution with mock infrastructure. (c7901f5)
