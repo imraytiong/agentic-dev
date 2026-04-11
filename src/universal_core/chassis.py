@@ -182,19 +182,262 @@ class BaseAgentChassis:
         async def get_studio():
             """Returns the Agent Studio UI."""
             return """
-            <html>
-                <head>
-                    <title>Agent Studio</title>
-                    <script src="https://cdn.tailwindcss.com"></script>
-                </head>
-                <body class="bg-gray-100 h-screen flex flex-col items-center justify-center">
-                    <h1 class="text-3xl font-bold mb-4">Agent Studio</h1>
-                    <div class="bg-white p-6 rounded shadow-md w-1/2 h-1/2">
-                        <p class="text-gray-500">Embedded chat interface goes here.</p>
+            <!DOCTYPE html>
+            <html lang="en" class="dark">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Agent Studio</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+                <script>
+                    tailwind.config = {
+                        darkMode: 'class',
+                    }
+                </script>
+                <style>
+                    /* Custom scrollbar for webkit */
+                    ::-webkit-scrollbar { width: 8px; }
+                    ::-webkit-scrollbar-track { background: #1f2937; }
+                    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+                </style>
+            </head>
+            <body class="bg-gray-900 text-gray-100 h-screen flex flex-col antialiased">
+                
+                <!-- Header -->
+                <header class="bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg">S</div>
+                        <h1 class="text-xl font-semibold tracking-tight text-white">Agent Studio</h1>
                     </div>
-                </body>
+                    <div class="text-sm text-gray-400 bg-gray-900 px-3 py-1 rounded-full border border-gray-700">v1.0</div>
+                </header>
+
+                <!-- Chat History -->
+                <main id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                    <!-- Initial Welcome Message -->
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-sm shadow">S</div>
+                        <div class="bg-gray-800 border border-gray-700 rounded-2xl rounded-tl-sm p-4 max-w-[85%] shadow-sm text-gray-200 leading-relaxed">
+                            Hello! I am your local mock agent. How can I help you today?
+                        </div>
+                    </div>
+                </main>
+
+                <!-- Loading Indicator (Hidden by default) -->
+                <div id="loading-indicator" class="hidden px-6 pb-2 text-sm text-gray-400 flex items-center gap-2">
+                    <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Agent is typing...
+                </div>
+
+                <!-- Input Area -->
+                <footer class="bg-gray-800 border-t border-gray-700 p-4 shrink-0">
+                    <div class="max-w-4xl mx-auto">
+                        <form id="chat-form" class="relative flex items-end gap-2 bg-gray-900 rounded-2xl border border-gray-700 p-2 shadow-inner focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
+                            
+                            <!-- File Upload Button -->
+                            <label for="file-upload" class="cursor-pointer p-3 text-gray-400 hover:text-blue-400 transition-colors rounded-xl hover:bg-gray-800 shrink-0 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 group-hover:scale-110 transition-transform">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                                </svg>
+                            </label>
+                            <input id="file-upload" type="file" name="file" class="hidden" accept="*/*" />
+                            
+                            <!-- Display selected filename -->
+                            <div id="file-name-display" class="hidden absolute -top-8 left-4 text-xs bg-blue-900 text-blue-200 px-3 py-1 rounded-full flex items-center gap-2 border border-blue-700 shadow-sm">
+                                <span id="file-name-text" class="truncate max-w-[200px]"></span>
+                                <button type="button" id="remove-file" class="hover:text-white">&times;</button>
+                            </div>
+
+                            <!-- Text Input -->
+                            <textarea id="chat-input" name="message" rows="1" class="w-full bg-transparent text-gray-100 placeholder-gray-500 border-none focus:ring-0 resize-none py-3 px-2 text-[15px] leading-relaxed" placeholder="Type a message..."></textarea>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 shadow-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                                </svg>
+                            </button>
+                        </form>
+                        <div class="text-center mt-3 text-xs text-gray-500">
+                            Running on BaseAgentChassis • Mock Infrastructure
+                        </div>
+                    </div>
+                </footer>
+
+                <script>
+                    const form = document.getElementById('chat-form');
+                    const input = document.getElementById('chat-input');
+                    const history = document.getElementById('chat-history');
+                    const loading = document.getElementById('loading-indicator');
+                    const fileUpload = document.getElementById('file-upload');
+                    const fileNameDisplay = document.getElementById('file-name-display');
+                    const fileNameText = document.getElementById('file-name-text');
+                    const removeFileBtn = document.getElementById('remove-file');
+
+                    // Auto-resize textarea
+                    input.addEventListener('input', function() {
+                        this.style.height = 'auto';
+                        this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
+                    });
+
+                    // Handle Enter to submit (Shift+Enter for newline)
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            form.dispatchEvent(new Event('submit'));
+                        }
+                    });
+
+                    // File upload UI handling
+                    fileUpload.addEventListener('change', function() {
+                        if (this.files && this.files[0]) {
+                            fileNameText.textContent = this.files[0].name;
+                            fileNameDisplay.classList.remove('hidden');
+                        } else {
+                            fileNameDisplay.classList.add('hidden');
+                        }
+                    });
+
+                    removeFileBtn.addEventListener('click', function() {
+                        fileUpload.value = '';
+                        fileNameDisplay.classList.add('hidden');
+                    });
+
+                    // Basic Markdown Link Parser
+                    function parseMarkdownLinks(text) {
+                        // Parses [Text](URL) into <a href="URL" class="text-blue-400 hover:underline">Text</a>
+                        return text.replace(/\\[(.*?)\\]\\((.*?)\\)/g, '<a href="$2" class="text-blue-400 hover:text-blue-300 font-medium underline decoration-blue-500/30 underline-offset-4" target="_blank">$1</a>');
+                    }
+
+                    // Append a message to the UI
+                    function appendMessage(text, isUser = false, fileName = null) {
+                        const div = document.createElement('div');
+                        div.className = "flex gap-4 " + (isUser ? "flex-row-reverse" : "");
+                        
+                        let avatar = isUser 
+                            ? `<div class="w-8 h-8 bg-gray-700 border border-gray-600 rounded-full flex shrink-0 items-center justify-center text-gray-300 text-sm shadow">U</div>`
+                            : `<div class="w-8 h-8 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-sm shadow">S</div>`;
+                            
+                        let bubbleClass = isUser
+                            ? "bg-blue-600 text-white border-blue-500 rounded-tr-sm"
+                            : "bg-gray-800 text-gray-200 border-gray-700 rounded-tl-sm";
+
+                        let fileAttachmentHtml = fileName ? `
+                            <div class="flex items-center gap-2 mb-2 p-2 rounded-lg bg-black/20 border border-black/10 text-sm">
+                                <span>📎</span> <span class="truncate opacity-90">${fileName}</span>
+                            </div>
+                        ` : "";
+
+                        // Parse markdown for agent messages
+                        let contentHtml = isUser ? text.replace(/\\n/g, '<br>') : parseMarkdownLinks(text.replace(/\\n/g, '<br>'));
+
+                        div.innerHTML = `
+                            ${avatar}
+                            <div class="border rounded-2xl p-4 max-w-[85%] shadow-sm leading-relaxed ${bubbleClass}">
+                                ${fileAttachmentHtml}
+                                <div>${contentHtml}</div>
+                            </div>
+                        `;
+                        history.appendChild(div);
+                        history.scrollTop = history.scrollHeight;
+                    }
+
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const message = input.value.trim();
+                        const file = fileUpload.files[0];
+                        
+                        if (!message && !file) return;
+
+                        // UI Updates
+                        appendMessage(message || "(File Upload)", true, file ? file.name : null);
+                        input.value = '';
+                        input.style.height = 'auto';
+                        fileUpload.value = '';
+                        fileNameDisplay.classList.add('hidden');
+                        loading.classList.remove('hidden');
+
+                        try {
+                            const formData = new FormData();
+                            if (message) formData.append('message', message);
+                            if (file) formData.append('file', file);
+                            formData.append('user_id', 'studio_user');
+                            formData.append('session_id', 'studio_session');
+                            formData.append('tenant_id', 'local_dev');
+
+                            const response = await fetch('/chat', {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            if (!response.ok) throw new Error("Server Error");
+                            
+                            const data = await response.json();
+                            appendMessage(data.response || "Task completed.");
+
+                        } catch (err) {
+                            appendMessage("⚠️ Error communicating with agent.", false);
+                        } finally {
+                            loading.classList.add('hidden');
+                        }
+                    });
+                </script>
+            </body>
             </html>
             """
+
+        from fastapi import Form
+        @self.app.post("/chat")
+        async def chat_handler(
+            message: str = Form(""),
+            user_id: str = Form("studio_user"),
+            session_id: str = Form("studio_session"),
+            tenant_id: str = Form("local_dev"),
+            file: Optional[UploadFile] = File(None)
+        ):
+            """Backend sync handler for the Agent Studio UI."""
+            file_id = None
+            if file and self.file_storage:
+                content = await file.read()
+                file_id = await self.file_storage.save_file(file.filename, content)
+            
+            # Since this is a generic chassis, we don't know the exact payload_model
+            # of the target agent. For the mock studio, we will attempt to find 
+            # a registered consumer and route to it dynamically, or return a generic mock response.
+            
+            if not hasattr(self, '_consumers') or not self._consumers:
+                # No agents registered, return a default mock response
+                return {"response": f"I received your message: '{message}'. No agents are currently registered to process it."}
+            
+            # In a real sync scenario, we would need a way to await the result of the specific queue.
+            # Because decorators are async while True loops, the easiest way to test in Studio
+            # is to publish to the default queue and read from a generic response queue, or 
+            # execute the underlying logic directly. 
+            
+            # For the mock Studio UI, we'll return a simulated response if we detect the HelloRequest model.
+            try:
+                # Let's try to simulate processing for 'hello_jobs'
+                context = AgentContext(user_id=user_id, session_id=session_id, tenant_id=tenant_id)
+                
+                # We'll publish the message to the first available queue to kick off the background worker
+                # (which was started in `start()`), but we won't wait for it since it's fire-and-forget.
+                # However, for a chat UI, users expect a synchronous reply.
+                # So we will invoke the LLM directly for the UI preview.
+                
+                prompt = f"User said: {message}"
+                if file_id:
+                    prompt += f" [Attached File ID: {file_id}]"
+                    
+                response_text = await self.llm_agent.generate_content(prompt)
+                return {"response": response_text}
+                
+            except Exception as e:
+                logger.error(f"Studio chat error: {e}")
+                return {"response": f"Error processing message: {str(e)}"}
 
         @self.app.post("/upload")
         async def upload_file(file: UploadFile = File(...)):
