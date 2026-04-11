@@ -9,3 +9,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Build Sparky Reference Agent**
   *Link: [./tracks/build_sparky_20260411/](./tracks/build_sparky_20260411/)*
+
+- [ ] **Track: Fix Agent Studio UI**
+  *Link: [./tracks/fix_studio_ui_20260411/](./tracks/fix_studio_ui_20260411/)*
