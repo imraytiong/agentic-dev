@@ -2,6 +2,16 @@
 
 **Goal:** Use the AI CLI to give Sparky a new Tool, modify its state logic (Memory), and update its Identity (Config/Prompts).
 
+### 🎓 What you will learn:
+* The core principles of **Agent-Driven Development** (Directing vs. Doing).
+* How to control your environment during rapid AI generation using Git commits and versioning.
+* How to enforce Test-Driven Defense (TDD) so the AI CLI writes tests before logic.
+* How to add persistent memory (state) to an agent using Pydantic.
+* How to add new capabilities (tools) to an agent using the AI CLI.
+* How to design system prompts that handle tool failures and fall back to "General Intelligence" reasoning.
+
+---
+
 ## Step 1: Initialize the AI Builder
 Ensure your terminal is in the root of the repository and your virtual environment is active. Load the Agent Builder skill into your AI CLI:
 
@@ -14,16 +24,25 @@ Before asking the AI to write code, tell it to look at Sparky's current setup. R
 
 > "Read `src/agents/hello_sparky/config.yaml`, `src/agents/hello_sparky/agent.py`, and `src/agents/hello_sparky/models.py`. Summarize what tools and state variables Sparky currently has."
 
-## Step 3: Add Memory and a Tool (The "Think & Act" Phase)
-Let's give Sparky the ability to remember the user's location and check the weather. Feed this prompt to your CLI:
+## Step 3: The Git Safety Net 
+When working with AI CLIs that generate code rapidly, you need a quick way to roll back if the AI hallucinates. Before we make changes, let's create a clean commit:
 
-> "I want to upgrade Sparky with memory and weather capabilities.
-> 1. Update `AgentState` in `src/agents/hello_sparky/models.py` to include an optional `user_location` string.
-> 2. Create an async python function in `src/agents/hello_sparky/tools.py` called `get_current_weather`. It should require a `location` string. If the location is 'San Francisco', return '65 degrees and foggy'. For any other location, return a string saying: 'Live data unavailable for [location]. Fallback to general climate knowledge.'
-> 3. Update `src/agents/hello_sparky/config.yaml` to register this new tool.
-> 4. Remember to follow the rules in `2_agent_builder_playbook.md` and use Pydantic for the tool arguments."
+```bash
+git add .
+git commit -m "chore: clean state before upgrading Sparky"
+```
 
-## Step 4: Update the Prompt
+## Step 4: Add Memory and a Tool (The "Think & Act" Phase with TDD)
+Let's give Sparky the ability to remember the user's location and check the weather. We also want to enforce Test-Driven Defense (TDD) so the AI writes the test first. Feed this prompt to your CLI:
+
+> "I want to upgrade Sparky with memory and weather capabilities. Follow Test-Driven Defense (TDD):
+> 1. First, create a test in `tests/test_agents/test_sparky_tools.py` that asserts `get_current_weather` returns '65 degrees and foggy' for 'San Francisco', and 'Live data unavailable...' for any other city.
+> 2. Next, update `AgentState` in `src/agents/hello_sparky/models.py` to include an optional `user_location` string.
+> 3. Create the async python function in `src/agents/hello_sparky/tools.py` called `get_current_weather` that passes the test.
+> 4. Update `src/agents/hello_sparky/config.yaml` to register this new tool.
+> 5. Remember to follow the rules in `2_agent_builder_playbook.md` and use Pydantic for the tool arguments."
+
+## Step 5: Update the Prompt
 Now, let's change Sparky's personality to utilize its new memory and fallback reasoning. Open `src/agents/hello_sparky/prompts/system.jinja` in your IDE.
 
 Modify the prompt to look like this:
@@ -36,7 +55,7 @@ Rules for Weather requests:
 3. Call your weather tool using their location. If the tool says live data is unavailable, use your general intelligence to take a best guess at the weather based on what you know about the typical climate for their location, and explicitly tell the user that you are guessing!
 ```
 
-## Step 5: Verify the Upgrade
+## Step 6: Verify the Upgrade
 Restart your agent:
 ```bash
 python src/agents/hello_sparky/agent.py --mock
@@ -50,7 +69,15 @@ Watch the UI as Sparky handles the multi-step reasoning:
 2. Reply with: *"I am in London."*
 3. Watch it update its memory (`user_location="London"`), call the tool, realize it has no live data, and enthusiastically guess that it's probably raining based on London's climate!
 
-## Step 6: Extra Credit (Connecting to Reality)
+## Step 7: Versioning & Committing
+Now that you have verified Sparky works, lock in your changes. Open `src/agents/hello_sparky/config.yaml` and bump the version (e.g., from `1.0.0` to `1.1.0`). Then, commit your successful AI-generated code:
+
+```bash
+git add .
+git commit -m "feat(sparky): add memory and weather tool"
+```
+
+## Step 8: Extra Credit (Connecting to Reality)
 **Challenge:** Swap out the mock weather response for a real, live API call. 
 
 **The Agent-Driven Development Approach:** Do not immediately start writing `requests.get()` code yourself. Practice "Directing" instead of "Doing."
