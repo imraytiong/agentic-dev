@@ -1,0 +1,8 @@
+{
+  "track_id": "build_sparky_20260411",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-04-11T15:00:00Z",
+  "updated_at": "2026-04-11T15:00:00Z",
+  "description": "Build the Sparky reference agent in src/agents/hello_sparky/ following the ADK Agent Builder protocol."
+}
