@@ -80,3 +80,8 @@ Depending on what you want to build, choose your role and follow the entry point
 *   **Start Building:** [2_architecture_playbook.md](developer_guides/architecture_developers/2_architecture_playbook.md)
 *   **Code Reference:** [3_architecture_reference.md](developer_guides/architecture_developers/3_architecture_reference.md)
 *   **Deep Topics (Homework):** [4_architecture_deep_topics.md](developer_guides/architecture_developers/4_architecture_deep_topics.md)
+
+### Codelabs
+We have prepared a set of Codelabs to get you up to speed quickly during the hackathon:
+* [Codelab 1: Hello Sparky!](learn/codelabs/1_hello_sparky.md) - Environment setup and running your first agent.
+* [Codelab 2: Upgrading Sparky](learn/codelabs/2_upgrading_sparky.md) - Adding tools and modifying agent behavior using the AI CLI.
