@@ -4,7 +4,7 @@ from typing import Dict, Any
 from src.universal_core.chassis import BaseAgentChassis
 from src.universal_core.interfaces import AgentContext
 from .models import HelloRequest, HelloState, HelloResponse
-from .tools import get_affirmation
+from .tools import get_affirmation, get_weather
 import yaml
 
 logger = logging.getLogger(__name__)
@@ -38,12 +38,16 @@ async def process_hello(payload: HelloRequest, context: AgentContext):
         
     # 2. Update State
     state.interaction_count += 1
+    if payload.location:
+        state.last_known_location = payload.location
     
     # 3. Use Tools
     affirmation = get_affirmation(payload.current_mood)
+    weather_report = None
+    if state.last_known_location:
+        weather_report = get_weather(state.last_known_location)
     
     # 4. Execute Task via LLM 
-    # (Loading prompt template - assuming it will be in the prompts directory created in Layer 5)
     prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "system_prompt.jinja")
     template_str = ""
     if os.path.exists(prompt_path):
@@ -51,13 +55,16 @@ async def process_hello(payload: HelloRequest, context: AgentContext):
             template_str = f.read()
     else:
         # Fallback template if file doesn't exist yet
-        template_str = "Say hello to {{ developer_name }} who is feeling {{ current_mood }}. Include this affirmation: {{ affirmation }}. Current interactions: {{ count }}"
-        
+        template_str = "Say hello to {{ developer_name }} who is feeling {{ current_mood }}. Include this affirmation: {{ affirmation }}. Current interactions: {{ count }}. "
+        if weather_report:
+            template_str += "Also mention the weather: {{ weather_report }}."
+            
     template_vars = {
         "developer_name": payload.developer_name,
         "current_mood": payload.current_mood,
         "affirmation": affirmation,
-        "count": state.interaction_count
+        "count": state.interaction_count,
+        "weather_report": weather_report
     }
     
     response = await chassis.execute_task(
@@ -73,6 +80,10 @@ async def process_hello(payload: HelloRequest, context: AgentContext):
     # Override total_interactions in the LLM response to ensure accuracy
     response.total_interactions = state.interaction_count
     
+    # Manually pass weather_report into response if it exists and LLM didn't set it nicely
+    if weather_report and not response.weather_report:
+        response.weather_report = weather_report
+        
     return response
 
 if __name__ == "__main__":
