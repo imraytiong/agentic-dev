@@ -461,6 +461,10 @@ class BaseAgentChassis:
             </body>
             </html>
             """
+            html_content = html_content.replace("__AGENT_NAME__", str(agent_name))
+            html_content = html_content.replace("__AGENT_NAME_SHORT__", str(agent_name)[:3].upper())
+            html_content = html_content.replace("__MODEL_NAME__", str(model_name))
+            
             return html_content
 
         from fastapi import Form
