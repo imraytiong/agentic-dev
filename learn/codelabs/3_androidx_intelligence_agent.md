@@ -58,3 +58,19 @@ If your team finishes the core challenges early, try tackling one of these advan
 ### 4. API "Blast Radius" Analyzer (Innovation)
 * **The Concept:** DevRel needs to know *before* a release if a change will break thousands of developers.
 * **The Mission:** Build a tool that analyzes an open PR in the AndroidX repo. The agent determines if the change breaks public API compatibility and generates a "DevRel Warning Score" predicting how much documentation or community outreach will be required if the PR merges.
+
+---
+
+## 🛑 Important: The Mock Infrastructure Constraint
+Because this hackathon is designed to run locally on your laptops without requiring heavy Docker containers, **you must build this agent to run entirely in the mock environment.**
+If your agent requires background queues (Challenge 1) or vector search, instruct your AI CLI to build lightweight in-memory (`asyncio.Queue`) or file-based (`json`) adapters rather than spinning up Redis or Postgres. The `BaseAgentChassis` supports this seamlessly!
+
+## 💡 Stuck? Use the Checkpoints!
+This is a complex challenge. If your team gets stuck on a specific architectural hurdle, you don't have to stay blocked! We have provided progressive solution branches in the repository. 
+
+You can check out these branches to see how the "Golden Path" solved the problem, or even merge them into your own work to jumpstart your progress:
+* `git checkout solution-codelab3-checkpoint1` (Provides the Async Queue skeleton and Mock Adapters)
+* `git checkout solution-codelab3-checkpoint2` (Adds the Semantic Mapper tool implementation)
+* `git checkout solution-codelab3-complete` (The final, fully mocked AndroidX Agent)
+
+*(Note: The complete, enterprise-grade version of this agent with real Redis/Postgres infrastructure will also be available on the `main` branch under `src/agents/androidx_agent` as a post-hackathon reference).*
