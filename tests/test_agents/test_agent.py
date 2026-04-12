@@ -7,7 +7,7 @@ import os
 @pytest.mark.asyncio
 async def test_agent_execution_loop(monkeypatch):
     # Setup mock infrastructure on chassis
-    os.environ["MOCK_INFRASTRUCTURE"] = "true"
+    monkeypatch.setenv("MOCK_INFRASTRUCTURE", "true")
     chassis.__init__({}, mock_infrastructure=True)
     
     # Mock the LLM to return a consistent structured response
