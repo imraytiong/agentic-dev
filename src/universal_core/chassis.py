@@ -478,27 +478,34 @@ class BaseAgentChassis:
                 # No agents registered, return a default mock response
                 return {"response": f"I received your message: '{message}'. No agents are currently registered to process it."}
             
-            # In a real sync scenario, we would need a way to await the result of the specific queue.
-            # Because decorators are async while True loops, the easiest way to test in Studio
-            # is to publish to the default queue and read from a generic response queue, or 
-            # execute the underlying logic directly. 
-            
-            # For the mock Studio UI, we'll return a simulated response if we detect the HelloRequest model.
             try:
-                # Let's try to simulate processing for 'hello_jobs'
+                # Get the first registered consumer as the target for the Studio UI
+                consumer = self._consumers[0]
+                target_func = consumer.func
+                payload_model = consumer.payload_model
+                
                 context = AgentContext(user_id=user_id, session_id=session_id, tenant_id=tenant_id)
                 
-                # We'll publish the message to the first available queue to kick off the background worker
-                # (which was started in `start()`), but we won't wait for it since it's fire-and-forget.
-                # However, for a chat UI, users expect a synchronous reply.
-                # So we will invoke the LLM directly for the UI preview.
-                
-                prompt = f"User said: {message}"
+                # Dynamically translate the raw chat message into the required structured payload
+                prompt = f"Extract the user's intent from the following chat message into the required JSON payload schema."
+                prompt += f"\nUser Message: {message}"
                 if file_id:
-                    prompt += f" [Attached File ID: {file_id}]"
+                    prompt += f"\n[Attached File ID: {file_id}]"
                     
-                response_text = await self.llm_agent.generate_content(prompt)
-                return {"response": response_text}
+                structured_payload = await self.ask_structured(prompt, payload_model)
+                
+                # Execute the target agent function directly
+                agent_response = await target_func(structured_payload, context)
+                
+                # Format the response back to the UI
+                if hasattr(agent_response, 'model_dump_json'):
+                    response_text = agent_response.model_dump_json(indent=2)
+                else:
+                    response_text = str(agent_response)
+                    
+                # Format as a markdown code block for prettier rendering in the UI
+                formatted_response = f"**Agent executed successfully:**\n```json\n{response_text}\n```"
+                return {"response": formatted_response}
                 
             except Exception as e:
                 logger.error(f"Studio chat error: {e}")
@@ -633,6 +640,12 @@ class BaseAgentChassis:
             # We attach the wrapper to the chassis so it can be managed by the application lifecycle
             if not hasattr(self, '_consumers'):
                 self._consumers = []
+            
+            # Attach metadata to the wrapper for dynamic routing in the Studio UI
+            wrapper.payload_model = payload_model
+            wrapper.func = func
+            wrapper.queue_name = queue_name
+            
             self._consumers.append(wrapper)
             return wrapper
         return decorator

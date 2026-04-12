@@ -18,16 +18,19 @@ class DummyStateStore(BaseStateStore):
 class DummyWrongAdapter:
     pass
 
-def test_chassis_initialization_no_adapters():
+def test_chassis_initialization_no_adapters(monkeypatch):
+    monkeypatch.delenv("MOCK_INFRASTRUCTURE", raising=False)
     config = {
         "infrastructure": {}
     }
-    chassis = BaseAgentChassis(config)
+    chassis = BaseAgentChassis(config, mock_infrastructure=False)
     
     assert chassis.state_store is None
     assert chassis.vector_store is None
 
 def test_chassis_loads_valid_adapter(monkeypatch):
+    import os
+    os.environ.pop("MOCK_INFRASTRUCTURE", None)
     import importlib
     
     def mock_import_module(name):
@@ -43,10 +46,11 @@ def test_chassis_loads_valid_adapter(monkeypatch):
         }
     }
     
-    chassis = BaseAgentChassis(config)
+    chassis = BaseAgentChassis(config, mock_infrastructure=False)
     assert isinstance(chassis.state_store, DummyStateStore)
 
 def test_chassis_rejects_invalid_adapter(monkeypatch):
+    monkeypatch.delenv("MOCK_INFRASTRUCTURE", raising=False)
     import importlib
     
     def mock_import_module(name):
@@ -63,7 +67,7 @@ def test_chassis_rejects_invalid_adapter(monkeypatch):
     }
     
     with pytest.raises(TypeError) as exc_info:
-        BaseAgentChassis(config)
+        BaseAgentChassis(config, mock_infrastructure=False)
     
     assert "does not implement the expected interface" in str(exc_info.value)
 
@@ -172,3 +176,4 @@ async def test_consume_task():
     assert executed_payload.message == "task_data"
     assert executed_payload.count == 5
     assert executed_context.user_id == "u1"
+id == "u1"
