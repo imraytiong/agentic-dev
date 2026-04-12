@@ -1,6 +1,7 @@
 # Core Framework
 google-adk
 litellm
+python-dotenv
 
 # API & Web UI
 fastapi

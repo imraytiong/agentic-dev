@@ -6,6 +6,12 @@ from typing import Dict, Any, Optional, Type, TypeVar
 from pydantic import BaseModel, ValidationError
 
 try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+try:
     import jinja2
 except ImportError:
     jinja2 = None
@@ -20,12 +26,37 @@ except ImportError:
 try:
     from google_adk import LlmAgent
 except ImportError:
-    # Fallback/Mock for LlmAgent
+    # Fallback for LlmAgent using litellm directly
+    try:
+        from litellm import acompletion
+    except ImportError:
+        acompletion = None
+
     class LlmAgent:
         def __init__(self, **kwargs):
-            pass
+            # Map standard model names to litellm prefixes if necessary. 
+            # Default to gemini-1.5-flash
+            model = kwargs.get("model", "gemini/gemini-1.5-flash")
+            if "gemini" in model and not model.startswith("gemini/"):
+                model = f"gemini/{model}"
+            self.model = model
+            self.temperature = kwargs.get("temperature", 0.7)
+
         async def generate_content(self, prompt: str) -> str:
-            return "{}"
+            if not acompletion:
+                logger.warning("litellm is not installed. Returning empty JSON stub.")
+                return "{}"
+            
+            try:
+                response = await acompletion(
+                    model=self.model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=self.temperature
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                logger.error(f"LLM Generation Error: {str(e)}")
+                raise e
 
 from .interfaces import (
     BaseStateStore,
