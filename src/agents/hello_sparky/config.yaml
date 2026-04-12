@@ -1,5 +1,5 @@
 agent:
-  name: "hello_chassis"
+  name: "Sparky"
   description: "The official Hello World reference agent for the BaseAgentChassis platform."
   model: "gemini-2.5-flash"
   temperature: 0.7
