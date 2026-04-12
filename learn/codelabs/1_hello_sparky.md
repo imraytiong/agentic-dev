@@ -40,3 +40,8 @@ You are now in the Agent Studio! Try the following to manually inspect the agent
 
 ---
 *Once you have successfully chatted with Sparky, you are ready for Codelab 2!*
+
+## Step 5: Extra Credit (For the Fast Finishers)
+If you finished early and are waiting for others to catch up, try this:
+1. **Break the UI:** Open `http://localhost:8000/studio`, open your browser's Developer Tools (Network tab), and watch the `/chat` endpoint fire when you send a message. What does the JSON payload look like?
+2. **Break the CLI:** Try asking Sparky something completely outside its persona (e.g., "Write me a Python script"). See how the LLM handles it based on its current bare-bones prompt.

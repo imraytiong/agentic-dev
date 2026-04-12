@@ -20,7 +20,7 @@ Before you touch your CLI or write a single line of code, you need a solid idea.
 
 **Your Task:**
 1. Pick a workflow that annoys you or your team. (e.g., Triaging Jira tickets, summarizing weekly standup notes, writing boilerplate code reviews).
-2. **Use an AI Assistant to Brainstorm:** Open Gemini Web, use Obsidian with the Gemini Scribe plugin, or your preferred conversational AI. 
+2. **Use an AI Assistant to Brainstorm:** Open the Gemini Web App (or your preferred conversational AI) on your second monitor. 
 3. **The Discovery Prompt:** Tell the AI about your problem. E.g., *"I want to build an AI agent that helps me triage incoming GitHub issues. Ask me questions one by one to help me define the agent's persona, what external tools it will need, and what state it needs to remember."*
 4. Keep it a discovery dialogue. Let the AI help you scope the problem down to something achievable in a hackathon.
 
