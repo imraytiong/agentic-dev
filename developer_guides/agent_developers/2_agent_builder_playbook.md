@@ -16,7 +16,7 @@ By using `chassis.run_local(mock_infrastructure=True)`, your agent will use in-m
 
 ---
 
-## 2. The 4 Rules of Directing Coding Agents
+## 2. The 5 Rules of Directing Coding Agents
 
 AI coding agents are eager to please and will invent infrastructure if you don't restrict them.
 
@@ -25,7 +25,13 @@ Whenever you instruct an AI to create a new agent, you **must** load the `adk-ag
 *   **Action:** Fire up your CLI and type `load adk-agent-builder`.
 *   **Why:** It forces the AI to read the BaseAgentChassis rules, forbids raw infrastructure code, and mandates the use of our decorators.
 
-### Rule 2: Generate in Layers (The Step-by-Step Workflow)
+### Rule 2: Enforce the Git Safety Net
+Do not let the AI overwrite your main branch blindly. Because you loaded the builder skill, the AI is instructed to automatically:
+1. Check your `git status` and ask you to commit pending work before it plans.
+2. Plan in your current branch.
+3. Automatically create and check out a **new feature branch** before it writes code.
+
+### Rule 3: Generate in Layers (The Step-by-Step Workflow)
 Do not ask an AI CLI to "Build the Research Agent." Direct it layer by layer:
 1.  **Layer 1 (Data):** Generate `models.py` for Pydantic schemas and JSONB state.
 2.  **Layer 2 (Defense):** Write the `test_models.py` & `test_tools.py` pytest suite *before* the logic.
@@ -33,10 +39,10 @@ Do not ask an AI CLI to "Build the Research Agent." Direct it layer by layer:
 4.  **Layer 4 (The Brain):** Generate `agent.py` using the `@chassis.consume_task` decorator.
 5.  **Layer 5 (Config):** Externalize settings to `config.yaml` and instructions to `prompts/`.
 
-### Rule 3: Test-Driven Defense (TDD)
+### Rule 4: Test-Driven Defense (TDD)
 Before asking the AI to write complex business logic, ask it to write the `pytest` file first. Once the test is locked in, the AI CLI is forced to generate code that passes it.
 
-### Rule 4: Lock Down Integration Points
+### Rule 5: Lock Down Integration Points
 Pydantic models that define inter-agent communication must be treated as sacred contracts. If Team A is building the Supervisor and Team B is building the Worker, lock the Pydantic schemas first.
 
 ---
