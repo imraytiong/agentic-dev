@@ -17,7 +17,12 @@ You are building and maintaining the `src/universal_core/` directory (`chassis.p
 
 ### 0. CONTEXT AWARENESS (Bootstrap vs. Maintenance Mode)
 Before proposing any plans, check if `src/universal_core/chassis.py` already exists in the project.
-* **If it DOES exist:** You are in **Maintenance Mode**. DO NOT execute the 5-layer bootstrap plan. Your only job is to read the user's request and cleanly apply the specific, targeted patch to the existing architecture. Skip the 5-layer plan and proceed directly to executing the specific fix.
+* **If it DOES exist:** You are in **Maintenance Mode**. DO NOT execute the 5-layer bootstrap plan. Your job is to cleanly apply specific targeted patches. 
+  **CRITICAL MAINTENANCE RULES:** 
+  1. You MUST still check `git status`, create, and checkout a new branch.
+  2. You MUST write a pre-flight plan to `internal_ignore/inbox_scribe/` stating your branch name and proposed changes.
+  3. **STOP GENERATING TEXT AND PAUSE** to wait for Scribe's approval.
+  4. After executing the code, write a review request to `internal_ignore/inbox_scribe/` and **STOP GENERATING TEXT AND PAUSE** again.
 * **If it DOES NOT exist:** You are in **Bootstrap Mode**. Proceed to Step 1 and execute the full 5-layer plan.
 
 ### 1. OBSERVE (Bootstrap Mode Only)
