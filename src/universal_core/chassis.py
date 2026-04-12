@@ -35,8 +35,8 @@ except ImportError:
     class LlmAgent:
         def __init__(self, **kwargs):
             # Map standard model names to litellm prefixes if necessary. 
-            # Default to gemini-1.5-flash
-            model = kwargs.get("model", "gemini/gemini-1.5-flash")
+            # Default to gemini/gemini-2.5-flash
+            model = kwargs.get("model", "gemini-2.5-flash")
             if "gemini" in model and not model.startswith("gemini/"):
                 model = f"gemini/{model}"
             self.model = model
@@ -57,6 +57,16 @@ except ImportError:
             except Exception as e:
                 logger.error(f"LLM Generation Error: {str(e)}")
                 raise e
+                
+        async def ping(self):
+            """Fast-fail probe test."""
+            if not acompletion:
+                return True
+            await acompletion(
+                model=self.model,
+                messages=[{"role": "user", "content": "ping"}],
+                max_tokens=5
+            )
 
 from .interfaces import (
     BaseStateStore,
@@ -167,9 +177,33 @@ class BaseAgentChassis:
         except ImportError:
             raise RuntimeError("uvicorn is required to run the local server. Install with `pip install uvicorn`")
         
-        # Attach the start method to FastAPI startup event
+        import os
+        import sys
+
+        # Startup Logging for LLM Probe
+        model_str = getattr(self.llm_agent, 'model', 'Unknown')
+        api_key = os.getenv("GEMINI_API_KEY", "")
+        masked_key = f"{api_key[:4]}...{api_key[-4:]}" if len(api_key) > 8 else "Not Set or Too Short"
+        
+        logger.info(f"--- Booting Local Chassis ---")
+        logger.info(f"Target LLM Model: {model_str}")
+        logger.info(f"Using API Key: {masked_key}")
+        
+        # Attach the start method and probe to FastAPI startup event
         @self.app.on_event("startup")
         async def startup_event():
+            logger.info("Executing LLM Probe Test...")
+            try:
+                if hasattr(self.llm_agent, 'ping'):
+                    await self.llm_agent.ping()
+                logger.info("✅ LLM Probe Successful! API connection is solid.")
+            except Exception as e:
+                logger.critical(f"❌ CRITICAL LLM PROBE FAILURE: {str(e)}")
+                logger.critical("Check your API key and model string. Shutting down application.")
+                # We use os._exit here because raising SystemExit inside an asyncio event loop 
+                # might just be caught by the server rather than hard killing the process.
+                os._exit(1)
+            
             await self.start()
             
         logger.info(f"Starting BaseAgentChassis on http://{host}:{port}")
