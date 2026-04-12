@@ -249,25 +249,25 @@ class BaseAgentChassis:
             agent_name = self.config.get("agent", {}).get("name", "Agent")
             model_name = getattr(self.llm_agent, "model", "Unknown")
             
-            html_content = f"""
+            html_content = """
             <!DOCTYPE html>
             <html lang="en" class="dark">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Agent Studio: {{agent_name}}</title>
+                <title>Agent Studio: __AGENT_NAME__</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <script>
-                    tailwind.config = {{
+                    tailwind.config = {
                         darkMode: 'class',
-                    }}
+                    }
                 </script>
                 <style>
                     /* Custom scrollbar for webkit */
-                    ::-webkit-scrollbar {{ width: 8px; }}
-                    ::-webkit-scrollbar-track {{ background: #1f2937; }}
-                    ::-webkit-scrollbar-thumb {{ background: #4b5563; border-radius: 4px; }}
-                    ::-webkit-scrollbar-thumb:hover {{ background: #6b7280; }}
+                    ::-webkit-scrollbar { width: 8px; }
+                    ::-webkit-scrollbar-track { background: #1f2937; }
+                    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
                 </style>
             </head>
             <body class="bg-gray-900 text-gray-100 h-screen flex flex-col antialiased">
@@ -275,8 +275,8 @@ class BaseAgentChassis:
                 <!-- Header -->
                 <header class="bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg text-sm">{{agent_name[:1].upper()}}</div>
-                        <h1 class="text-xl font-semibold tracking-tight text-white">Agent Studio: {{agent_name}}</h1>
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg text-sm">__AGENT_NAME_SHORT__</div>
+                        <h1 class="text-xl font-semibold tracking-tight text-white">Agent Studio: __AGENT_NAME__</h1>
                     </div>
                     <div class="text-sm text-gray-400 bg-gray-900 px-3 py-1 rounded-full border border-gray-700">v1.0</div>
                 </header>
@@ -285,11 +285,11 @@ class BaseAgentChassis:
                 <main id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
                     <!-- Initial Welcome Message -->
                     <div class="flex gap-4">
-                        <div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">{{agent_name[:3]}}</div>
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">__AGENT_NAME_SHORT__</div>
                         <div class="bg-gray-800 border border-gray-700 rounded-2xl rounded-tl-sm p-4 max-w-[85%] shadow-sm text-gray-200 leading-relaxed">
                             <strong>System Note:</strong><br>
-                            Loaded Agent: <code>{{agent_name}}</code><br>
-                            Model: <code>{{model_name}}</code><br>
+                            Loaded Agent: <code>__AGENT_NAME__</code><br>
+                            Model: <code>__MODEL_NAME__</code><br>
                             Status: Ready for input.
                         </div>
                     </div>
@@ -349,50 +349,51 @@ class BaseAgentChassis:
                     const fileNameText = document.getElementById('file-name-text');
                     const removeFileBtn = document.getElementById('remove-file');
                     
-                    const agentName = "{agent_name}";
+                    const agentName = "__AGENT_NAME__";
+                    const agentNameShort = "__AGENT_NAME_SHORT__";
 
                     // Auto-resize textarea
-                    input.addEventListener('input', function() {{
+                    input.addEventListener('input', function() {
                         this.style.height = 'auto';
                         this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
-                    }});
+                    });
 
                     // Handle Enter to submit (Shift+Enter for newline)
-                    input.addEventListener('keydown', function(e) {{
-                        if (e.key === 'Enter' && !e.shiftKey) {{
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             form.dispatchEvent(new Event('submit'));
-                        }}
-                    }});
+                        }
+                    });
 
                     // File upload UI handling
-                    fileUpload.addEventListener('change', function() {{
-                        if (this.files && this.files[0]) {{
+                    fileUpload.addEventListener('change', function() {
+                        if (this.files && this.files[0]) {
                             fileNameText.textContent = this.files[0].name;
                             fileNameDisplay.classList.remove('hidden');
-                        }} else {{
+                        } else {
                             fileNameDisplay.classList.add('hidden');
-                        }}
-                    }});
+                        }
+                    });
 
-                    removeFileBtn.addEventListener('click', function() {{
+                    removeFileBtn.addEventListener('click', function() {
                         fileUpload.value = '';
                         fileNameDisplay.classList.add('hidden');
-                    }});
+                    });
 
                     // Basic Markdown Link Parser
-                    function parseMarkdownLinks(text) {{
+                    function parseMarkdownLinks(text) {
                         return text.replace(/\\[(.*?)\\]\\((.*?)\\)/g, '<a href="$2" class="text-blue-400 hover:text-blue-300 font-medium underline decoration-blue-500/30 underline-offset-4" target="_blank">$1</a>');
-                    }}
+                    }
 
                     // Append a message to the UI
-                    function appendMessage(text, isUser = false, fileName = null) {{
+                    function appendMessage(text, isUser = false, fileName = null) {
                         const div = document.createElement('div');
                         div.className = "flex gap-4 " + (isUser ? "flex-row-reverse" : "");
                         
                         let avatar = isUser 
                             ? `<div class="px-2 py-1 h-10 bg-gray-700 border border-gray-600 rounded-full flex shrink-0 items-center justify-center text-gray-300 text-xs shadow">You</div>`
-                            : `<div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">${{agentName[:3]}}</div>`;
+                            : `<div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">${agentNameShort}</div>`;
                             
                         let bubbleClass = isUser
                             ? "bg-blue-600 text-white border-blue-500 rounded-tr-sm"
@@ -400,24 +401,24 @@ class BaseAgentChassis:
 
                         let fileAttachmentHtml = fileName ? `
                             <div class="flex items-center gap-2 mb-2 p-2 rounded-lg bg-black/20 border border-black/10 text-sm">
-                                <span>📎</span> <span class="truncate opacity-90">${{fileName}}</span>
+                                <span>📎</span> <span class="truncate opacity-90">${fileName}</span>
                             </div>
                         ` : "";
 
                         let contentHtml = isUser ? text.replace(/\\n/g, '<br>') : parseMarkdownLinks(text.replace(/\\n/g, '<br>'));
 
                         div.innerHTML = `
-                            ${{avatar}}
-                            <div class="border rounded-2xl p-4 max-w-[85%] shadow-sm leading-relaxed ${{bubbleClass}}">
-                                ${{fileAttachmentHtml}}
-                                <div>${{contentHtml}}</div>
+                            ${avatar}
+                            <div class="border rounded-2xl p-4 max-w-[85%] shadow-sm leading-relaxed ${bubbleClass}">
+                                ${fileAttachmentHtml}
+                                <div>${contentHtml}</div>
                             </div>
                         `;
                         history.appendChild(div);
                         history.scrollTop = history.scrollHeight;
-                    }}
+                    }
 
-                    form.addEventListener('submit', async (e) => {{
+                    form.addEventListener('submit', async (e) => {
                         e.preventDefault();
                         const message = input.value.trim();
                         const file = fileUpload.files[0];
@@ -432,7 +433,7 @@ class BaseAgentChassis:
                         fileNameDisplay.classList.add('hidden');
                         loading.classList.remove('hidden');
 
-                        try {{
+                        try {
                             const formData = new FormData();
                             if (message) formData.append('message', message);
                             if (file) formData.append('file', file);
@@ -440,22 +441,22 @@ class BaseAgentChassis:
                             formData.append('session_id', 'studio_session');
                             formData.append('tenant_id', 'local_dev');
 
-                            const response = await fetch('/chat', {{
+                            const response = await fetch('/chat', {
                                 method: 'POST',
                                 body: formData
-                            }});
+                            });
 
                             if (!response.ok) throw new Error("Server Error");
                             
                             const data = await response.json();
                             appendMessage(data.response || "Task completed.");
 
-                        }} catch (err) {{
+                        } catch (err) {
                             appendMessage("⚠️ Error communicating with agent.", false);
-                        }} finally {{
+                        } finally {
                             loading.classList.add('hidden');
-                        }}
-                    }});
+                        }
+                    });
                 </script>
             </body>
             </html>
