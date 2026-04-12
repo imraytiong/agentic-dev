@@ -23,7 +23,7 @@ status: Active
     *   Ports: `6060:6060` (UI), `4317:4317` (OTel gRPC)
 
 ## 3. Global Configuration (fleet.yaml)
-*   **Models:** `default: gemini-1.5-flash`, `reasoning: gemini-1.5-pro`
+*   **Models:** `default: gemini-2.5-flash`, `reasoning: gemini-2.5-pro`
 *   **Database URI:** `postgresql+asyncpg://agent:hackathon@postgres:5432/agent_db`
 *   **Message Broker URI:** `amqp://...` or `redis://...` *(Depends on the chosen broker)*
 *   **Telemetry Endpoint:** `http://arize-phoenix:4317`

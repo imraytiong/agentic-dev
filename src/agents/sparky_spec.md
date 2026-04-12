@@ -4,7 +4,7 @@
 
 ## 1. Identity & Config
 *   **Name:** `hello_chassis`
-*   **Model:** `gemini-1.5-flash` *(Optional - Using Flash for instant, cheap responses)*
+*   **Model:** `gemini-2.5-flash` *(Optional - Using Flash for instant, cheap responses)*
 *   **Skills to Load:** *(Blank - No complex skills needed)*
 
 ## 2. Triggers & Routing
