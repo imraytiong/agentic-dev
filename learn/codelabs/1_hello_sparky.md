@@ -1,13 +1,11 @@
 # Codelab 1: Hello, Sparky! ⚡
 
-**Goal:** Get your environment running, boot up the Universal Core, and interact with the reference agent (Sparky) via the Agent Studio Web UI.
+**Goal:** Get your environment running, boot up the agent framework (*Universal Core*), and interact with the reference agent (*Sparky*) via the built in testing UI (*Agent Studio Web U*I).
 
 ### 🎓 What you will learn:
-* How to bootstrap the monorepo environment and AI context.
-* How to run the `BaseAgentChassis` in local "mock" mode.
-* How to interact with your agents natively via the Agent Studio Web UI.
-* How to test multimodal inputs (file uploads) with your agent.
-* How to manually inspect an agent's reasoning loop by interacting with it and observing its behavior.
+* How to bootstrap the environment
+* How to run an agent in local "mock" mode
+* How to interact with your agents natively via the built in  testing UI 
 
 ---
 
@@ -26,7 +24,7 @@ Since we want to manually run the Sparky agent first, type `exit` in the Gemini 
 We are going to run Sparky using the `mock_infrastructure` flag. This bypasses the need for enterprise Redis/Postgres and spins everything up locally in memory.
 
 ```bash
-python src/agents/hello_sparky/agent.py --mock
+python -m src.agents.hello_sparky.agent --mock
 ```
 
 ## Step 4: The Agent Studio & Manual Inspection
@@ -35,7 +33,7 @@ Once the server boots, open your web browser and navigate to:
 
 You are now in the Agent Studio! Try the following to manually inspect the agent:
 1. **Say Hello:** Type "Hello Sparky, what is your purpose?" Watch how the agent responds.
-2. **Test Multimodal:** Click the paperclip icon, upload a small image or text file, and ask Sparky to describe it.
+2. **Test Multimodal (The Limitation):** Click the paperclip icon, upload a small image or text file, and ask Sparky to describe it. *Notice how Sparky ignores the file or gets confused!* This is because while the UI supports file uploads, Sparky's current `HelloRequest` schema and prompt are strictly built for text. You will learn how to expand agent schemas to fix limitations like this later!
 3. **Observe the Loop:** As Sparky processes your inputs, pay attention to any status updates, tool calls, or intermediate reasoning steps that the UI (or your terminal console) displays. This manual inspection is critical for understanding *how* the agent arrives at its answers.
 
 ---
