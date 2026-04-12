@@ -5,7 +5,7 @@ class HelloRequest(BaseModel):
     """
     Incoming payload for the Sparky greeting task.
     """
-    developer_name: str = Field(..., description="The name of the developer testing the system.")
+    developer_name: Optional[str] = Field(None, description="The name of the developer testing the system.")
     current_mood: str = Field(..., description="How they are feeling about the architecture today.")
     location: Optional[str] = Field(None, description="The user's current city or location for weather updates.")
 
@@ -13,6 +13,7 @@ class HelloState(BaseModel):
     """
     Persistent state for the user's interaction with Sparky.
     """
+    developer_name: Optional[str] = Field(None, description="The user's saved name.")
     interaction_count: int = Field(0, description="Tracks how many times this specific user has pinged Sparky.")
     last_known_location: Optional[str] = Field(None, description="The last location provided by the user.")
 

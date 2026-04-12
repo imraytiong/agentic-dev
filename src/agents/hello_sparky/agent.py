@@ -40,6 +40,11 @@ async def process_hello(payload: HelloRequest, context: AgentContext):
     state.interaction_count += 1
     if payload.location:
         state.last_known_location = payload.location
+    if payload.developer_name:
+        state.developer_name = payload.developer_name
+        
+    # Resolve the final developer name to use in the prompt
+    resolved_name = payload.developer_name or state.developer_name or "Developer"
     
     # 3. Use Tools
     affirmation = get_affirmation(payload.current_mood)
@@ -60,7 +65,7 @@ async def process_hello(payload: HelloRequest, context: AgentContext):
             template_str += "Also mention the weather: {{ weather_report }}."
             
     template_vars = {
-        "developer_name": payload.developer_name,
+        "developer_name": resolved_name,
         "current_mood": payload.current_mood,
         "affirmation": affirmation,
         "count": state.interaction_count,

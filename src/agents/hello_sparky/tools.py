@@ -10,7 +10,7 @@ def get_affirmation(mood: str) -> str:
     """
     mood_lower = mood.lower()
     
-    if "happy" in mood_lower or "positive" in mood_lower or "good" in mood_lower:
+    if "happy" in mood_lower or "positive" in mood_lower or "good" in mood_lower or "excited" in mood_lower or "pumped" in mood_lower:
         return "May your code compile on the first try and your CI/CD pipelines run green! Your Docker containers will be flawless today."
     elif "sad" in mood_lower or "negative" in mood_lower or "frustrated" in mood_lower:
         return "Don't worry, even the best developers face segfaults and cryptic error messages. Take a breath, you've got this."

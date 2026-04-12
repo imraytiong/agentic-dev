@@ -3,6 +3,7 @@ from src.agents.hello_sparky.tools import get_affirmation, get_weather
 
 def test_get_affirmation_logic():
     assert "CI/CD" in get_affirmation("happy")
+    assert "CI/CD" in get_affirmation("excited")
     assert "segfaults" in get_affirmation("sad")
     assert "water" in get_affirmation("stress")
     assert "coding abilities" in get_affirmation("unknown")
