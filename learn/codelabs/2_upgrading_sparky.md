@@ -21,20 +21,20 @@ If you didn't use the script, you can load it manually by copying and pasting th
 please load adk-agent-builder
 ```
 ## Step 2: The "Observe" Phase
-Before asking the AI to write code, tell it to look at Sparky's current setup. Run this prompt in your CLI:
+Before asking the AI to write code, tell it to look at Sparky's current setup. Instead of providing exact file paths, use a natural **Director Prompt**. Run this prompt in your CLI:
 
-> "Read `src/agents/hello_sparky/config.yaml`, `src/agents/hello_sparky/agent.py`, and `src/agents/hello_sparky/models.py`. Summarize what tools and state variables Sparky currently has."
+> "I am working on the Sparky agent. Please inspect its configuration, agent logic, and models, and summarize what tools and state variables Sparky currently has."
+
+*(Notice how you didn't have to tell the AI to read `models.py` or `agent.py`? The `adk-agent-builder` skill already knows the architecture rules!)*
 
 This allows you to inspect the current workings of Sparky. You can continue to ask the CLI questions about Sparky to get a good understanding of what Sparky is capable of doing. 
 
 ## Step 3: The Execution Prompt
 Let's give Sparky the ability to remember the user's location and check the weather. We also want to enforce Test-Driven Defense (TDD) so the AI writes the test first.
 
-Instead of writing a hyper-specific technical prompt with file paths, we will use a **Natural Director Prompt**. Feed this exact prompt to your CLI:
+Feed this exact prompt to your CLI:
 
-> "I want to teach Sparky how to check the weather. Please update his state so he can remember the user's location. Then, build a tool that checks the weather (it can be a mock tool that reads from a simple configuration file since this is a codelab). If the tool can't find the location. Please generate a plan."
-
-**Why this works:** You don't need to memorize file paths or Pydantic class names. Because your CLI has the `adk-agent-builder` skill loaded, it *already knows* the architecture! It knows state goes in `models.py` and tools go in `tools.py`. You just define the business logic, and the AI handles the architecture.
+> "I want to teach Sparky how to check the weather. Please update his state so he can remember the user's location. Then, build a tool that checks the weather (it can be a mock tool that reads from a simple configuration file since this is a codelab). If the tool can't find the location return that the weather for that location is not available. Please generate a plan."
 
 > **Aside: The Art of Prompting**
 > How you specify the prompt is entirely up to you. Even if you use a fluid, natural language prompt, it should be as detailed as possible so the initial plan generated is closer to your expectations. 
@@ -53,7 +53,6 @@ Instead of writing a hyper-specific technical prompt with file paths, we will us
 
 ## Step 4: Reviewing and Iterating on the Plan
 
-
 Once the CLI prints out its **Layer-by-Layer Plan** (Models -> Tests -> Tools -> Brain -> Prompts), it will pause and wait for your approval. 
 
 **Do not just blindly approve it!** You are the Technical Director. This pause is your opportunity to review the plan and iterate on it until you are satisfied. 
@@ -66,7 +65,7 @@ Once the CLI prints out its **Layer-by-Layer Plan** (Models -> Tests -> Tools ->
 
 You can go back and forth with the CLI as many times as you need. Once the plan looks perfect, you can move to execution.
 
-**Give planning revision a try:**  run the prompt and observe how the AI agent proposes the architecture for your changes. Ask it to add 10 different weather scenarios for testing purposes to the plan if it didn't already suggest it. Or if it suggested it ask it to ensure that some places have adverse weather patterns.  
+**Give planning revision a try:** run the prompt and observe how the AI agent proposes the architecture for your changes. Ask it to add 10 different weather scenarios for testing purposes to the plan if it didn't already suggest it. Or if it suggested it ask it to ensure that some places have adverse weather patterns.  
 
 ## Step 5: Directing the execution (The Loop)
 Now you must act as the Director. Review the plan the CLI printed. If it looks correct, reply:
@@ -116,6 +115,7 @@ If you wanted to dictate the exact strings and rules (which is less flexible but
 ## Step 7: Verify the Upgrade
 Restart your agent:
 ```bash
+source venv/bin/activate
 python -m src.agents.hello_sparky.agent --mock
 ```
 
@@ -143,5 +143,19 @@ git commit -m "feat(sparky): add memory and weather tool"
 1. **Discovery (The Web App):** Open the standard Gemini Web App (or ChatGPT/Claude). Tell it: *"I am building a Python AI agent. I need a free weather API that doesn't require complex authentication. Discuss my options and constraints."*
 2. **Specification:** Once you and the AI agree on an API (like Open-Meteo), tell the web app: *"Write a strict specification for a Python async function called `get_current_weather` that uses this API and handles rate-limit errors gracefully. Format it as a markdown spec."*
 3. **Execution (The CLI):** Copy that spec, open your terminal, and feed it to your Gemini CLI or Conductor. Tell it to update `src/agents/hello_sparky/tools.py` based on the spec. 
+4. **Fix annoying (unintentional) bugs:** There some obvious bugs with the solution.  Use the director development pattern to quickly patch them (hint Sparky seems to forget your name and doesn't know how to respond to some moods). 
+	- Note how quickly you were able to patch the bug (versus hand debugging and fixing)
+	- note sometimes it can get syntax incorrect :(.
 
 This reinforces the core habit of this hackathon: You are the Technical Director. You scope the problem, define the constraints, and direct the AI to execute the code.
+
+---
+
+## 💡 Stuck? Need a Reference?
+If you get completely stuck or want to compare your implementation against a "golden path" solution, you don't need to look in a separate folder. The reference solution is saved directly in this repository's Git history!
+
+To view the completed code for this codelab, simply switch your branch in your terminal:
+```bash
+git checkout solution-codelab2
+```
+*(You can easily switch back to your own work by running `git checkout main` or whichever branch you were working on!)*
