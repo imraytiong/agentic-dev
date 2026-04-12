@@ -32,7 +32,7 @@ Let's give Sparky the ability to remember the user's location and check the weat
 
 Instead of writing a hyper-specific technical prompt with file paths, we will use a **Natural Director Prompt**. Feed this exact prompt to your CLI:
 
-> "I want to teach Sparky how to check the weather. Please update his state so he can remember the user's location. Then, build a tool that checks the weather (it can be a mock tool that reads from a simple configuration file since this is a codelab). If the tool can't find the location, it should return a message telling Sparky to take a best guess based on climate data. Please generate a plan."
+> "I want to teach Sparky how to check the weather. Please update his state so he can remember the user's location. Then, build a tool that checks the weather (it can be a mock tool that reads from a simple configuration file since this is a codelab). If the tool can't find the location. Please generate a plan."
 
 **Why this works:** You don't need to memorize file paths or Pydantic class names. Because your CLI has the `adk-agent-builder` skill loaded, it *already knows* the architecture! It knows state goes in `models.py` and tools go in `tools.py`. You just define the business logic, and the AI handles the architecture.
 
@@ -66,6 +66,8 @@ Once the CLI prints out its **Layer-by-Layer Plan** (Models -> Tests -> Tools ->
 
 You can go back and forth with the CLI as many times as you need. Once the plan looks perfect, you can move to execution.
 
+**Give planning revision a try:**  run the prompt and observe how the AI agent proposes the architecture for your changes. Ask it to add 10 different weather scenarios for testing purposes to the plan if it didn't already suggest it. Or if it suggested it ask it to ensure that some places have adverse weather patterns.  
+
 ## Step 5: Directing the execution (The Loop)
 Now you must act as the Director. Review the plan the CLI printed. If it looks correct, reply:
 
@@ -89,7 +91,7 @@ This layer-by-layer pause is crucial. It ensures the AI doesn't run off and hall
 You don't have to review the code alone! You can invite another human teammate (or even another AI agent) to peer-review the layer's implementation before proceeding to the next layer. 
 
 > **Aside: The Git Safety Net**
-> Because you are using the `adk-agent-builder` skill, the CLI will not just blindly generate code. It strictly enforces a **Git Safety Net** and a **Layered Approach**. When you gave it the prompt in Step 3, you probably noticed it automatically checked your `git status`, asked if you wanted to commit any pending work, and then created and checked out a **new feature branch** (e.g., `track/upgrade-sparky`). This protects your main branch and gives you a clean workspace!
+> Because you are using the `adk-agent-builder` skill, the CLI will not just blindly generate code. It strictly enforces a **Git Safety Net** and a **Layered Approach**. When you gave it the prompt in Step 3, you probably noticed it automatically checked your `git status`, asked if you wanted to commit any pending work, and then created and checked out a **new feature branch** (e.g., `track/upgrade-sparky`). This protects you main branch and gives you a clean workspace!
 
 ## Step 6: The Stateful System Prompt (Layer 5)
 When you tell the CLI to execute Layer 5 (Prompts), tell it to update the Jinja prompt to handle the new memory and tool fallback logic. 
