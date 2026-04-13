@@ -29,8 +29,10 @@ git checkout -b track/<descriptive-name>
 ```
 
 **5. THE ELEGANT PAUSE.** After creating the branch, you MUST output a polite, user-friendly status message to the terminal so the human knows what is happening. Say exactly this:
-> "⏸️ **PAUSED FOR REVIEW**: I have pushed the pre-flight plan to `main` and checked out the new track branch. I am now waiting for Gemini Scribe to review the plan. Please provide the approval message when ready."
-After printing that message, immediately stop generating text and wait.
+
+"⏸️ **PAUSED FOR REVIEW**: I have pushed the pre-flight plan to `main` and checked out the new track branch. I am now waiting for Gemini Scribe to review the plan. Please provide the approval message when ready."
+
+CRITICAL: After printing the elegant pause message, simply end your response. DO NOT print "STOP GENERATING TEXT" or any other robotic halt commands. Just finish your reply naturally.
 
 ## The 5-Layer Bootstrap Plan (Bootstrap Mode Only)
 1. **Contracts (`interfaces.py`)**: Abstract Base Classes for State, Queues, Vectors, Telemetry, MCP, FileStorage.
