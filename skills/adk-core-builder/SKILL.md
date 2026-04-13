@@ -9,12 +9,26 @@ Check if `src/universal_core/chassis.py` already exists in the project.
 - **If NO (Bootstrap Mode):** Execute the 5-layer plan.
 
 ## CRITICAL: The AI Bridge & Git Workflow
-Whenever you are asked to do work, you MUST follow this EXACT sequence to ensure Gemini Scribe can read your messages:
-1. **STAY ON `main` BRANCH.** Do not branch yet.
-2. Write a pre-flight message to `internal_ignore/inbox_scribe/` detailing your plan and stating the exact branch name you *will* create (e.g. `track/fix-name`).
-3. **Commit and push this message to `main`** (`git add internal_ignore/inbox_scribe/`, `git commit -m "preflight"`, `git push origin main`).
-4. **NOW**, create and checkout your new feature branch (`git checkout -b track/fix-name`).
-5. **STOP GENERATING TEXT.** Wait for the user to approve the plan via `internal_ignore/inbox_gemini_cli/`.
+AI coding assistants often branch too early. You MUST execute the following exact `bash` commands in order so Gemini Scribe (on a different machine) can see your pre-flight message on `main`.
+
+**Before writing any code or analyzing, run this exact sequence:**
+```bash
+# 1. Stay on main
+git checkout main
+
+# 2. Write your pre-flight plan and state the branch name you will use
+# (Write this to a new file in internal_ignore/inbox_scribe/)
+
+# 3. Commit and push the message TO MAIN
+git add internal_ignore/inbox_scribe/
+git commit -m "chore: pre-flight plan"
+git push origin main
+
+# 4. NOW create and checkout the track branch
+git checkout -b track/<descriptive-name>
+```
+
+**5. STOP GENERATING TEXT.** Wait for the user to approve the plan via `internal_ignore/inbox_gemini_cli/`.
 
 ## The 5-Layer Bootstrap Plan (Bootstrap Mode Only)
 1. **Contracts (`interfaces.py`)**: Abstract Base Classes for State, Queues, Vectors, Telemetry, MCP, FileStorage.
