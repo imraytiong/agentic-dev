@@ -1,15 +1,15 @@
-# Checkpoint 1: AndroidX Agent Skeleton (Async Queues)
+# Checkpoint 1: Developer API Agent Skeleton (Async Queues)
 
-Hello Gemini CLI! We are beginning Codelab 3: The AndroidX Intelligence Agent. 
+Hello Gemini CLI! We are beginning Codelab 3: The Developer API Intelligence Agent. 
 
 Our first goal (Checkpoint 1) is to build the skeleton of the agent and prove that our `BaseAgentChassis` can handle asynchronous tasks without freezing the UI.
 
-Please review the specification at `src/agents/androidx_agent/androidx_spec.md`.
+Please review the specification at `src/agents/developer_api_agent/developer_api_spec.md`.
 
 **Task:**
-1. Create the `androidx_agent` directory structure under `src/agents/`.
-2. Implement the `agent.py` file with the `AndroidXState` Pydantic model.
-3. Implement a mock `index_repository` tool. Instead of a hardcoded 10-second sleep, it should read the provided JSON mock files from `src/agents/androidx_agent/mocks/` (like `mock_github_prs.json` or `mock_semantic_map.json`) and include a realistic `await asyncio.sleep(1.5)` to accurately simulate the latency of pulling from real Google/GitHub APIs. It must update the agent state before and after the sleep.
+1. Create the `developer_api_agent` directory structure under `src/agents/`. (*Note: The mocks directory may already exist here*).
+2. Implement the `agent.py` file with the `DeveloperAPIState` Pydantic model.
+3. Implement a mock `index_repository` tool. Instead of a hardcoded 10-second sleep, it should read the provided JSON mock files from `src/agents/developer_api_agent/mocks/` (like `mock_github_prs.json` or `mock_semantic_map.json`) and include a realistic `await asyncio.sleep(1.5)` to accurately simulate the latency of pulling from real Google/GitHub APIs. It must update the agent state before and after the sleep.
 4. Create the `prompts/system.md` file with instructions for the agent.
 5. Update any necessary configuration files (like `config.yaml` or `fleet.yaml` if applicable) to register the new agent.
 
