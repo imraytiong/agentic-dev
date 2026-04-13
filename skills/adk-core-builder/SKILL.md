@@ -28,7 +28,9 @@ git push origin main
 git checkout -b track/<descriptive-name>
 ```
 
-**5. STOP GENERATING TEXT.** Wait for the user to approve the plan via `internal_ignore/inbox_gemini_cli/`.
+**5. THE ELEGANT PAUSE.** After creating the branch, you MUST output a polite, user-friendly status message to the terminal so the human knows what is happening. Say exactly this:
+> "⏸️ **PAUSED FOR REVIEW**: I have pushed the pre-flight plan to `main` and checked out the new track branch. I am now waiting for Gemini Scribe to review the plan. Please provide the approval message when ready."
+After printing that message, immediately stop generating text and wait.
 
 ## The 5-Layer Bootstrap Plan (Bootstrap Mode Only)
 1. **Contracts (`interfaces.py`)**: Abstract Base Classes for State, Queues, Vectors, Telemetry, MCP, FileStorage.
@@ -39,4 +41,4 @@ git checkout -b track/<descriptive-name>
 
 ## General Rules
 - NEVER hardcode Redis, Postgres, or Kafka. Use adapters.
-- ALWAYS use `STOP GENERATING TEXT` after completing a layer or waiting for review.
+- ALWAYS use the Elegant Pause after completing a layer or waiting for review.
