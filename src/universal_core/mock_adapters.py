@@ -25,7 +25,10 @@ class MockStateStore(BaseStateStore):
         data = self._store.get(key, {})
         return state_model(**data)
 
-class MockMessageBroker(BaseMessageBroker):
+class MockMessageQueue(BaseMessageBroker):
+    """
+    In-memory message broker using asyncio.Queue for local development.
+    """
     def __init__(self, config=None):
         self.config = config
         self._queues: Dict[str, asyncio.Queue] = {}
@@ -45,6 +48,9 @@ class MockMessageBroker(BaseMessageBroker):
     async def listen(self, queue_name: str) -> Any:
         q = self._get_queue(queue_name)
         return await q.get()
+
+# Alias for backward compatibility
+MockMessageBroker = MockMessageQueue
 
 class MockVectorStore(BaseVectorStore):
     def __init__(self, config=None):

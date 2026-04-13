@@ -120,11 +120,11 @@ class BaseAgentChassis:
         if mock_infrastructure:
             logger.info("Initializing Chassis with MOCK infrastructure.")
             from .mock_adapters import (
-                MockStateStore, MockMessageBroker, MockVectorStore, 
+                MockStateStore, MockMessageQueue, MockVectorStore, 
                 MockFileStorage, MockTelemetry, MockMCPServer
             )
             self.state_store = MockStateStore(self.config)
-            self.message_broker = MockMessageBroker(self.config)
+            self.message_broker = MockMessageQueue(self.config)
             self.vector_store = MockVectorStore(self.config)
             self.file_storage = MockFileStorage(self.config)
             self.telemetry = MockTelemetry(self.config)
