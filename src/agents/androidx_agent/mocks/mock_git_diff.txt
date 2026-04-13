@@ -1,0 +1,17 @@
+diff --git a/libraries/extractor/src/main/java/androidx/media3/extractor/mp3/Mp3Extractor.java b/libraries/extractor/src/main/java/androidx/media3/extractor/mp3/Mp3Extractor.java
+index 8a7b6c5..3f2e1a9 100644
+--- a/libraries/extractor/src/main/java/androidx/media3/extractor/mp3/Mp3Extractor.java
++++ b/libraries/extractor/src/main/java/androidx/media3/extractor/mp3/Mp3Extractor.java
+@@ -215,7 +215,12 @@ public final class Mp3Extractor implements Extractor {
+     if (seekHeader != null && seekHeader.isSeekable()) {
+       return seekHeader;
+     }
+-    return new VbriSeeker(header.frameSize, header.sampleRate, header.bitrate, length);
++    
++    // Fix for VBR duration calculation (Issue #3117)
++    // Calculate exact duration based on Xing/VBRI headers rather than falling back to constant bitrate estimation
++    long durationUs = VbriSeeker.calculateDurationUs(header, length);
++    return new VbriSeeker(header.frameSize, header.sampleRate, header.bitrate, length, durationUs);
+   }
+ 
+   private static boolean isSeekable(Seeker seeker) {

@@ -54,7 +54,7 @@ The hackathon structure is guided by four progressive codelabs. These take devel
   * *Goal:* Use the AI CLI to add a new tool (weather), update the Pydantic `AgentState` to remember the user's location, modify the Jinja prompt to handle tool failures via general intelligence, and establish Git versioning and TDD practices.
 * **Codelab 3: AndroidX Intelligence Agent (`learn/codelabs/3_androidx_intelligence_agent.md`)**
   * *Focus:* Advanced enterprise agent architecture.
-  * *Goal:* A team-based offline challenge to build a complex DevRel agent. Requires handling long-running tasks (Redis queues), semantic mapping of AndroidX modules, and querying Git/Web APIs while managing context limits.
+  * *Goal:* An individual offline challenge to build a complex DevRel agent. Requires handling long-running tasks (Redis queues), semantic mapping of AndroidX modules, and querying Git/Web APIs while managing context limits.
 * **Codelab 4: Capstone - Build Your Own Agent (`learn/codelabs/4_capstone_build_your_own.md`)**
   * *Focus:* End-to-end creation of a custom agent.
   * *Goal:* Use Gemini Web or Scribe for ideation, draft a formal `agent_spec_template.md`, and use the AI CLI to build, test, and deploy a brand new custom agent.
@@ -67,7 +67,7 @@ To keep the momentum going, the hackathon follows a structured 5-day timeline ma
   * *Late Morning:* **Codelab 1 (Hello Sparky)** - Running the mock infrastructure and interacting with the UI.
   * *Afternoon:* **Codelab 2 (Upgrading Sparky)** - Introduction to Agent-Driven Development and modifying an agent via the CLI.
 * **Tuesday (Day 2): The Enterprise Challenge**
-  * *All Day:* **Codelab 3 (AndroidX Intelligence Agent)** - Teams form and tackle the offline challenge. Focus on asynchronous Redis queues, semantic mapping, and Git/Doc intelligence.
+  * *All Day:* **Codelab 3 (AndroidX Intelligence Agent)** - Developers tackle the offline challenge individually, collaborating in the open chat. Focus on asynchronous Redis queues, semantic mapping, and Git/Doc intelligence.
 * **Wednesday (Day 3): Ideation & Capstone Kickoff**
   * *Morning:* Finish Codelab 3 or tackle the Extra Credit missions.
   * *Afternoon:* **Codelab 4 (Capstone) Kickoff** - Ideation phase. Teams use LLMs to brainstorm, scope their custom agent idea, and write their `agent_spec_template.md`.

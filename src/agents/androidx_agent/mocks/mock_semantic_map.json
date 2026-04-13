@@ -1,0 +1,26 @@
+{
+  "Media3": {
+    "artifact": "androidx.media3",
+    "path": "libraries/media3"
+  },
+  "ExoPlayer": {
+    "artifact": "androidx.media3:media3-exoplayer",
+    "path": "libraries/media3/exoplayer"
+  },
+  "CameraX": {
+    "artifact": "androidx.camera",
+    "path": "camera/camera-core"
+  },
+  "CameraPipe": {
+    "artifact": "androidx.camera:camera-camera2-pipe",
+    "path": "camera/camera-camera2-pipe"
+  },
+  "WindowInsets": {
+    "artifact": "androidx.core:core",
+    "path": "core/core/src/main/java/androidx/core/view/WindowInsetsCompat.java"
+  },
+  "Compose UI": {
+    "artifact": "androidx.compose.ui:ui",
+    "path": "compose/ui/ui"
+  }
+}
