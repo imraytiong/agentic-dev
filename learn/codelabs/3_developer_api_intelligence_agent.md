@@ -17,8 +17,19 @@ Expect to provide strong guidance to your AI CLI. This codelab simulates the ver
 ### 🎓 What you will learn:
 * How to handle long-running tasks asynchronously using messaging queues so the UI doesn't freeze.
 * How to build "Semantic Mapping" tools that translate human shorthand (e.g., "Compose UI") into exact system paths.
-* How to manage and truncate massive data payloads (like Git diffs) to prevent blowing out the LLM's context window.
-* How to orchestrate multiple tools (GitHub APIs + Web Scraping) to synthesize a single answer.
+* How to write tools that execute real terminal commands (like `git log` and `git diff`) and manage the resulting massive data payloads to prevent blowing out the LLM's context window.
+* How to orchestrate multiple tools to synthesize a single answer.
+
+---
+
+## 🛠️ Prerequisite: Clone the AndroidX Repository
+For this codelab, we are going to use real Git commands. Because cloning the framework takes a few minutes, kick off this clone command right now in a new terminal window so it downloads while you read the rest of the instructions!
+
+```bash
+# Clone the AndroidX source tree to your /tmp directory
+# This is a ~1.3GB download and takes about 2 minutes on a fast connection.
+git clone https://android.googlesource.com/platform/frameworks/support /tmp/androidx-source
+```
 
 ---
 
@@ -32,49 +43,45 @@ Downloading, parsing, or indexing parts of massive repositories takes time.
 
 ## Challenge 2: Translating Developer Shorthand
 Developers rarely use the exact Gradle paths when asking questions.
-* **The Problem:** A user might ask, "What changed in Compose UI lately?" but the code lives in `androidx.compose.ui:ui`.
-* **The Goal:** Build a tool (or a dedicated routing agent) that maintains a semantic map. It must translate developer shorthand ("Navigation", "Paging", "Room") into the exact artifact IDs and directory paths used in the repository (e.g., AndroidX GitHub).
+* **The Problem:** A user might ask, "What changed in Compose UI lately?" but the code lives in `androidx.compose.ui:ui` and the folder path is `compose/ui/ui`.
+* **The Goal:** Build a tool (or a dedicated routing agent) that maintains a semantic map. It must translate developer shorthand ("Navigation", "Paging", "Room") into the exact artifact IDs and directory paths used in the repository.
 
-## Challenge 3: Reading Massive Code and Docs
-Your agent needs eyes on both the code and the public-facing docs.
-* **The Goal:** Build specific tools for:
-    1. **Git Intelligence:** Querying the GitHub API to read recent commits, PRs, and release tags for specific modules.
-    2. **Doc Parsing:** Fetching and parsing recent updates from public developer documentation sites to see if the public documentation matches the recent code changes.
-* **The Trap:** A raw Git diff for a major release will easily blow out an LLM's context window. You must build your tools to summarize, truncate, or selectively extract the diffs *before* passing them back to the agent's brain.
+## Challenge 3: Executing Real Git Commands (and surviving the Context Window)
+Your agent needs eyes on the actual code changes.
+* **The Goal:** Build a tool that uses Python's `subprocess` module to execute real `git log` and `git diff` commands against the `/tmp/androidx-source` directory you cloned earlier. 
+* **The Trap:** A raw `git diff` for a major release will easily blow out an LLM's context window. You must build your tools to summarize, truncate, or selectively extract the diffs *before* passing them back to the agent's brain. (Hint: look at `git log -p -1`, `git diff --stat`, or building Python logic to chunk the output).
 
 ## The Strategy (How to tackle this)
 This codelab is not a step-by-step tutorial. It is a real engineering challenge of a practical use case that could serve as a major innovation unlock. I recommend:
 1. **Open Collaboration:** While this is an individual build, you are highly encouraged to use the open hackathon chat to discuss roadblocks, share prompt strategies, and ideate with your peers.
-2. **Use the AI Bridge:** Use your Gemini Web App to paste in GitHub API payloads and ask it to write the exact Python parsing logic.
-3. **The "Mock First" Tactic:** Create and generate Mock interfaces and mock data for the tools you are building. Don't try to connect to the real GitHub API or download massive payloads on day one. Have your AI CLI generate mock tool interfaces and static JSON responses (e.g., a fake Git diff or mock PR list) to ensure your agent's reasoning loop and UI work flawlessly. **Make sure your mock tools include realistic async delays (e.g., `await asyncio.sleep(1.5)`) to accurately simulate the latency of real APIs!** Once you feel you've landed a great agent showcase, you can start replacing those mocked tools with real API calls for added effect!
+2. **Use the AI Bridge:** Use your Gemini Web App to paste in terminal output or Python errors and ask it to write the exact Python parsing logic.
+3. **The "Mock First" Tactic:** Even though we are using real Git for Challenge 3, you can still use mocks for Challenge 1 and 2 to move fast! Have your AI CLI generate mock tool interfaces and static JSON responses (e.g., a fake semantic map) to ensure your agent's reasoning loop and UI work flawlessly. **Make sure your mock tools include realistic async delays (e.g., `await asyncio.sleep(1.5)`) to accurately simulate the latency of long-running tasks!** 
 
 Good luck, and remember to ***direct*** your AI CLIs rather than writing all the boilerplate yourselves!
 
 ---
 
 ## 🛠️ Provided Mock Services
-To help you focus purely on agent logic rather than scraping data or hitting GitHub API limits, we have provided a set of pre-built mock data files focused specifically on **Media (Media3)**, **Camera (CameraX)**, and **System UI (WindowInsets)** modules as our specific AndroidX example. These files contain *real* data pulled from actual AndroidX releases and PRs to make your demos authentic.
+To help you focus purely on agent logic for external API calls (like scraping docs), we have provided a couple of pre-built mock data files focused specifically on **Media (Media3)**, **Camera (CameraX)**, and **System UI (WindowInsets)** modules as our specific AndroidX example. These files contain *real* data pulled from actual AndroidX releases.
 
 You can find these in the `src/agents/developer_api_agent/mocks/` directory:
 
 1. **`mock_semantic_map.json`**: Maps shorthand like "ExoPlayer" or "WindowInsets" to their exact `androidx` artifact IDs and paths.
-2. **`mock_github_prs.json`**: Simulates a GitHub API response returning recently merged PRs for these specific modules (e.g., real fixes for VBR MP3 seeking and CameraPipe migrations).
-3. **`mock_git_diff.txt`**: A safe, truncated Git diff showing a real bug fix in ExoPlayer. Use this to practice handling code snippets without blowing out context windows!
-4. **`mock_release_notes.json`**: Simulates scraped release notes detailing recent features like Ultra HDR and Compose Pager fixes.
+2. **`mock_release_notes.json`**: Simulates scraped release notes detailing recent features like Ultra HDR and Compose Pager fixes.
 
 **How to use them:**
-Instead of writing complex network requests in your tools, simply read these files! **Remember to add your forced delays to simulate the network request!**
+Instead of writing complex web scrapers in your tools, simply read these files! **Remember to add your forced delays to simulate the network request!**
 ```python
 import json
 import os
 import asyncio
 
-async def read_mock_prs() -> str:
-    # Simulate the latency of hitting the real GitHub API
+async def read_mock_release_notes() -> str:
+    # Simulate the latency of a web scraper
     await asyncio.sleep(1.5) 
     
     # Note: Use your agent's specific mock directory path
-    mock_path = os.path.join(os.path.dirname(__file__), "mocks", "mock_github_prs.json")
+    mock_path = os.path.join(os.path.dirname(__file__), "mocks", "mock_release_notes.json")
     with open(mock_path, "r") as f:
         return json.dumps(json.load(f), indent=2)
 ```
@@ -115,7 +122,7 @@ You do not need to build any infrastructure adapters for Codelab 3. Continue to 
 You can check out these branches to see how the "Golden Path" solved the problem, or even merge them into your own work to jumpstart your progress:
 * `git checkout solution-codelab3-checkpoint1` (Provides the Async Queue skeleton and Mock Tools)
 * `git checkout solution-codelab3-checkpoint2` (Adds the Semantic Mapper tool implementation)
-* `git checkout solution-codelab3-complete` (The final Developer API Intelligence Agent using mocked data)
+* `git checkout solution-codelab3-complete` (The final Developer API Intelligence Agent using real Git commands and mocked data)
 
 *(Note: The complete, enterprise-grade version of this agent with real Redis/Postgres infrastructure will also be available on the `main` branch under `src/agents/developer_api_agent` as a post-hackathon reference).*
 
