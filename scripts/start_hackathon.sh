@@ -22,31 +22,31 @@ fi
 GEMINI_CMD=${GEMINI_CMD:-gemini}
 
 if ! command -v "$GEMINI_CMD" &> /dev/null; then
-    # Try to detect if 'gemini' is aliased in the user's interactive shell profile
-    # This runs an interactive bash shim to safely evaluate aliases
-    ALIAS_TARGET=$(bash -ic 'alias gemini' 2>/dev/null | sed -E "s/^alias gemini=['\"]?([^ '\"=]+).*/\1/")
+    echo "⚠️  'gemini' command not found in standard PATH."
     
-    if [ -n "$ALIAS_TARGET" ] && command -v "$ALIAS_TARGET" &> /dev/null; then
-        GEMINI_CMD="$ALIAS_TARGET"
-        echo "⚠️  Detected 'gemini' as an environment alias. Using '$GEMINI_CMD' instead."
-    fi
-fi
-
-if ! command -v "$GEMINI_CMD" &> /dev/null; then
-    # Try common alias 'ai' as a final fallback
+    # Try common alias 'ai' as a fallback
     if command -v ai &> /dev/null; then
         GEMINI_CMD="ai"
-        echo "⚠️  'gemini' command not found, using 'ai' instead."
+        echo "⚠️  Found 'ai' command. Using 'ai' instead."
+    else
+        # Interactive prompt to ask the user for their alias
+        echo ""
+        read -p "❓ Do you use an alias for the Gemini CLI (e.g., 'ai')? If so, enter it now (or press Enter to exit): " user_alias
+        
+        if [ -n "$user_alias" ] && command -v "$user_alias" &> /dev/null; then
+            GEMINI_CMD="$user_alias"
+            echo "✅ Validated '$GEMINI_CMD' as your Gemini CLI command."
+        else
+            echo "❌ ERROR: Gemini CLI is not installed or not in PATH."
+            echo "If you use a different command name, run: GEMINI_CMD=your_alias ./start_hackathon.sh"
+            exit 1
+        fi
     fi
 fi
 
 if command -v "$GEMINI_CMD" &> /dev/null; then
     GEM_VERSION=$("$GEMINI_CMD" --version 2>/dev/null || echo "installed")
     echo "✅ Gemini CLI found ($GEMINI_CMD): $GEM_VERSION"
-else
-    echo "❌ ERROR: Gemini CLI ($GEMINI_CMD) is not installed or not in PATH."
-    echo "If you use a different command name, run: GEMINI_CMD=your_alias ./start_hackathon.sh"
-    exit 1
 fi
 
 # 1. Prompt for and validate Gemini API Key
