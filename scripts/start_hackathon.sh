@@ -22,25 +22,21 @@ fi
 GEMINI_CMD=${GEMINI_CMD:-gemini}
 
 if ! command -v "$GEMINI_CMD" &> /dev/null; then
-    echo "⚠️  'gemini' command not found in standard PATH."
+    echo "⚠️  '$GEMINI_CMD' command not found in standard PATH."
     
-    # Try common alias 'ai' as a fallback
-    if command -v ai &> /dev/null; then
-        GEMINI_CMD="ai"
-        echo "⚠️  Found 'ai' command. Using 'ai' instead."
-    else
-        # Interactive prompt to ask the user for their alias
+    # Check if 'gemini' is defined as an alias in common shell profiles
+    if grep -E "^alias gemini=" ~/.bashrc ~/.zshrc ~/.bash_profile ~/.profile 2>/dev/null | grep -q .; then
         echo ""
-        read -p "❓ Do you use an alias for the Gemini CLI (e.g., 'ai')? If so, enter it now (or press Enter to exit): " user_alias
-        
-        if [ -n "$user_alias" ] && command -v "$user_alias" &> /dev/null; then
-            GEMINI_CMD="$user_alias"
-            echo "✅ Validated '$GEMINI_CMD' as your Gemini CLI command."
-        else
-            echo "❌ ERROR: Gemini CLI is not installed or not in PATH."
-            echo "If you use a different command name, run: GEMINI_CMD=your_alias ./start_hackathon.sh"
-            exit 1
-        fi
+        echo "❌ ERROR: It looks like 'gemini' is defined as an alias in your shell configuration."
+        echo "Bash scripts cannot automatically execute user aliases."
+        echo ""
+        echo "To fix this, please run the script passing your underlying command like this:"
+        echo "  GEMINI_CMD=\"<your_real_command>\" ./scripts/start_hackathon.sh"
+        exit 1
+    else
+        echo "❌ ERROR: Gemini CLI is not installed or not in PATH."
+        echo "If you use a different command name, run: GEMINI_CMD=your_alias ./scripts/start_hackathon.sh"
+        exit 1
     fi
 fi
 
