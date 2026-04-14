@@ -22,27 +22,32 @@ fi
 GEMINI_CMD=${GEMINI_CMD:-gemini}
 
 if ! command -v "$GEMINI_CMD" &> /dev/null; then
-    echo "⚠️  '$GEMINI_CMD' command not found in standard PATH."
+    echo "🔍 Checking if '$GEMINI_CMD' is an alias in your environment..."
+    # Spin up an interactive subshell to load .bashrc and check `type`
+    ALIAS_TARGET=$(bash -ic "type $GEMINI_CMD 2>/dev/null" | grep -i "aliased to" | awk -F"[\`']" '{print $2}')
     
-    # Check if 'gemini' is defined as an alias in common shell profiles
-    if grep -E "^alias gemini=" ~/.bashrc ~/.zshrc ~/.bash_profile ~/.profile 2>/dev/null | grep -q .; then
-        echo ""
-        echo "❌ ERROR: It looks like 'gemini' is defined as an alias in your shell configuration."
-        echo "Bash scripts cannot automatically execute user aliases."
-        echo ""
-        echo "To fix this, please run the script passing your underlying command like this:"
-        echo "  GEMINI_CMD=\"<your_real_command>\" ./scripts/start_hackathon.sh"
-        exit 1
+    if [ -n "$ALIAS_TARGET" ]; then
+        echo "✅ Detected '$GEMINI_CMD' is aliased to: $ALIAS_TARGET"
+        GEMINI_CMD="$ALIAS_TARGET"
     else
-        echo "❌ ERROR: Gemini CLI is not installed or not in PATH."
-        echo "If you use a different command name, run: GEMINI_CMD=your_alias ./scripts/start_hackathon.sh"
-        exit 1
+        echo "⚠️  I couldn't find '$GEMINI_CMD' in your path or aliases."
+        read -p "   Please enter the full path or exact command for the Gemini CLI (or press Enter to continue anyway): " user_cmd || true
+        
+        if [ -n "$user_cmd" ]; then
+            GEMINI_CMD="$user_cmd"
+            echo "   Using '$GEMINI_CMD' as the Gemini CLI command."
+        else
+            echo "   Continuing without explicit Gemini CLI verification..."
+        fi
     fi
 fi
 
+# Verify the final command
 if command -v "$GEMINI_CMD" &> /dev/null; then
     GEM_VERSION=$("$GEMINI_CMD" --version 2>/dev/null || echo "installed")
     echo "✅ Gemini CLI found ($GEMINI_CMD): $GEM_VERSION"
+else
+    echo "⚠️  Note: '$GEMINI_CMD' doesn't seem to be an executable path, but we will try using it."
 fi
 
 # 1. Prompt for and validate Gemini API Key
@@ -52,7 +57,7 @@ echo "You need a valid Gemini API key to proceed."
 echo "Get one at: https://aistudio.google.com/app/apikey"
 VALID_KEY=""
 while true; do
-    read -s -p "Enter your Gemini API Key (or type 'q' to quit): " api_key
+    read -s -p "Enter your Gemini API Key (or type 'q' to quit): " api_key || true
     echo ""
     
     if [ "$api_key" = "q" ] || [ "$api_key" = "Q" ]; then
@@ -85,11 +90,16 @@ done
 echo ""
 echo "🔌 Step 2: Optional Extensions"
 while true; do
-    read -p "Hackathon assumes we will be using the conductor extension. Install it now? [y/N]: " install_conductor
+    read -p "Hackathon assumes we will be using the conductor extension. Install it now? [y/N]: " install_conductor || true
     case $install_conductor in
         [Yy]* ) 
             echo "⏳ Installing Conductor extension in non-interactive mode..."
-            yes | "$GEMINI_CMD" extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
+            if command -v "$GEMINI_CMD" &> /dev/null; then
+                yes | "$GEMINI_CMD" extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
+            else
+                echo "⚠️  Skipping extension install because '$GEMINI_CMD' is not correctly resolving."
+                echo "   (Please run 'gemini extension install https://github.com/gemini-cli-extensions/conductor' manually later)."
+            fi
             break;;
         [Nn]* | "" ) 
             echo "Skipping Conductor installation."
@@ -155,12 +165,13 @@ if command -v "$GEMINI_CMD" &> /dev/null; then
     yes | "$GEMINI_CMD" context add skills/adk-agent-builder/SKILL.md || true
     echo "   Gemini CLI initialized and Agent Builder skill loaded by default!"
 else
-    echo "⚠️  Gemini CLI not found in PATH. Please ensure it is installed."
+    echo "⚠️  Gemini CLI not perfectly resolved in PATH. Skipping CLI initialization."
+    echo "   (Once the script drops you into the shell, your command/alias will work. You can manually run your init commands)."
 fi
 
 echo ""
 echo "======================================================================"
-echo "✅ Environment Ready! Dropping you into the Gemini CLI..."
+echo "✅ Environment Ready! Dropping you into the terminal..."
 echo "======================================================================"
 
 if command -v "$GEMINI_CMD" &> /dev/null; then
