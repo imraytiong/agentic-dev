@@ -22,7 +22,7 @@
 ## Before you start
 
 ### 🛑 Stick to the mocked framework for an easier time
-Because this hackathon is designed to run locally on your machines without depending on possibly corporate resources or prohibited external services, **you should build this agent to run entirely in the mock environment.**  You are of course welcome to attempt to plug into policy allowed systems if you're curious.  
+Because this codelab is designed to run locally on your machines without depending on possibly corporate resources or prohibited external services, **you should build this agent to run entirely in the mock environment.**  You are of course welcome to attempt to plug into policy allowed systems if you're curious.  
 
 ### 🛠️ Prerequisite: Git CLI
 Since your agent will be executing real terminal commands against a cloned repository, **you must have `git` installed and accessible in your system PATH.** 

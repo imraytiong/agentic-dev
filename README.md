@@ -10,7 +10,7 @@ Before running the quick start script, you **must** have the following installed
 1. **Python 3** (and `venv` module)
 2. **Gemini CLI** (e.g., `npm install -g @google/generative-ai-cli` or your internal equivalent)
 
-## Quick Start (Hackathon Setup)
+## Quick Start
 To instantly set up your local environment, clone the repo, and initialize your AI CLI with the correct guardrails, run this single command in your terminal:
 
 ```bash
@@ -30,10 +30,10 @@ flowchart TD
     classDef core fill:#2b3a42,stroke:#3f5765,stroke-width:2px,color:#fff;
     classDef public fill:#1e4620,stroke:#2e6b32,stroke-width:2px,color:#fff;
     classDef private fill:#5c1e1e,stroke:#8a2e2e,stroke-width:2px,color:#fff;
-    classDef config fill:#4a4a4a,stroke:#666,stroke-width:2px,color:#fff;
+    classDef cfgNode fill:#4a4a4a,stroke:#666666,stroke-width:2px,color:#fff;
 
     %% Nodes
-    Config[YAML Configuration]:::config
+    FleetConfig["Fleet Config (fleet.yaml)<br/>Base Dependencies"]:::cfgNode
 
     subgraph CoreLayer [Universal Core]
         Chassis(BaseAgentChassis):::core
@@ -42,28 +42,30 @@ flowchart TD
     end
 
     subgraph AgentLayer [Agent Microservices]
-        Sparky[Sparky Agent 🌐]:::public
-        CorpAgent[Agents 🔒]:::private
+        AgentConfig["Agent Config (config.yaml)<br/>Agent Specifics"]:::cfgNode
+        CustomAgents["Custom Agents 🌐/🔒"]:::public
+        AgentConfig -. Configures .-> CustomAgents
     end
 
     subgraph InfraLayer [Infrastructure Adapters]
-        PubAdapters[Public Adapters 🌐\nRedis, Postgres]:::public
-        PrivAdapters[Corporate Adapters 🔒\nCorp Kafka, APIs]:::private
+        MsgQueue["Message Queue Adapters 🌐<br/>Redis, Kafka"]:::public
+        DBAdapter["Database Adapters 🌐<br/>Postgres, pgvector"]:::public
+        CustomAPI["Custom API Adapters 🔒<br/>Internal Services"]:::private
     end
 
     %% Connections
-    Config -. Injects dependencies .-> Chassis
-    Sparky -- Inherits --> Chassis
-    CorpAgent -- Inherits --> Chassis
+    FleetConfig -. Injects dependencies .-> Chassis
+    CustomAgents -- Inherits --> Chassis
 
-    Interfaces -. Implemented by .-> PubAdapters
-    Interfaces -. Implemented by .-> PrivAdapters
+    Interfaces -. Implemented by .-> MsgQueue
+    Interfaces -. Implemented by .-> DBAdapter
+    Interfaces -. Implemented by .-> CustomAPI
 ```
 *(Legend: 🌐 = Open Source / Public Repository, 🔒 = Corporate Internal Repository)*
 
 ## Directory Structure
 
-*   **[src/agents/](src/agents/)** — Active or reference agent implementations (e.g., our baseline test agent, `sparky_spec.md`). Code for agents goes here.
+*   **[src/agents/](src/agents/)** — Active or reference agent implementations. Code for agents goes here.
 *   **[src/infrastructure/](src/infrastructure/)** — Where the Hexagonal Adapters live (e.g., standard Redis, Postgres) and the `fleet_infrastructure_spec.md`. Code for infrastructure goes here.
 *   **[src/universal_core/](src/universal_core/)** — The sealed Universal Core (`BaseAgentChassis`), system contracts, boundaries, and the `universal_core_architecture_spec.md`.
 *   **[developer_guides/](developer_guides/)** — The core playbooks and instructions. This is where human developers learn how to build and direct agents.
@@ -77,28 +79,28 @@ Depending on what you want to build, choose your role and follow the entry point
 
 ### 1. Agent Developers
 *Your focus: Writing business logic, tools, and prompts. You do not need to worry about infrastructure.*
-*   **Concepts:** [1_agent_concepts.md](developer_guides/agent_developers/1_agent_concepts.md)
-*   **Start Building:** [2_agent_builder_playbook.md](developer_guides/agent_developers/2_agent_builder_playbook.md)
-*   **Code Reference:** [3_code_reference.md](developer_guides/agent_developers/3_code_reference.md)
-*   **Deep Topics (Homework):** [4_agent_deep_topics.md](developer_guides/agent_developers/4_agent_deep_topics.md)
+*   **Concepts:** [[developer_guides/agent_developers/1_agent_concepts.md]]
+*   **Start Building:** [[developer_guides/agent_developers/2_agent_builder_playbook.md]]
+*   **Code Reference:** [[developer_guides/agent_developers/3_code_reference.md]]
+*   **Deep Topics (Homework):** [[developer_guides/agent_developers/4_agent_deep_topics.md]]
 
 ### 2. Infrastructure Developers
 *Your focus: Deployments, containers, adapters, and mapping the environment (Docker/K3s).*
-*   **Concepts:** [1_infrastructure_concepts.md](developer_guides/infrastructure_developers/1_infrastructure_concepts.md)
-*   **Start Building:** [2_infrastructure_playbook.md](developer_guides/infrastructure_developers/2_infrastructure_playbook.md)
-*   **Code Reference:** [3_core_internals_reference.md](developer_guides/infrastructure_developers/3_core_internals_reference.md)
-*   **Deep Topics (Homework):** [4_infrastructure_deep_topics.md](developer_guides/infrastructure_developers/4_infrastructure_deep_topics.md)
+*   **Concepts:** [[developer_guides/infrastructure_developers/1_infrastructure_concepts.md]]
+*   **Start Building:** [[developer_guides/infrastructure_developers/2_infrastructure_playbook.md]]
+*   **Code Reference:** [[developer_guides/infrastructure_developers/3_core_internals_reference.md]]
+*   **Deep Topics (Homework):** [[developer_guides/infrastructure_developers/4_infrastructure_deep_topics.md]]
 
 ### 3. Architecture Developers
 *Your focus: Maintaining the sealed Universal Core (`BaseAgentChassis`), system contracts, and boundaries.*
-*   **Concepts:** [1_architecture_concepts.md](developer_guides/architecture_developers/1_architecture_concepts.md)
-*   **Start Building:** [2_architecture_playbook.md](developer_guides/architecture_developers/2_architecture_playbook.md)
-*   **Code Reference:** [3_architecture_reference.md](developer_guides/architecture_developers/3_architecture_reference.md)
-*   **Deep Topics (Homework):** [4_architecture_deep_topics.md](developer_guides/architecture_developers/4_architecture_deep_topics.md)
+*   **Concepts:** [[developer_guides/architecture_developers/1_architecture_concepts.md]]
+*   **Start Building:** [[developer_guides/architecture_developers/2_architecture_playbook.md]]
+*   **Code Reference:** [[developer_guides/architecture_developers/3_architecture_reference.md]]
+*   **Deep Topics (Homework):** [[developer_guides/architecture_developers/4_architecture_deep_topics.md]]
 
 ### Codelabs
-We have prepared a set of Codelabs to get you up to speed quickly during the hackathon:
+We have prepared a set of Codelabs to get you up to speed quickly:
 * [Codelab 1: Hello Sparky!](learn/codelabs/1_hello_sparky.md) - Environment setup and running your first agent.
 * [Codelab 2: Upgrading Sparky](learn/codelabs/2_upgrading_sparky.md) - Adding tools and modifying agent behavior using the AI CLI.
-* [Codelab 3: AndroidX Intelligence Agent](learn/codelabs/3_developer_api_intelligence_agent.md) - Advanced challenge to build a real-world code repo assistant.
+* [Codelab 3: Developer API Intelligence Agent](learn/codelabs/3_developer_api_intelligence_agent.md) - Advanced challenge to build a real-world code repo assistant.
 * [Codelab 4: Capstone - Build Your Own Agent](learn/codelabs/4_capstone_build_your_own.md) - Take a rough idea, create a spec, and direct the CLI to build your custom agent
