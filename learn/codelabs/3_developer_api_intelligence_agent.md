@@ -60,20 +60,25 @@ You are about to build the **Developer API Intelligence Agent**. This agent will
 By the end of this codelab, your Agent Studio UI should be able to handle complex, multi-step workflows like these:
 
 **Example 1: The Long-Running Task**
-> **You:** What's changed recently in Compose UI?
-> **Agent:** Hold on, I need to sync the repository first. This might take a minute... *(UI remains responsive)*
-> *(2 minutes later)*
-> **Agent:** Repository synced! I searched the repo for the Compose UI, specifically did you mean `compose/ui/ui`? If so the biggest recent change is a fix to the `Modifier.Node` lifecycle, specifically addressing a memory leak when detaching nodes. Here is a quick summary of the diffs...
+
+**You:** What's changed recently in Compose UI?
+**Agent:** Hold on, I need to sync the repository first. This might take a minute... *(UI remains responsive)*
+
+*(2 minutes later)*
+
+**Agent:** Repository synced! I searched the repo for the Compose UI, specifically did you mean `compose/ui/ui`? If so the biggest recent change is a fix to the `Modifier.Node` lifecycle, specifically addressing a memory leak when detaching nodes. Here is a quick summary of the diffs...
 
 **Example 2: Semantic Translation & Ambiguity**
-> **You:** What are the latest commits for "Navigation"?
-> **Agent:** By "Navigation", do you mean `androidx.navigation:navigation-compose` or `androidx.navigation:navigation-fragment`? 
-> **You:** Compose please.
-> **Agent:** Got it. Looking at `navigation/navigation-compose`. The last 3 commits involve adding type safety to the NavGraphBuilder. Here are the details...
+
+**You:** What are the latest commits for "Navigation"?
+**Agent:** By "Navigation", do you mean `androidx.navigation:navigation-compose` or `androidx.navigation:navigation-fragment`? 
+**You:** Compose please.
+**Agent:** Got it. Looking at `navigation/navigation-compose`. The last 3 commits involve adding type safety to the NavGraphBuilder. Here are the details...
 
 **Example 3: Context Window Survival**
-> **You:** Show me the diff for the latest major refactor in Room.
-> **Agent:** The latest commit in `room/room-compiler` is massive (over 4,000 lines changed). Instead of showing you the raw diff, I ran a diff stat. It looks like they completely rewrote the `QueryProcessor.kt` and added 15 new test files. Would you like me to summarize just the changes in `QueryProcessor.kt`?
+
+**You:** Show me the diff for the latest major refactor in Room.
+**Agent:** The latest commit in `room/room-compiler` is massive (over 4,000 lines changed). Instead of showing you the raw diff, I ran a diff stat. It looks like they completely rewrote the `QueryProcessor.kt` and added 15 new test files. Would you like me to summarize just the changes in `QueryProcessor.kt`?
 
 ---
 
