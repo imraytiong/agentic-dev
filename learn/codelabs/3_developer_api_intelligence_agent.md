@@ -73,9 +73,12 @@ By the end of this codelab, your Agent Studio UI should be able to handle comple
 
 ## 🧠 The Agent Builder Workflow: Observe, Think, Act, Verify
 
-Rather than treating this as a standard coding tutorial, we want you to practice **Agent-Driven Development**. In this paradigm, you act as the Technical Director. You spend your time observing constraints and planning the architecture upfront, and then you direct your AI CLI to act on those plans.
+Rather than treating this as a standard coding tutorial, we want you to practice **Agent-Driven Development**. In this paradigm, you act as the Technical Director. You spend your time observing constraints and planning the architecture upfront, and then you direct your AI CLI to act on those plans:
 
-Follow this macro-workflow to conquer the codelab:
+- Phase 1: Observe (consider your intentions and outcomes you are seeking)
+- Phase 2: Think (define your specifications and review AI's projected plan)
+- Phase 3: Act (direct AI to execute the plan and help it along as necessary)
+- Phase 4: Verify (validate the solution, iterate and revise as needed)
 
 ### Phase 1: Observe (The Domain & Constraints)
 Before writing a single prompt, take a step back and look at the reality of the systems you are integrating with.
@@ -85,7 +88,7 @@ Before writing a single prompt, take a step back and look at the reality of the 
 
 *💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
-### Phase 2: Think (The Architecture & Spec)
+### Phase 2: Think (The Specification & Plan)
 Now that you know the constraints, plan the architecture. *This is where you earn your paycheck as an Agent Architect.*
 * **State Management:** The agent needs a `DeveloperAPIState` to remember if the repo is `not_cloned`, `cloning`, or `ready`. 
 * **Async Queues:** The `sync_repository` tool must be offloaded to a background task using the `BaseAgentChassis`'s native async capabilities. It should log to the terminal so developers know it isn't broken.
@@ -93,7 +96,7 @@ Now that you know the constraints, plan the architecture. *This is where you ear
 
 *💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
-### Phase 3: Act (The AI CLI Execution)
+### Phase 3: Act (Direct the CLI Execution)
 With your plan in place, instruct your AI CLI to build the agent layer-by-layer. Do not write the boilerplate yourself!
 * Open your terminal and use your AI CLI (e.g., Gemini CLI, Cursor).
 * Feed it your architectural decisions. (See the *Solution Kickoff Prompts* below for examples of how to direct the CLI).
@@ -101,7 +104,7 @@ With your plan in place, instruct your AI CLI to build the agent layer-by-layer.
 
 *💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
-### Phase 4: Verify (The Testing & HITL)
+### Phase 4: Verify (Test & Refine Outcome)
 Test the agent in the Agent Studio UI to ensure the architecture holds up.
 * Ask the agent to sync the repo. Does the UI respond instantly with "Job Started" while the terminal shows Git progress?
 * Ask for "Navigation". Does it pause to clarify which module you meant?
@@ -127,7 +130,6 @@ If you finish the core workflow early, try tackling one of these advanced missio
 * **The Plan:** Build a tool that reads open issues, uses the semantic mapper to determine which module they belong to, and drafts a preliminary response proposing relevant tags.
 
 ---
-
 <a id="solutions-overview"></a>
 ## Reference Solution
 Your solution may be different. This reference solution provides one possible outcome of the project. You can use this to aid and guide your understanding of how to move from stage to stage.
