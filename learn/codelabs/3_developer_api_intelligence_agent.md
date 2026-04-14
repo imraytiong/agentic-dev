@@ -38,9 +38,10 @@ Expect to provide strong guidance to your AI CLI. This codelab simulates the ver
 If you get stuck don't stay blocked for too long. Use the branches below to get you moving forward faster. 
 
 You can check out these branches to see how the "Golden Path" solved the problem, or even merge them into your own work to jumpstart your progress:
-* `git checkout solution-codelab3-checkpoint1` (Provides the Async Queue skeleton and `sync_repository` tool)
-* `git checkout solution-codelab3-checkpoint2` (Adds the Semantic Mapper tool implementation)
-* `git checkout solution-codelab3-complete` (The final Developer API Intelligence Agent using real Git commands and mocked data)
+* `git checkout solution-codelab3-phase1` (Phase 1: Domain Research & Constraints)
+* `git checkout solution-codelab3-phase2` (Phase 2: Architectural Spec)
+* `git checkout solution-codelab3-phase3` (Phase 3: Scaffold & Async Queue Tools)
+* `git checkout solution-codelab3-phase4` (Phase 4: Complete Agent with Local Git Executor)
 
 *(Note: The complete, enterprise-grade version of this agent with real Redis/Postgres infrastructure will also be available on the `main` branch under `src/agents/developer_api_agent` as a post-hackathon reference).*
 
@@ -88,11 +89,15 @@ Before writing a single prompt, take a step back and look at the reality of the 
 * **The Translation Gap:** Developers say "Compose UI", but the file system expects `compose/ui/ui`. The agent cannot guess this; it needs deterministic mapping.
 * **The Context Window Nuke:** A raw `git diff` for a major framework release will easily output 10,000+ lines of text. Feeding this directly into an LLM will crash the agent or cause severe hallucinations.
 
+*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
+
 ### Phase 2: Think (The Architecture & Spec)
 Now that you know the constraints, plan the architecture. *This is where you earn your paycheck as an Agent Architect.*
 * **State Management:** The agent needs a `DeveloperAPIState` to remember if the repo is `not_cloned`, `cloning`, or `ready`. 
 * **Async Queues:** The `sync_repository` tool must be offloaded to a background task using the `BaseAgentChassis`'s native async capabilities. It should log to the terminal so developers know it isn't broken.
 * **Tool Boundaries:** We need a semantic mapping dictionary to translate shorthand. We also need a `local_git_executor` tool that uses Python's `subprocess` module. Crucially, this Git tool must be constrained—it should run `git diff --stat` first, forcing the agent to request specific files rather than dumping the whole diff.
+
+*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
 ### Phase 3: Act (The AI CLI Execution)
 With your plan in place, instruct your AI CLI to build the agent layer-by-layer. Do not write the boilerplate yourself!
@@ -100,11 +105,15 @@ With your plan in place, instruct your AI CLI to build the agent layer-by-layer.
 * Feed it your architectural decisions. (See the *Solution Kickoff Prompts* below for examples of how to direct the CLI).
 * If the CLI gets confused, use the **AI Bridge**—paste terminal output or Python errors back into your Gemini Web App to have it write the exact Python parsing logic or refactoring steps for you.
 
+*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
+
 ### Phase 4: Verify (The Testing & HITL)
 Test the agent in the Agent Studio UI to ensure the architecture holds up.
 * Ask the agent to sync the repo. Does the UI respond instantly with "Job Started" while the terminal shows Git progress?
 * Ask for "Navigation". Does it pause to clarify which module you meant?
 * Ask for a massive diff. Does it successfully summarize it without crashing?
+
+*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
 ---
 
@@ -125,11 +134,51 @@ If you finish the core workflow early, try tackling one of these advanced missio
 
 ---
 
-## Solutions Overview
-To ensure everyone walks away with a deep understanding of the architecture, we will provide a **Solutions Overview** at the end of the codelab. We will walk through the real explanations of the code, discuss how the async queues communicate with the frontend, and review the architectural decisions made in the "Golden Path" solution branches.
+<a id="solutions-overview"></a>
+## Reference Solution
+Your solution may be different. This reference solution provides one possible outcome of the project. You can use this to aid and guide your understanding of how to move from stage to stage.
 
-### Solution Kickoff Prompts
-If you are stuck on how to begin Phase 3 (Act), try feeding these exact prompts to your AI CLI to get the momentum going:
+### Solution: Phase 1 (Observe)
+**Reference Checkpoint Branch:** [`solution-codelab3-phase1`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase1)
+
+**Reference Approach:** Before writing any code, Agent Developers should use tools like Gemini Web, NotebookLM, or their preferred LLM to explore the domain constraints. You can paste the AndroidX repository URL and ask, "What are the common submodules here? How large is the repo?" to gather facts and validate your understanding of the constraints.
+
+**Expected Output:** A brief research document or checklist (e.g., `domain_research.md`) that explicitly lists the system constraints: repo size, context window risks, and shorthand mapping requirements. The most vital technical details would be:
+* **Repo Size:** A synchronous `git clone` of 1.3GB will trigger a timeout in any standard HTTP server (like FastAPI). You absolutely must use an asynchronous background queue.
+* **Context Limits:** You cannot run `git diff` on a major framework and pipe the raw stdout to the LLM. It will exceed the token limit. You must engineer a tool that runs `git diff --stat` first to see the size, or chunks the output.
+* **Shorthand:** The LLM cannot magically guess that "Navigation" maps to `navigation/navigation-compose`. It needs a hardcoded dictionary or a semantic search tool to bridge the human-to-system gap.
+
+### Solution: Phase 2 (Think)
+**Reference Checkpoint Branch:** [`solution-codelab3-phase2`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase2)
+
+**Reference Approach:** Agent Developers should draft an architectural specification document (e.g., `developer_api_spec.md`) mapping out the state requirements, tool boundaries, and error handling. You can use an architecture-focused prompt in Gemini Web to brainstorm the best way to chunk Git diffs before committing to a design.
+
+**Example Spec Generation Prompts:**
+If you aren't sure how to turn your research into an architectural spec, try feeding these prompts into an LLM (like Gemini Web or NotebookLM) to have it draft the document for you:
+* *"I am building an AI agent using the BaseAgentChassis framework. Here are my research notes on the domain constraints: [paste notes]. Draft a formal architectural spec including the Pydantic State definition, required Tools, and the async Queue strategy."*
+* *"Let's refine the State section of the spec. We need to track the repository clone status (not_cloned, cloning, ready) so the UI can show progress without freezing. Update the draft."*
+* *"For the Git diff tool, a raw diff will blow out the LLM context limits. Propose a tool design in the spec that handles this safely (e.g., using `git diff --stat` or chunking) and update the document."*
+
+> 💡 **Iterative Planning:** Keep in mind that building this spec is an iterative process! You will likely go back and forth with the LLM several times—tweaking edge cases and refining the architecture—before you are satisfied that the plan is solid enough to start generating code.
+
+**Expected Output:** A formal architectural specification document (e.g., `developer_api_spec.md`) that defines the required `DeveloperAPIState` properties, the async Queue strategy, and the exact Tool boundaries.
+
+**What your architecture should look like:**
+* **State (`DeveloperAPIState`):** Needs `repo_status` (string) to prevent the agent from cloning multiple times, and `current_module` (string) to remember what the user is asking about.
+* **Tools:**
+  * `sync_repository`: An async tool that runs the clone and updates the state.
+  * `translate_shorthand`: A simple sync tool that looks up user terms in a predefined dictionary.
+  * `execute_git_command`: A sync tool that uses `subprocess.run` but enforces strict limits (e.g., truncating output over 2000 characters or enforcing `--stat` for diffs).
+
+### Solution: Phase 3 (Act)
+**Reference Checkpoint Branch:** [`solution-codelab3-phase3`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase3)
+
+**Reference Approach:** Agent Developers should rely heavily on their AI CLI (Cursor, Windsurf, Gemini CLI, AntiGravity) loaded with the `adk-agent-builder` skill to generate the boilerplate. The developer's job here is to provide the spec from Phase 2 and review the generated Python code to ensure it adheres to the BaseAgentChassis constraints.
+
+**Expected Output:** The actual functioning Python code generated by your AI tool, including `agent.py`, `tools.py`, and the `prompts/` directory, properly registered in the system configuration.
+
+**Kickoff Prompts:**
+If you are stuck on how to begin Phase 3, try feeding these exact prompts to your AI CLI to get the momentum going:
 
 **1. Scaffold the Agent:**
 *"Use the `adk-agent-builder` skill to scaffold a new agent called 'developer_api_agent'. It should be able to track state, specifically whether a local repository is 'not_cloned', 'cloning', or 'ready'."*
@@ -139,3 +188,15 @@ If you are stuck on how to begin Phase 3 (Act), try feeding these exact prompts 
 
 **3. Build the Core Tool:**
 *"Build a tool for this agent that clones the AndroidX repo to `/tmp/androidx-source`. It needs to run in the background so the UI doesn't freeze, and it should print its progress to the terminal so I know it's working."*
+
+### Solution: Phase 4 (Verify)
+**Reference Checkpoint Branch:** [`solution-codelab3-phase4`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase4)
+
+**Reference Approach:** Agent Developers should use the local Agent Studio UI to interact with the agent as a real user would. When errors occur (like context window overflows), developers should copy the terminal stack trace and paste it back into their AI CLI or Gemini Web to ask for a fix.
+
+**Expected Output:** A robust, working agent validated in the Agent Studio UI that successfully handles long-running clones, clarifies shorthand, and summarizes diffs without crashing.
+
+**How to test your implementation:**
+1. **The Clone Test:** Type "Sync the repo" in the UI. The UI should instantly reply "Started syncing" (or similar), and your terminal should start showing Git clone progress.
+2. **The Clarification Test:** Type "What changed in Navigation?" The agent should pause, use the `translate_shorthand` tool, and ask you to clarify which specific navigation module you meant.
+3. **The Nuke Test:** Ask "Show me the full diff for the last 10 commits in Compose UI." If your agent crashes or throws a token limit error, your `execute_git_command` tool is not properly constrained! It should reply with a summary or a truncated diff stat instead.
