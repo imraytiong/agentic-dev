@@ -13,7 +13,7 @@
 **Format:** Individual Challenge with Open Collaboration
 
 ### 🎓 What you will learn:
-* How to handle long-running tasks (like cloning a 1.3GB repo) asynchronously using messaging queues so the UI doesn't freeze.
+* How to handle long-running tasks (like cloning a repo) asynchronously using messaging queues so the UI doesn't freeze.
 * How to implement **State Management** to track if long-running tasks have already been completed (and so it won't have to do it again)
 * How to use **Logging and Tracing** so users can see terminal output while waiting for async jobs.
 * How to build "Semantic Mapping" tools that translate human shorthand (e.g., "Compose UI") into exact system paths.
@@ -81,34 +81,43 @@ Rather than treating this as a standard coding tutorial, we want you to practice
 - Phase 4: Verify (validate the solution, iterate and revise as needed)
 
 ### Phase 1: Observe (The Domain & Constraints)
-Before writing a single prompt, take a step back and look at the reality of the systems you are integrating with.
-* **The Long-Running Task:** The AndroidX repo is ~1.3GB. A `git clone` will take about 2 minutes. A synchronous HTTP request will timeout and freeze the UI. 
-* **The Translation Gap:** Developers say "Compose UI", but the file system expects `compose/ui/ui`. The agent cannot guess this; it needs deterministic mapping.
-* **The Context Window Nuke:** A raw `git diff` for a major framework release will easily output 10,000+ lines of text. Feeding this directly into an LLM will crash the agent or cause severe hallucinations.
+Before writing a single prompt, take a step back and look at the reality of the systems you are integrating with. Consider the physical and technical constraints of the environment.
+* **The Long-Running Task:** How large is the repository you are downloading? How long will a standard clone operation take, and what happens to a synchronous web request if it waits that long?
+* **The Translation Gap:** How do humans talk about the code vs. how the file system organizes it? How will your agent know the difference?
+* **The Context Window:** What happens when an agent tries to read a massive code change? How much text can your LLM actually process before it crashes or hallucinates?
+
+*Hint: If you aren't sure what to consider, try asking your AI LLM (like Gemini Web or NotebookLM): "Based on what I'm trying to build (an AI agent that clones a massive repo and reads git diffs), what do you think I should consider? Give me 5-10 technical things to work through."*
 
 *💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
 ### Phase 2: Think (The Specification & Plan)
 Now that you know the constraints, plan the architecture. *This is where you earn your paycheck as an Agent Architect.*
-* **State Management:** The agent needs a `DeveloperAPIState` to remember if the repo is `not_cloned`, `cloning`, or `ready`. 
-* **Async Queues:** The `sync_repository` tool must be offloaded to a background task using the `BaseAgentChassis`'s native async capabilities. It should log to the terminal so developers know it isn't broken.
-* **Tool Boundaries:** We need a semantic mapping dictionary to translate shorthand. We also need a `local_git_executor` tool that uses Python's `subprocess` module. Crucially, this Git tool must be constrained—it should run `git diff --stat` first, forcing the agent to request specific files rather than dumping the whole diff.
+
+* **State Management:** What data does the agent need to remember between interactions? How will it know if a long-running task is already finished or still in progress?
+* **Async Queues:** How will you design the agent to handle tasks that take minutes to complete without freezing the user interface? How will you keep the user informed of the progress?
+* **Tool Boundaries:** What specific tools does the agent need to bridge the translation gap? How will you design a tool to execute local commands safely without overwhelming the agent with too much data?
+
+*Hint: Take your research from Phase 1 and draft a technical specification. If you need help, ask your AI: "I need to build an architecture spec for an agent that handles long-running tasks and massive data payloads. What state fields, async queues, and tool boundaries should I define?"*
 
 *💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
 ### Phase 3: Act (Direct the CLI Execution)
 With your plan in place, instruct your AI CLI to build the agent layer-by-layer. Do not write the boilerplate yourself!
-* Open your terminal and use your AI CLI (e.g., Gemini CLI, Cursor).
-* Feed it your architectural decisions. (See the *Solution Kickoff Prompts* below for examples of how to direct the CLI).
-* If the CLI gets confused, use the **AI Bridge**—paste terminal output or Python errors back into your Gemini Web App to have it write the exact Python parsing logic or refactoring steps for you.
+* **The Hand-off:** Provide your specification to your AI coding assistant and instruct it to begin building. 
+* **The Layered Review:** As the AI generates the state, prompts, tools, and logic, review its work. Does the generated code actually address the constraints you planned for?
+* **The Course Correction:** If the CLI hallucinates or gets confused, how will you guide it back on track? 
+
+*Hint: Use the `adk-agent-builder` skill to guide your CLI through a structured generation process. Tell it: "Here is my architectural spec. Please activate the adk-agent-builder skill and walk me through building this agent layer-by-layer."*
 
 *💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
 ### Phase 4: Verify (Test & Refine Outcome)
-Test the agent in the Agent Studio UI to ensure the architecture holds up.
-* Ask the agent to sync the repo. Does the UI respond instantly with "Job Started" while the terminal shows Git progress?
-* Ask for "Navigation". Does it pause to clarify which module you meant?
-* Ask for a massive diff. Does it successfully summarize it without crashing?
+Test the agent in the Agent Studio UI to ensure the architecture holds up against edge cases.
+* **The Async Test:** Trigger your long-running task. Does the UI freeze, or does it remain responsive while the work happens in the background?
+* **The Ambiguity Test:** Ask the agent a vague question using developer shorthand. Does it guess blindly, or does it stop to clarify what you meant?
+* **The Stress Test:** Ask the agent for an enormous amount of data (like a massive code change). Does it crash, or does it protect its context window?
+
+*Hint: If a test fails, copy the terminal errors or unexpected outputs and start a new Observe -> Think -> Act loop with your AI to refine the solution..  Or, if the agent is not behaving as you thought it might, prompt in the terminal what you're seeing and also what you were expecting instead. 
 
 *💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
 
