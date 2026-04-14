@@ -18,13 +18,33 @@ else
     exit 1
 fi
 
-# Check Gemini CLI
-if command -v gemini &> /dev/null; then
-    GEM_VERSION=$(gemini --version 2>/dev/null || echo "installed")
-    echo "✅ Gemini CLI found: $GEM_VERSION"
+# Check Gemini CLI, allowing an override via $GEMINI_CMD
+GEMINI_CMD=${GEMINI_CMD:-gemini}
+
+if ! command -v "$GEMINI_CMD" &> /dev/null; then
+    # Try to detect if 'gemini' is aliased in common shell config files
+    ALIAS_TARGET=$(grep -Eh "^alias gemini=" ~/.bashrc ~/.bash_profile ~/.zshrc ~/.zprofile 2>/dev/null | tail -n 1 | sed -E "s/^alias gemini=['\"]?([^ '\"=]+).*/\1/")
+    
+    if [ -n "$ALIAS_TARGET" ] && command -v "$ALIAS_TARGET" &> /dev/null; then
+        GEMINI_CMD="$ALIAS_TARGET"
+        echo "⚠️  Detected 'gemini' as an environment alias. Using '$GEMINI_CMD' instead."
+    fi
+fi
+
+if ! command -v "$GEMINI_CMD" &> /dev/null; then
+    # Try common alias 'ai' as a final fallback
+    if command -v ai &> /dev/null; then
+        GEMINI_CMD="ai"
+        echo "⚠️  'gemini' command not found, using 'ai' instead."
+    fi
+fi
+
+if command -v "$GEMINI_CMD" &> /dev/null; then
+    GEM_VERSION=$("$GEMINI_CMD" --version 2>/dev/null || echo "installed")
+    echo "✅ Gemini CLI found ($GEMINI_CMD): $GEM_VERSION"
 else
-    echo "❌ ERROR: gemini CLI is not installed or not in PATH."
-    echo "Please install the Gemini CLI before running this script."
+    echo "❌ ERROR: Gemini CLI ($GEMINI_CMD) is not installed or not in PATH."
+    echo "If you use a different command name, run: GEMINI_CMD=your_alias ./start_hackathon.sh"
     exit 1
 fi
 
@@ -72,7 +92,7 @@ while true; do
     case $install_conductor in
         [Yy]* ) 
             echo "⏳ Installing Conductor extension in non-interactive mode..."
-            yes | gemini extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
+            yes | "$GEMINI_CMD" extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
             break;;
         [Nn]* | "" ) 
             echo "Skipping Conductor installation."
@@ -131,11 +151,11 @@ echo "   ✅ Dependencies installed successfully."
 # 6. Gemini CLI Initialization
 echo ""
 echo "🤖 Step 6: Initializing Gemini CLI and Context..."
-if command -v gemini &> /dev/null; then
-    yes | gemini init || true
-    yes | gemini git init || true
-    yes | gemini context add SYSTEM_INSTRUCTIONS.md || true
-    yes | gemini context add skills/adk-agent-builder/SKILL.md || true
+if command -v "$GEMINI_CMD" &> /dev/null; then
+    yes | "$GEMINI_CMD" init || true
+    yes | "$GEMINI_CMD" git init || true
+    yes | "$GEMINI_CMD" context add SYSTEM_INSTRUCTIONS.md || true
+    yes | "$GEMINI_CMD" context add skills/adk-agent-builder/SKILL.md || true
     echo "   Gemini CLI initialized and Agent Builder skill loaded by default!"
 else
     echo "⚠️  Gemini CLI not found in PATH. Please ensure it is installed."
@@ -146,8 +166,8 @@ echo "======================================================================"
 echo "✅ Environment Ready! Dropping you into the Gemini CLI..."
 echo "======================================================================"
 
-if command -v gemini &> /dev/null; then
-    exec bash --init-file <(echo "source venv/bin/activate; gemini")
+if command -v "$GEMINI_CMD" &> /dev/null; then
+    exec bash --init-file <(echo "source venv/bin/activate; $GEMINI_CMD")
 else
     exec bash --init-file <(echo "source venv/bin/activate")
 fi
