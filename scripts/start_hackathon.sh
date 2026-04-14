@@ -22,8 +22,9 @@ fi
 GEMINI_CMD=${GEMINI_CMD:-gemini}
 
 if ! command -v "$GEMINI_CMD" &> /dev/null; then
-    # Try to detect if 'gemini' is aliased in common shell config files
-    ALIAS_TARGET=$(grep -Eh "^alias gemini=" ~/.bashrc ~/.bash_profile ~/.zshrc ~/.zprofile 2>/dev/null | tail -n 1 | sed -E "s/^alias gemini=['\"]?([^ '\"=]+).*/\1/")
+    # Try to detect if 'gemini' is aliased in the user's interactive shell profile
+    # This runs an interactive bash shim to safely evaluate aliases
+    ALIAS_TARGET=$(bash -ic 'alias gemini' 2>/dev/null | sed -E "s/^alias gemini=['\"]?([^ '\"=]+).*/\1/")
     
     if [ -n "$ALIAS_TARGET" ] && command -v "$ALIAS_TARGET" &> /dev/null; then
         GEMINI_CMD="$ALIAS_TARGET"
