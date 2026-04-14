@@ -24,6 +24,9 @@
 ### 🛑 Stick to the mocked framework for an easier time
 Because this hackathon is designed to run locally on your machines without depending on possibly corporate resources or prohibited external services, **you should build this agent to run entirely in the mock environment.**  You are of course welcome to attempt to plug into policy allowed systems if you're curious.  
 
+### 🛠️ Prerequisite: Git CLI
+Since your agent will be executing real terminal commands against a cloned repository, **you must have `git` installed and accessible in your system PATH.** 
+
 ### ⚠️ This is an intentionally difficult codelab 
 This codelab is meant to be **very difficult** and mirrors a practical, real-world use case for building agentic flows. One of our primary goals is to show that it still takes thought, planning, and work to create good tooling—not everything is just "a prompt away."
 
@@ -88,7 +91,7 @@ Before writing a single prompt, take a step back and look at the reality of the 
 
 *Hint: If you aren't sure what to consider, try asking your AI LLM (like Gemini Web or NotebookLM): "Based on what I'm trying to build (an AI agent that clones a massive repo and reads git diffs), what do you think I should consider? Give me 5-10 technical things to work through."*
 
-*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solution-phase-1-observe).*
+*💡 Stuck? See the [reference solution for Phase 1](#solution-phase-1-observe).*
 
 ### Phase 2: Think (The Specification & Plan)
 Now that you know the constraints, plan the architecture. *This is where you earn your paycheck as an Agent Architect.*
@@ -99,7 +102,7 @@ Now that you know the constraints, plan the architecture. *This is where you ear
 
 *Hint: Take your research from Phase 1 and draft a technical specification. If you need help, ask your AI: "I need to build an architecture spec for an agent that handles long-running tasks and massive data payloads. What state fields, async queues, and tool boundaries should I define?"*
 
-*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solution-phase-2-think).*
+*💡 Stuck? See the [reference solution for Phase 2](#solution-phase-2-think).*
 
 ### Phase 3: Act (Direct the CLI Execution)
 With your plan in place, instruct your AI CLI to build the agent layer-by-layer. Do not write the boilerplate yourself!
@@ -109,7 +112,7 @@ With your plan in place, instruct your AI CLI to build the agent layer-by-layer.
 
 *Hint: Use the `adk-agent-builder` skill to guide your CLI through a structured generation process. Tell it: "Here is my architectural spec. Please activate the adk-agent-builder skill and walk me through building this agent layer-by-layer."*
 
-*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solution-phase-3-act).*
+*💡 Stuck? See the [reference solution for Phase 3](#solution-phase-3-act).*
 
 ### Phase 4: Verify (Test & Refine Outcome)
 Test the agent in the Agent Studio UI to ensure the architecture holds up against edge cases.
@@ -119,7 +122,7 @@ Test the agent in the Agent Studio UI to ensure the architecture holds up agains
 
 *Hint: If a test fails, copy the terminal errors or unexpected outputs and start a new Observe -> Think -> Act loop with your AI to refine the solution..  Or, if the agent is not behaving as you thought it might, prompt in the terminal what you're seeing and also what you were expecting instead. 
 
-*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solution-phase-4-verify).*
+*💡 Stuck? See the [reference solution for Phase 4](#solution-phase-4-verify).*
 
 ---
 
