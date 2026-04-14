@@ -43,12 +43,12 @@ flowchart TD
 
     subgraph AgentLayer [Agent Microservices]
         Sparky[Sparky Agent 🌐]:::public
-        CorpAgent[Internal Hackathon Agents 🔒]:::private
+        CorpAgent[Agents 🔒]:::private
     end
 
     subgraph InfraLayer [Infrastructure Adapters]
         PubAdapters[Public Adapters 🌐\nRedis, Postgres]:::public
-        PrivAdapters[Internal Adapters 🔒\nCorp Kafka, APIs]:::private
+        PrivAdapters[Corporate Adapters 🔒\nCorp Kafka, APIs]:::private
     end
 
     %% Connections
@@ -100,5 +100,5 @@ Depending on what you want to build, choose your role and follow the entry point
 We have prepared a set of Codelabs to get you up to speed quickly during the hackathon:
 * [Codelab 1: Hello Sparky!](learn/codelabs/1_hello_sparky.md) - Environment setup and running your first agent.
 * [Codelab 2: Upgrading Sparky](learn/codelabs/2_upgrading_sparky.md) - Adding tools and modifying agent behavior using the AI CLI.
-* [Codelab 3: AndroidX Intelligence Agent](learn/codelabs/3_androidx_intelligence_agent.md) - Advanced offline challenge to build a real-world DevRel assistant.
-* [Codelab 4: Capstone - Build Your Own Agent](learn/codelabs/4_capstone_build_your_own.md) - Take a rough idea, write a spec, and direct the CLI to build your custom agent.
+* [Codelab 3: AndroidX Intelligence Agent](learn/codelabs/3_developer_api_intelligence_agent.md) - Advanced challenge to build a real-world code repo assistant.
+* [Codelab 4: Capstone - Build Your Own Agent](learn/codelabs/4_capstone_build_your_own.md) - Take a rough idea, create a spec, and direct the CLI to build your custom agent
