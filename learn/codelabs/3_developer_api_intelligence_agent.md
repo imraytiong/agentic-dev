@@ -88,7 +88,7 @@ Before writing a single prompt, take a step back and look at the reality of the 
 
 *Hint: If you aren't sure what to consider, try asking your AI LLM (like Gemini Web or NotebookLM): "Based on what I'm trying to build (an AI agent that clones a massive repo and reads git diffs), what do you think I should consider? Give me 5-10 technical things to work through."*
 
-*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
+*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solution-phase-1-observe).*
 
 ### Phase 2: Think (The Specification & Plan)
 Now that you know the constraints, plan the architecture. *This is where you earn your paycheck as an Agent Architect.*
@@ -99,7 +99,7 @@ Now that you know the constraints, plan the architecture. *This is where you ear
 
 *Hint: Take your research from Phase 1 and draft a technical specification. If you need help, ask your AI: "I need to build an architecture spec for an agent that handles long-running tasks and massive data payloads. What state fields, async queues, and tool boundaries should I define?"*
 
-*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
+*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solution-phase-2-think).*
 
 ### Phase 3: Act (Direct the CLI Execution)
 With your plan in place, instruct your AI CLI to build the agent layer-by-layer. Do not write the boilerplate yourself!
@@ -109,7 +109,7 @@ With your plan in place, instruct your AI CLI to build the agent layer-by-layer.
 
 *Hint: Use the `adk-agent-builder` skill to guide your CLI through a structured generation process. Tell it: "Here is my architectural spec. Please activate the adk-agent-builder skill and walk me through building this agent layer-by-layer."*
 
-*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
+*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solution-phase-3-act).*
 
 ### Phase 4: Verify (Test & Refine Outcome)
 Test the agent in the Agent Studio UI to ensure the architecture holds up against edge cases.
@@ -119,7 +119,7 @@ Test the agent in the Agent Studio UI to ensure the architecture holds up agains
 
 *Hint: If a test fails, copy the terminal errors or unexpected outputs and start a new Observe -> Think -> Act loop with your AI to refine the solution..  Or, if the agent is not behaving as you thought it might, prompt in the terminal what you're seeing and also what you were expecting instead. 
 
-*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solutions-overview).*
+*💡 Stuck? Check out the solution for this phase in the [Solutions Overview](#solution-phase-4-verify).*
 
 ---
 
@@ -146,25 +146,15 @@ Your solution may be different. This reference solution provides one possible ou
 ### Solution: Phase 1 (Observe)
 **Reference Checkpoint Branch:** [`solution-codelab3-phase1`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase1)
 
-**Reference Approach:** Before writing any code, Agent Developers should use tools like Gemini Web, NotebookLM, or their preferred LLM to explore the domain constraints. You can paste the AndroidX repository URL and ask, "What are the common submodules here? How large is the repo?" to gather facts and validate your understanding of the constraints.
-
-**Expected Output:** A brief research document or checklist (e.g., `domain_research.md`) that explicitly lists the system constraints: repo size, context window risks, and shorthand mapping requirements. The most vital technical details would be:
+**Reference Output:** A brief research document or checklist (e.g., `domain_research.md`) that explicitly lists the system constraints: repo size, context window risks, and shorthand mapping requirements. The most vital technical details would be:
 * **Repo Size:** A synchronous `git clone` of 1.3GB will trigger a timeout in any standard HTTP server (like FastAPI). You absolutely must use an asynchronous background queue.
 * **Context Limits:** You cannot run `git diff` on a major framework and pipe the raw stdout to the LLM. It will exceed the token limit. You must engineer a tool that runs `git diff --stat` first to see the size, or chunks the output.
 * **Shorthand:** The LLM cannot magically guess that "Navigation" maps to `navigation/navigation-compose`. It needs a hardcoded dictionary or a semantic search tool to bridge the human-to-system gap.
 
+**Reference Approach:** Before writing any code, Agent Developers should use tools like Gemini Web, NotebookLM, or their preferred LLM to explore the domain constraints. You can paste the AndroidX repository URL and ask, "What are the common submodules here? How large is the repo?" to gather facts and validate your understanding of the constraints.
+
 ### Solution: Phase 2 (Think)
 **Reference Checkpoint Branch:** [`solution-codelab3-phase2`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase2)
-
-**Reference Approach:** Agent Developers should draft an architectural specification document (e.g., `developer_api_spec.md`) mapping out the state requirements, tool boundaries, and error handling. You can use an architecture-focused prompt in Gemini Web to brainstorm the best way to chunk Git diffs before committing to a design.
-
-**Example Spec Generation Prompts:**
-If you aren't sure how to turn your research into an architectural spec, try feeding these prompts into an LLM (like Gemini Web or NotebookLM) to have it draft the document for you:
-* *"I am building an AI agent using the BaseAgentChassis framework. Here are my research notes on the domain constraints: [paste notes]. Draft a formal architectural spec including the Pydantic State definition, required Tools, and the async Queue strategy."*
-* *"Let's refine the State section of the spec. We need to track the repository clone status (not_cloned, cloning, ready) so the UI can show progress without freezing. Update the draft."*
-* *"For the Git diff tool, a raw diff will blow out the LLM context limits. Propose a tool design in the spec that handles this safely (e.g., using `git diff --stat` or chunking) and update the document."*
-
-> 💡 **Iterative Planning:** Keep in mind that building this spec is an iterative process! You will likely go back and forth with the LLM several times—tweaking edge cases and refining the architecture—before you are satisfied that the plan is solid enough to start generating code.
 
 **Expected Output:** A formal architectural specification document (e.g., `developer_api_spec.md`) that defines the required `DeveloperAPIState` properties, the async Queue strategy, and the exact Tool boundaries.
 
@@ -175,19 +165,25 @@ If you aren't sure how to turn your research into an architectural spec, try fee
   * `translate_shorthand`: A simple sync tool that looks up user terms in a predefined dictionary.
   * `execute_git_command`: A sync tool that uses `subprocess.run` but enforces strict limits (e.g., truncating output over 2000 characters or enforcing `--stat` for diffs).
 
+**Reference Approach:** Agent Developers should draft an architectural specification document (e.g., `developer_api_spec.md`) mapping out the state requirements, tool boundaries, and error handling. You can use an architecture-focused prompt in Gemini Web to brainstorm the best way to chunk Git diffs before committing to a design.
+
+**Example Spec Generation Prompts:**
+If you aren't sure how to turn your research into an architectural spec, try feeding these prompts into an LLM (like Gemini Web or NotebookLM) to have it draft the document for you:
+* *"I am building an AI agent using the BaseAgentChassis framework. Here are my research notes on the domain constraints: [paste notes]. Draft a formal architectural spec including the Pydantic State definition, required Tools, and the async Queue strategy."*
+* *"Let's refine the State section of the spec. We need to track the repository clone status (not_cloned, cloning, ready) so the UI can show progress without freezing. Update the draft."*
+* *"For the Git diff tool, a raw diff will blow out the LLM context limits. Propose a tool design in the spec that handles this safely (e.g., using `git diff --stat` or chunking) and update the document."*
+
+> 💡 **Iterative Planning:** Keep in mind that building this spec is an iterative process! You will likely go back and forth with the LLM several times—tweaking edge cases and refining the architecture—before you are satisfied that the plan is solid enough to start generating code.
 ### Solution: Phase 3 (Act)
 **Reference Checkpoint Branch:** [`solution-codelab3-phase3`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase3)
 
-**Reference Approach:** Agent Developers should rely heavily on their AI CLI (Cursor, Windsurf, Gemini CLI) loaded with the `adk-agent-builder` skill. Rather than manually wiring up files, your job is to act as the Technical Director. You will provide the spec document from Phase 2 to the AI CLI, kick off a Conductor track, and let the `adk-agent-builder` skill drive the Specification-Driven Development process. 
-
-The skill will automatically pause at each "layer" of the architecture and ask if you would like to proceed. You should review the code generated at each stop, ask for revisions if needed, and then confirm to move on.
-
 **Expected Output:** The actual functioning Python code generated layer-by-layer by your AI tool, including `agent.py`, `tools.py`, and the `prompts/` directory, properly registered in the system configuration.
 
-**Kickoff Prompt:**
-If you are stuck on how to begin Phase 3, try feeding this exact prompt to your AI CLI. The skill will take it from here:
+**Reference Approach:** Agent Developers should rely heavily on their AI CLI (Cursor, Windsurf, Gemini CLI) loaded with the `adk-agent-builder` skill. Rather than manually wiring up files, your job is to act as the Technical Director. You will provide the spec document from Phase 2 to the AI CLI, kick off a Conductor track, and let the `adk-agent-builder` skill drive the Specification-Driven Development process.  You run a prompt similar to:
 
 *"I have finalized the architecture in `src/agents/developer_api_agent/developer_api_spec.md`. Please activate the `adk-agent-builder` skill and begin a conductor track to build this agent."*
+
+The skill will automatically pause at each "layer" of the architecture and ask if you would like to proceed. You should review the code generated at each stop, ask for revisions if needed, and then confirm to move on.
 
 **The Layer-by-Layer Review Process:**
 When you kick off the prompt above, expect to review the following layers:
@@ -202,15 +198,8 @@ When you kick off the prompt above, expect to review the following layers:
    * *What to do:* Check the routing and queue consumption. Ensure the `@chassis.consume_task` decorator is used for the async clone job.
 5. **Layer 5: Wiring (`config.yaml`)** 
    * *What to do:* Confirm the agent is registered correctly so it appears in the Agent Studio UI.
-
 ### Solution: Phase 4 (Verify)
 **Reference Checkpoint Branch:** [`solution-codelab3-phase4`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase4)
-
-**Reference Approach:** Agent Developers should use the local Agent Studio UI to interact with the agent as a real user would. When errors occur (like context window overflows), developers should copy the terminal stack trace and paste it back into their AI CLI or Gemini Web to ask for a fix. 
-
-> 💡 **The Iterative Loop:** Remember, building agents is rarely a one-shot process! It is highly likely that during verification, you will discover a flaw in your design (e.g., the diff stat is still too large, or the semantic mapper missed an edge case). When this happens, you must kick off successive **Observe → Think → Act → Verify** loops. Go back to your spec, update your plan, have the CLI revise the code, and verify again until you arrive at the robust solution you were hoping for.
-
-> 🎬 **The Director's Mindset:** Keep in mind that your AI CLI might get details wrong, hallucinate, and possibly introduce bugs—just like any human software engineer! As the Director, it is your job to validate the work and explicitly ask the AI builder to go through revisions. What you choose to revise is entirely up to you. You might want to get down into the nitty-gritty details of how the code is organized, or you might only care about the user interaction, or you might focus heavily on how state is managed and how the agent responds. Using successively tighter OTAV loops gets you closer to your "ideal" solution.
 
 **Expected Output:** A robust, working agent validated in the Agent Studio UI that successfully handles long-running clones, clarifies shorthand, and summarizes diffs without crashing.
 
@@ -218,3 +207,9 @@ When you kick off the prompt above, expect to review the following layers:
 1. **The Clone Test:** Type "Sync the repo" in the UI. The UI should instantly reply "Started syncing" (or similar), and your terminal should start showing Git clone progress.
 2. **The Clarification Test:** Type "What changed in Navigation?" The agent should pause, use the `translate_shorthand` tool, and ask you to clarify which specific navigation module you meant.
 3. **The Nuke Test:** Ask "Show me the full diff for the last 10 commits in Compose UI." If your agent crashes or throws a token limit error, your `execute_git_command` tool is not properly constrained! It should reply with a summary or a truncated diff stat instead.
+
+**Reference Approach:** Agent Developers should use the local Agent Studio UI to interact with the agent as a real user would. When errors occur (like context window overflows), developers should copy the terminal stack trace and paste it back into their AI CLI or Gemini Web to ask for a fix. 
+
+> 💡 **The Iterative Loop:** Remember, building agents is rarely a one-shot process! It is highly likely that during verification, you will discover a flaw in your design (e.g., the diff stat is still too large, or the semantic mapper missed an edge case). When this happens, you must kick off successive **Observe → Think → Act → Verify** loops. Go back to your spec, update your plan, have the CLI revise the code, and verify again until you arrive at the robust solution you were hoping for.
+
+> 🎬 **The Director's Mindset:** Keep in mind that your AI CLI might get details wrong, hallucinate, and possibly introduce bugs—just like any human software engineer! As the Director, it is your job to validate the work and explicitly ask the AI builder to go through revisions. What you choose to revise is entirely up to you. You might want to get down into the nitty-gritty details of how the code is organized, or you might only care about the user interaction, or you might focus heavily on how state is managed and how the agent responds. Using successively tighter OTAV loops gets you closer to your "ideal" solution.
