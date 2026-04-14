@@ -34,17 +34,6 @@ Throughout this challenge, we hope to highlight the reality of agent development
 
 Expect to provide strong guidance to your AI CLI. This codelab simulates the very real, sometimes involved workflow of building production agents.
 
-### 💡 Stuck? Use the Checkpoints!
-If you get stuck don't stay blocked for too long. Use the branches below to get you moving forward faster. 
-
-You can check out these branches to see how the "Golden Path" solved the problem, or even merge them into your own work to jumpstart your progress:
-* `git checkout solution-codelab3-phase1` (Phase 1: Domain Research & Constraints)
-* `git checkout solution-codelab3-phase2` (Phase 2: Architectural Spec)
-* `git checkout solution-codelab3-phase3` (Phase 3: Scaffold & Async Queue Tools)
-* `git checkout solution-codelab3-phase4` (Phase 4: Complete Agent with Local Git Executor)
-
-*(Note: The complete, enterprise-grade version of this agent with real Redis/Postgres infrastructure will also be available on the `main` branch under `src/agents/developer_api_agent` as a post-hackathon reference).*
-
 ---
 
 ## 🚀 Let's Get Started
