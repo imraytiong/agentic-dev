@@ -79,24 +79,24 @@ Depending on what you want to build, choose your role and follow the entry point
 
 ### 1. Agent Developers
 *Your focus: Writing business logic, tools, and prompts. You do not need to worry about infrastructure.*
-*   **Concepts:** [[developer_guides/agent_developers/1_agent_concepts.md]]
-*   **Start Building:** [[developer_guides/agent_developers/2_agent_builder_playbook.md]]
-*   **Code Reference:** [[developer_guides/agent_developers/3_code_reference.md]]
-*   **Deep Topics (Homework):** [[developer_guides/agent_developers/4_agent_deep_topics.md]]
+*   [Concepts](developer_guides/agent_developers/1_agent_concepts.md)
+*   [Start Building](developer_guides/agent_developers/2_agent_builder_playbook.md)
+*   [Code Reference](developer_guides/agent_developers/3_code_reference.md)
+*   [Deep Topics (Homework)](developer_guides/agent_developers/4_agent_deep_topics.md)
 
 ### 2. Infrastructure Developers
 *Your focus: Deployments, containers, adapters, and mapping the environment (Docker/K3s).*
-*   **Concepts:** [[developer_guides/infrastructure_developers/1_infrastructure_concepts.md]]
-*   **Start Building:** [[developer_guides/infrastructure_developers/2_infrastructure_playbook.md]]
-*   **Code Reference:** [[developer_guides/infrastructure_developers/3_core_internals_reference.md]]
-*   **Deep Topics (Homework):** [[developer_guides/infrastructure_developers/4_infrastructure_deep_topics.md]]
+*   [Concepts](developer_guides/infrastructure_developers/1_infrastructure_concepts.md)
+*   [Start Building](developer_guides/infrastructure_developers/2_infrastructure_playbook.md)
+*   [Code Reference](developer_guides/infrastructure_developers/3_core_internals_reference.md)
+*   [Deep Topics (Homework)](developer_guides/infrastructure_developers/4_infrastructure_deep_topics.md)
 
 ### 3. Architecture Developers
 *Your focus: Maintaining the sealed Universal Core (`BaseAgentChassis`), system contracts, and boundaries.*
-*   **Concepts:** [[developer_guides/architecture_developers/1_architecture_concepts.md]]
-*   **Start Building:** [[developer_guides/architecture_developers/2_architecture_playbook.md]]
-*   **Code Reference:** [[developer_guides/architecture_developers/3_architecture_reference.md]]
-*   **Deep Topics (Homework):** [[developer_guides/architecture_developers/4_architecture_deep_topics.md]]
+*   [Concepts](developer_guides/architecture_developers/1_architecture_concepts.md)
+*   [Start Building](developer_guides/architecture_developers/2_architecture_playbook.md)
+*   [Code Reference](developer_guides/architecture_developers/3_architecture_reference.md)
+*   [Deep Topics (Homework)](developer_guides/architecture_developers/4_architecture_deep_topics.md)
 
 ### Codelabs
 We have prepared a set of Codelabs to get you up to speed quickly:
