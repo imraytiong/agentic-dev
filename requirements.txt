@@ -2,6 +2,7 @@
 google-adk
 litellm
 python-dotenv
+chromadb
 
 # API & Web UI
 fastapi
