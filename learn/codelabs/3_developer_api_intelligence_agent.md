@@ -159,7 +159,7 @@ Your solution may be different. This reference solution provides one possible ou
 Reference [Gemini Web discussion](https://gemini.google.com/share/866045485d31) and final output: 
 
 ```
-# Agent Specification: Android-Dissect (v1.1)
+# Agent Specification: Android-Dissect Proposal (v1.1)
 
 ## 1.0 System Overview
 * **1.1 System Objective:** Build an interactive AI agent capable of cloning, navigating, and summarizing the AndroidX/Jetpack monolithic repository. The agent must handle long-running I/O tasks asynchronously, translate human-readable framework concepts into exact repository paths, and strictly manage its context window when analyzing massive code diffs.
@@ -209,9 +209,39 @@ Reference [Gemini Web discussion](https://gemini.google.com/share/866045485d31) 
 ```
 
 ### Solution: Phase 2 (Think)
-**Reference Checkpoint Branch:** [`solution-codelab3-phase2`](https://github.com/your-org/hackathon-monorepo/tree/solution-codelab3-phase2)
 
-**Expected Output:** A formal architectural specification document (e.g., `developer_api_spec.md`) that defines the required `DeveloperAPIState` properties, the async Queue strategy, and the exact Tool boundaries.
+**Expected Output:** The CLI should propose a plan similar to:
+
+ I've created and checked out the track/android-dissect-agent branch to ensure we have a
+  clean environment for development.
+
+  Based on the Android-Dissect Proposal and the ADK Agent Builder guidelines, here is the
+  execution plan. We will build this layer by layer:
+
+  Execution Plan: Android-Dissect Agent
+   1. `Layer 1 (Data - models.py):`
+       * `Create AndroidDissectState (tracking active_focus, command_history,`
+         `cached_summaries, pending_interrupt).`
+       * `Create standard Pydantic models for Input/Output payloads.`
+   2. `Layer 2 (Defense - test_tools.py & test_agent.py):`
+       * `Create a pytest suite.`
+       * `Use patch or mock fixtures for run_git_command to ensure we don't execute raw git`
+         `commands against the host during unit tests.`
+   3. `Layer 3 (Capabilities - tools.py):`
+       * `Implement resolve_module_path utilizing the framework's mock vector capabilities.`
+       * `Implement run_git_command using subprocess with directory scoping and the 8,000`
+         `character output truncation guardrail.`
+   4. `Layer 4 (The Brain - agent.py):`
+       * `Implement the agent using @chassis.consume_task.`
+       * `Implement the Triage Loop and the Disambiguation Interrupt (checking state, saving`
+         `pending_interrupt, and returning early if disambiguation is needed).`
+   5. `Layer 5 (Config - config.yaml & prompts/system_prompt.jinja):`
+       * `Set up the dynamic volume/storage configurations.`
+
+  `If you approve this plan, I will immediately begin executing Layer 1 (Data) by creating`
+  `src/agents/android_dissect/models.py.`
+
+  `Do you approve this plan?`
 
 **What your architecture should look like:**
 * **State (`DeveloperAPIState`):** Needs `repo_status` (string) to prevent the agent from cloning multiple times, and `current_module` (string) to remember what the user is asking about.

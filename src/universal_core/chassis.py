@@ -516,7 +516,7 @@ class BaseAgentChassis:
                     response_json = json.dumps(agent_response) if isinstance(agent_response, dict) else str(agent_response)
                     
                 # Synthesize a conversational reply from the JSON payload
-                synthesis_prompt = f"You are a helpful AI Agent. Synthesize this structured agent payload into a friendly, conversational reply for the user. Do not include markdown code blocks unless explaining code.\n\nPayload:\n{response_json}"
+                synthesis_prompt = f"You are a helpful AI Agent. Synthesize this structured agent payload into a direct, friendly reply for the user. IMPORTANT: Provide ONLY the final synthesized message. Do NOT include any conversational filler, meta-commentary, or introductory phrases like 'Here is a friendly reply' or 'Of course!'. Do not include markdown code blocks unless explaining code.\n\nPayload:\n{response_json}"
                 conversational_reply = await self.llm_agent.generate_content(synthesis_prompt)
                 
                 return {"response": conversational_reply}
