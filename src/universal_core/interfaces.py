@@ -27,6 +27,11 @@ class BaseStateStore(ABC):
 
 class BaseVectorStore(ABC):
     @abstractmethod
+    async def add_documents(self, documents: list[str], metadatas: list[dict], ids: list[str]) -> None:
+        """Add documents with metadata to the vector database."""
+        pass
+
+    @abstractmethod
     async def semantic_search(self, query: str, limit: int = 5) -> List[BaseModel]:
         """Perform semantic search against the vector database."""
         pass

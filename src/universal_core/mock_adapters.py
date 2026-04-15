@@ -1,7 +1,13 @@
 import os
 import asyncio
+import chromadb
 from typing import Dict, Any, Type, List
 from pydantic import BaseModel
+
+class DocumentResult(BaseModel):
+    id: str
+    document: str
+    metadata: dict
 
 from src.universal_core.interfaces import (
     BaseStateStore,
@@ -54,10 +60,34 @@ MockMessageBroker = MockMessageQueue
 
 class MockVectorStore(BaseVectorStore):
     def __init__(self, config=None):
+        import uuid
         self.config = config
+        self.client = chromadb.EphemeralClient()
+        self.collection = self.client.get_or_create_collection(f"mock_collection_{uuid.uuid4().hex}")
+
+    async def add_documents(self, documents: list[str], metadatas: list[dict], ids: list[str]) -> None:
+        self.collection.add(
+            documents=documents,
+            metadatas=metadatas,
+            ids=ids
+        )
 
     async def semantic_search(self, query: str, limit: int = 5) -> List[BaseModel]:
-        return []
+        results = self.collection.query(
+            query_texts=[query],
+            n_results=limit
+        )
+        
+        matches = []
+        if results and results["documents"] and results["documents"][0]:
+            docs = results["documents"][0]
+            metas = results["metadatas"][0] if results.get("metadatas") else [{}] * len(docs)
+            ids = results["ids"][0]
+            
+            for doc, meta, doc_id in zip(docs, metas, ids):
+                matches.append(DocumentResult(id=doc_id, document=doc, metadata=meta or {}))
+                
+        return matches
 
 class MockFileStorage(BaseFileStorage):
     def __init__(self, config=None):
