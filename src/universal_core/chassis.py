@@ -29,8 +29,10 @@ except ImportError:
     # Fallback for LlmAgent using litellm directly
     try:
         from litellm import acompletion
+        import litellm
     except ImportError:
         acompletion = None
+        litellm = None
 
     class LlmAgent:
         def __init__(self, **kwargs):
@@ -47,16 +49,28 @@ except ImportError:
                 logger.warning("litellm is not installed. Returning empty JSON stub.")
                 return "{}"
             
-            try:
-                response = await acompletion(
-                    model=self.model,
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=self.temperature
-                )
-                return response.choices[0].message.content
-            except Exception as e:
-                logger.error(f"LLM Generation Error: {str(e)}")
-                raise e
+            max_retries = 3
+            base_delay = 2
+            
+            for attempt in range(max_retries):
+                try:
+                    response = await acompletion(
+                        model=self.model,
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=self.temperature
+                    )
+                    return response.choices[0].message.content
+                except litellm.ServiceUnavailableError as e:
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)
+                        logger.warning(f"LLM Service Unavailable. Retrying in {delay}s... (Attempt {attempt + 1}/{max_retries})")
+                        await asyncio.sleep(delay)
+                    else:
+                        logger.error(f"LLM Generation Error: Service Unavailable after {max_retries} attempts.")
+                        raise e
+                except Exception as e:
+                    logger.error(f"LLM Generation Error: {str(e)}")
+                    raise e
                 
         async def ping(self):
             """Fast-fail probe test."""
