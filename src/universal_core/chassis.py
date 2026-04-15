@@ -499,7 +499,7 @@ class BaseAgentChassis:
                 context = AgentContext(user_id=user_id, session_id=session_id, tenant_id=tenant_id)
                 
                 # Dynamically translate the raw chat message into the required structured payload
-                prompt = f"Extract the user's intent from the following chat message into the required JSON payload schema."
+                prompt = f"Extract the user's intent from the following chat message into the required JSON payload schema. If any required fields are missing from the user's message, infer them or provide reasonable placeholder defaults (e.g., 'Unknown', 'N/A', or a generic name)."
                 prompt += f"\nUser Message: {message}"
                 if file_id:
                     prompt += f"\n[Attached File ID: {file_id}]"
