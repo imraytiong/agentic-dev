@@ -1,8 +1,11 @@
 import os
 import asyncio
+import logging
 import chromadb
 from typing import Dict, Any, Type, List
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 class DocumentResult(BaseModel):
     id: str
@@ -64,15 +67,28 @@ class MockVectorStore(BaseVectorStore):
         self.config = config
         self.client = chromadb.EphemeralClient()
         self.collection = self.client.get_or_create_collection(f"mock_collection_{uuid.uuid4().hex}")
+        logger.info("MockVectorStore: Initialized ephemeral ChromaDB client.")
 
     async def add_documents(self, documents: list[str], metadatas: list[dict], ids: list[str]) -> None:
+        logger.info(f"MockVectorStore: Indexing {len(documents)} documents into in-memory ChromaDB...")
+        
+        # Log a few details for observability (useful for Codelab 3)
+        for i, (doc, meta, doc_id) in enumerate(zip(documents, metadatas, ids)):
+            if i < 3: # Just log the first few so we don't spam the terminal for massive repos
+                logger.info(f"MockVectorStore: Indexing document [{doc_id}] | Metadata: {meta}")
+            elif i == 3:
+                logger.info(f"MockVectorStore: ... and {len(documents) - 3} more documents.")
+                
         self.collection.add(
             documents=documents,
             metadatas=metadatas,
             ids=ids
         )
+        logger.info(f"MockVectorStore: Successfully completed indexing {len(documents)} documents.")
 
     async def semantic_search(self, query: str, limit: int = 5) -> List[BaseModel]:
+        logger.info(f"MockVectorStore: Executing semantic search for: '{query}' (limit={limit})")
+        
         results = self.collection.query(
             query_texts=[query],
             n_results=limit
@@ -87,6 +103,7 @@ class MockVectorStore(BaseVectorStore):
             for doc, meta, doc_id in zip(docs, metas, ids):
                 matches.append(DocumentResult(id=doc_id, document=doc, metadata=meta or {}))
                 
+        logger.info(f"MockVectorStore: Found {len(matches)} matches for semantic search.")
         return matches
 
 class MockFileStorage(BaseFileStorage):

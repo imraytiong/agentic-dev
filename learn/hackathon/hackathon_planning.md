@@ -107,3 +107,6 @@ This file enforces that the AI:
 
 * **Idea 1:** Provide a "Pre-flight Check" script that participants can run to verify their `.env` and Gemini CLI are configured correctly before they write their first prompt.
 * **Idea 2:** ...
+### Improvements for Codelab 3 (Post-Dry Run Notes)
+- **Enhanced Observability:** We need to emphasize verbose logging heavily. The agent developer should add extensive `print()` or `logging` statements throughout their asynchronous tool execution (e.g., when cloning, parsing, or running vector searches) so the background queue progress is highly visible in the terminal.
+- **UI Feedback:** Consider adding a mechanism or guideline for passing intermediate status updates back to the UI (e.g., updating a "status" field in the state payload) so the user isn't left guessing while long-running tasks process.
