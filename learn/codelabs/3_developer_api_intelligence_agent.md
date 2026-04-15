@@ -5,9 +5,10 @@
 **What You Will Build:** An AI agent that connects to a local clone of a codebase. When a user asks "What changed in Compose UI lately?", the agent will:
 1. **Dynamically Clone** the repository to your local machine (using state management to check if it already exists).
 2. **Handle** the request asynchronously via a background queue so the UI doesn't freeze during the long download.
-3. **Translate** human shorthand ("Compose UI") into the exact repository path. Ask the user if the found path was what the user meant.  
-4. **Execute** real `git log` and `git diff` commands against the local code to analyze recent changes without blowing out the LLM context window.
-5. **Synthesize** the raw code diffs into a clear, human-readable summary.
+3. **Index** the downloaded repository by storing module paths and descriptions into a vector database.
+4. **Translate** human shorthand ("Compose UI") into the exact repository path using semantic search against the indexed vector database. Ask the user if the found path was what the user meant.  
+5. **Execute** real `git log` and `git diff` commands against the local code to analyze recent changes without blowing out the LLM context window.
+6. **Synthesize** the raw code diffs into a clear, human-readable summary.
 
 **Status:** Advanced / Offline Challenge
 **Format:** Individual Challenge with Open Collaboration
@@ -16,7 +17,7 @@
 * How to handle long-running tasks (like cloning a repo) asynchronously using messaging queues so the UI doesn't freeze.
 * How to implement **State Management** to track if long-running tasks have already been completed (and so it won't have to do it again)
 * How to use **Logging and Tracing** so users can see terminal output while waiting for async jobs.
-* How to build "Semantic Mapping" tools that translate human shorthand (e.g., "Compose UI") into exact system paths.
+* How to build "Semantic Mapping" tools that translate human shorthand (e.g., "Compose UI") into exact system paths using vector databases populated during runtime.
 * How to write tools that execute real terminal commands (like `git log` and `git diff`) and manage the resulting massive data payloads to prevent blowing out the LLM's context window.
 
 ## Before you start
@@ -45,7 +46,8 @@ You are about to build the **Developer API Intelligence Agent**. This agent will
 
 **Key Features of this Agent:**
 * **Asynchronous Repo Management:** Safely clones and updates massive codebases (like AndroidX) in the background without freezing your UI.
-* **Semantic Translation:** Understands that when you say "Compose UI", you actually mean the `androidx.compose.ui:ui` artifact and the `compose/ui/ui` directory.
+* **Dynamic Indexing:** Parses the repository after cloning and populates a vector store with module names and paths.
+* **Semantic Translation:** Understands that when you say "Compose UI", you actually mean the `androidx.compose.ui:ui` artifact and the `compose/ui/ui` directory by querying a vector store.
 * **Context-Aware Git Execution:** Runs real `git log` and `git diff` commands, intelligently chunking or summarizing the output so it doesn't overwhelm the LLM's context window.
 
 ### Example Interactions
@@ -58,7 +60,7 @@ By the end of this codelab, your Agent Studio UI should be able to handle comple
 
 *(2 minutes later)*
 
-- **Agent:** Repository synced! I searched the repo for the Compose UI, specifically did you mean `compose/ui/ui`? If so the biggest recent change is a fix to the `Modifier.Node` lifecycle, specifically addressing a memory leak when detaching nodes. Here is a quick summary of the diffs...
+- **Agent:** Repository synced and indexed! I searched the repo for the Compose UI, specifically did you mean `compose/ui/ui`? If so the biggest recent change is a fix to the `Modifier.Node` lifecycle, specifically addressing a memory leak when detaching nodes. Here is a quick summary of the diffs...
 
 **Example 2: Semantic Translation & Ambiguity**
 
@@ -86,7 +88,7 @@ Rather than treating this as a standard coding tutorial, we want you to practice
 ### Phase 1: Observe (The Domain & Constraints)
 Before writing a single prompt, take a step back and look at the reality of the systems you are integrating with. Consider the physical and technical constraints of the environment.
 * **The Long-Running Task:** How large is the repository you are downloading? How long will a standard clone operation take, and what happens to a synchronous web request if it waits that long?
-* **The Translation Gap:** How do humans talk about the code vs. how the file system organizes it? How will your agent know the difference?
+* **The Translation Gap:** How do humans talk about the code vs. how the file system organizes it? How can the agent dynamically build a map of this codebase so it knows the difference?
 * **The Context Window:** What happens when an agent tries to read a massive code change? How much text can your LLM actually process before it crashes or hallucinates?
 
 *Hint: If you aren't sure what to consider, try asking your AI LLM (like Gemini Web or NotebookLM): "Based on what I'm trying to build (an AI agent that clones a massive repo and reads git diffs), what do you think I should consider? Give me 5-10 technical things to work through."*
@@ -98,7 +100,7 @@ Now that you know the constraints, plan the architecture. *This is where you ear
 
 * **State Management:** What data does the agent need to remember between interactions? How will it know if a long-running task is already finished or still in progress?
 * **Async Queues:** How will you design the agent to handle tasks that take minutes to complete without freezing the user interface? How will you keep the user informed of the progress?
-* **Tool Boundaries:** What specific tools does the agent need to bridge the translation gap? How will you design a tool to execute local commands safely without overwhelming the agent with too much data?
+* **Tool Boundaries:** What specific tools does the agent need to bridge the translation gap? How will you design the sync tool to not only download the code, but also parse the directory structure and populate the vector store? How will the semantic search tool query it?
 
 *Hint: Take your research from Phase 1 and draft a technical specification. If you need help, ask your AI: "I need to build an architecture spec for an agent that handles long-running tasks and massive data payloads. What state fields, async queues, and tool boundaries should I define?"*
 
@@ -152,7 +154,7 @@ Your solution may be different. This reference solution provides one possible ou
 **Reference Output:** A brief research document or checklist (e.g., `domain_research.md`) that explicitly lists the system constraints: repo size, context window risks, and shorthand mapping requirements. The most vital technical details would be:
 * **Repo Size:** A synchronous `git clone` of 1.3GB will trigger a timeout in any standard HTTP server (like FastAPI). You absolutely must use an asynchronous background queue.
 * **Context Limits:** You cannot run `git diff` on a major framework and pipe the raw stdout to the LLM. It will exceed the token limit. You must engineer a tool that runs `git diff --stat` first to see the size, or chunks the output.
-* **Shorthand:** The LLM cannot magically guess that "Navigation" maps to `navigation/navigation-compose`. It needs a hardcoded dictionary or a semantic search tool to bridge the human-to-system gap.
+* **Shorthand:** The LLM cannot magically guess that "Navigation" maps to `navigation/navigation-compose`. It needs a semantic search tool to bridge the human-to-system gap, which means the repository must be indexed into a vector store after cloning.
 
 **Reference Approach:** Before writing any code, Agent Developers should use tools like Gemini Web, NotebookLM, or their preferred LLM to explore the domain constraints. You can paste the AndroidX repository URL and ask, "What are the common submodules here? How large is the repo?" to gather facts and validate your understanding of the constraints.
 
@@ -164,8 +166,8 @@ Your solution may be different. This reference solution provides one possible ou
 **What your architecture should look like:**
 * **State (`DeveloperAPIState`):** Needs `repo_status` (string) to prevent the agent from cloning multiple times, and `current_module` (string) to remember what the user is asking about.
 * **Tools:**
-  * `sync_repository`: An async tool that runs the clone and updates the state.
-  * `translate_shorthand`: A simple sync tool that looks up user terms in a predefined dictionary.
+  * `sync_repository`: An async tool that runs the clone, parses the directory structure to find key modules, populates `chassis.vector_store.add_documents()`, and updates the state.
+  * `translate_shorthand`: A sync tool that uses the framework's `chassis.vector_store.semantic_search()` to look up user terms and map them to physical repository paths.
   * `execute_git_command`: A sync tool that uses `subprocess.run` but enforces strict limits (e.g., truncating output over 2000 characters or enforcing `--stat` for diffs).
 
 **Reference Approach:** Agent Developers should draft an architectural specification document (e.g., `developer_api_spec.md`) mapping out the state requirements, tool boundaries, and error handling. You can use an architecture-focused prompt in Gemini Web to brainstorm the best way to chunk Git diffs before committing to a design.
@@ -196,7 +198,7 @@ When you kick off the prompt above, expect to review the following layers:
 2. **Layer 2: Prompts (`prompts/`)** 
    * *What to do:* Read the generated system instructions. Ensure the tone is correct and that it explicitly tells the LLM to use the async tool for cloning.
 3. **Layer 3: Tools (`tools.py`)** 
-   * *What to do:* This is the most critical review. Check the `subprocess` logic for the Git commands. Are they handling context limits (e.g., using `--stat` or truncating)? Are they using async `asyncio.sleep` or background tasks correctly? Ask for revisions if the Git tool looks like it will blow out the context window.
+   * *What to do:* This is the most critical review. Check the `subprocess` logic for the Git commands. Are they handling context limits? Check the `sync_repository` tool - is it properly calling `chassis.vector_store.add_documents()` to index the repo? Check the `translate_shorthand` tool - is it calling `chassis.vector_store.semantic_search()`?
 4. **Layer 4: Agent Logic (`agent.py`)** 
    * *What to do:* Check the routing and queue consumption. Ensure the `@chassis.consume_task` decorator is used for the async clone job.
 5. **Layer 5: Wiring (`config.yaml`)** 
