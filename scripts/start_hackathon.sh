@@ -13,9 +13,10 @@ if command -v python3 &> /dev/null; then
     PY_VERSION=$(python3 --version)
     echo "✅ Python 3 found: $PY_VERSION"
     
-    # Check if python3-venv is available
-    if ! python3 -c "import venv" &> /dev/null; then
-        echo "⚠️  The 'venv' module is missing. Attempting to install python3-venv..."
+    # Check if python3-venv is available (Ubuntu/Debian often have the module but not the package)
+    if ! python3 -c "import venv" &> /dev/null || ! python3 -m venv .test_venv &> /dev/null; then
+        rm -rf .test_venv
+        echo "⚠️  The 'venv' package is missing or incomplete. Attempting to install python3-venv..."
         if command -v apt-get &> /dev/null; then
             echo "   Running: sudo apt-get update && sudo apt-get install -y python3-venv"
             sudo apt-get update && sudo apt-get install -y python3-venv || {
@@ -29,7 +30,8 @@ if command -v python3 &> /dev/null; then
             exit 1
         fi
     else
-        echo "✅ Python 'venv' module is available."
+        rm -rf .test_venv
+        echo "✅ Python 'venv' module is fully functional."
     fi
 else
     echo "❌ ERROR: python3 is not installed or not in PATH."
@@ -155,14 +157,22 @@ REPO_DIR="agentic-dev"
 echo ""
 echo "📂 Step 3: Fetching Repository..."
 
-# Check if we are already inside the repo
-if git rev-parse --is-inside-work-tree &> /dev/null && [ "$(basename "$(pwd)")" = "$REPO_DIR" ]; then
-    echo "   Already inside the $REPO_DIR repository. Pulling latest changes..."
-    git pull origin main
+# Check if we are already inside the repo safely
+if git rev-parse --is-inside-work-tree &> /dev/null; then
+    REPO_ROOT=$(git rev-parse --show-toplevel)
+    if [ "$(basename "$REPO_ROOT")" = "$REPO_DIR" ] || [ -f "$REPO_ROOT/scripts/start_hackathon.sh" ]; then
+        echo "   Already inside the repository. Pulling latest changes..."
+        cd "$REPO_ROOT"
+        git pull origin main || true
+    else
+        echo "   Cloning repository..."
+        git clone "$REPO_URL" "$REPO_DIR"
+        cd "$REPO_DIR"
+    fi
 elif [ -d "$REPO_DIR" ]; then
     echo "   Directory $REPO_DIR already exists. Pulling latest changes..."
     cd "$REPO_DIR"
-    git pull origin main
+    git pull origin main || true
 else
     echo "   Cloning repository..."
     git clone "$REPO_URL" "$REPO_DIR"
@@ -199,8 +209,13 @@ if [ -d "venv" ] && [ ! -f "venv/bin/activate" ] && [ ! -f "venv/Scripts/activat
 fi
 
 if [ ! -d "venv" ]; then
-    python3 -m venv venv
-    echo "   Created new virtual environment."
+    echo "   Creating new virtual environment..."
+    if ! python3 -m venv venv; then
+        echo "❌ Failed to create virtual environment."
+        echo "   (On Debian/Ubuntu, you may need to run: sudo apt-get install python3-venv)"
+        rm -rf venv
+        exit 1
+    fi
 else
     echo "   Virtual environment already exists."
 fi
@@ -212,7 +227,7 @@ elif [ -f "venv/Scripts/activate" ]; then
     ACTIVATE_CMD="source venv/Scripts/activate"
 else
     echo "❌ Could not find virtual environment activation script in $(pwd)/venv"
-    echo "   Directory contents of venv:"
+    echo "   Directory contents of $(pwd)/venv:"
     ls -la venv || true
     exit 1
 fi
@@ -221,7 +236,10 @@ eval "$ACTIVATE_CMD"
 echo "   Installing dependencies (this is safe to re-run)..."
 echo "   (You will see download progress bars below)"
 if [ -f "requirements.txt" ]; then
-    pip install -r requirements.txt
+    pip install -r requirements.txt || {
+        echo "❌ Failed to install dependencies."
+        exit 1
+    }
     echo "   ✅ Dependencies installed successfully."
 else
     echo "   ⚠️ requirements.txt not found. Skipping pip install."
