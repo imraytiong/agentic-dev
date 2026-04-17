@@ -12,6 +12,25 @@ echo "🔍 Step 0: Checking Prerequisites..."
 if command -v python3 &> /dev/null; then
     PY_VERSION=$(python3 --version)
     echo "✅ Python 3 found: $PY_VERSION"
+    
+    # Check if python3-venv is available
+    if ! python3 -c "import venv" &> /dev/null; then
+        echo "⚠️  The 'venv' module is missing. Attempting to install python3-venv..."
+        if command -v apt-get &> /dev/null; then
+            echo "   Running: sudo apt-get update && sudo apt-get install -y python3-venv"
+            sudo apt-get update && sudo apt-get install -y python3-venv || {
+                echo "❌ Failed to install python3-venv. Please install it manually."
+                exit 1
+            }
+            echo "✅ python3-venv installed successfully."
+        else
+            echo "❌ Could not automatically install python3-venv (apt-get not found)."
+            echo "Please install the python3-venv package using your system's package manager before continuing."
+            exit 1
+        fi
+    else
+        echo "✅ Python 'venv' module is available."
+    fi
 else
     echo "❌ ERROR: python3 is not installed or not in PATH."
     echo "Please install Python 3 before running this script."
@@ -95,7 +114,7 @@ if command -v "$GEMINI_CMD" &> /dev/null; then
         echo "✅ Conductor extension is already installed."
     else
         echo "⏳ Installing Conductor extension..."
-        yes | "$GEMINI_CMD" extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
+        "$GEMINI_CMD" extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
     fi
 else
     echo "⚠️  Skipping extension install because '$GEMINI_CMD' is not correctly resolving."
