@@ -28,6 +28,7 @@
     - [x] Subtask: Proactive notification system and query queuing
     - [x] Subtask: Resilient Triage Loop with self-correction logic
     - [x] Subtask: Version history retrieval using `git tag`
+    - [x] Subtask: API change analysis between versions using `git diff` on `current.txt`
 - [ ] Task: Conductor - User Manual Verification 'Layer 4: The Brain'
 
 ## Layer 5: Configuration & Prompts

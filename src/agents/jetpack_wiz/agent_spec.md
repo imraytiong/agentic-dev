@@ -6,7 +6,7 @@
 *   **Queue Name:** `@chassis.consume_task(queue_name="jetpack_wiz_jobs")`
 *   **Model:** Omit from code; allow `BaseAgentChassis` to use the `fleet.yaml` default.
 *   **Testing:** Write an extensive `pytest` suite in `tests/test_agents/test_jetpack_wiz/`.
-*   **Capabilities:** Module Discovery, Git Analysis, API Surface Review, Version History.
+*   **Capabilities:** Module Discovery, Git Analysis, API Surface Review, Version History, API Change Analysis.
 
 ## 2. Models (`models.py`)
 *   **Payload Model (`JetpackWizRequest`):**
@@ -49,11 +49,11 @@
 *   **Execution Flow:**
     1.  **Background Init:** If the repo isn't ready, trigger `ensure_repo_and_index` in the background. Queue incoming queries. Report `du -sh` and elapsed time.
     2.  **Proactive Analysis:** Once indexing finishes, process every query in the `pending_queries` queue sequentially and store results in `pending_notifications`.
-    3.  **Conversational Catch:** Intercept status pings or help requests when the repo is ready but no module is selected.
-    4.  **Resilient Triage Loop:** Uses `execute_task` to get LLM decisions. If a git command fails, the agent inspects the error and is allowed one self-correction retry via `run_git` before summarizing for the user.
-    5.  **Version Analysis:** If the user asks for versions, the agent finds the artifact prefix in `build.gradle` and uses `git tag` to list the top 5 releases.
+    3.  **Conversational Catch:** Intercept status pings or help requests when the repo is ready but no module is selected. Returns `CAPABILITIES_MSG`.
+    4.  **Resilient Triage Loop:** Uses a multi-step triage loop (up to 3 steps) to chain tool calls. If a tool fails, the agent can retry or adjust.
+    5.  **API Change Analysis:** If asked to compare versions, the agent finds the latest two tags and runs `git diff tag1..tag2 -- path/to/api/current.txt`.
 
-## 5. Configuration (`config.yaml` & `prompts/system.jinja`)
+## 5. Configuration (`config.yaml` & `prompts/system_prompt.jinja`)
 *   **Config:** Store `repo_path` dynamically.
 *   **System Prompt:** 
     *   Strict Rule: No raw diffs without `--stat`.
@@ -61,3 +61,4 @@
     *   Strict Rule: Never provide meta-commentary/apologies for tool failures.
     *   Capability Suggestion: Remind the user about the ability to analyze API surfaces via `current.txt`.
     *   API Summary: ALWAYS format public API summaries as a clean, bulleted list of classes/functions.
+    *   API Changes: Summarize API diffs into a human-readable explanation followed by a clean list of changes.

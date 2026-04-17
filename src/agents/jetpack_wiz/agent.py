@@ -30,7 +30,8 @@ Here is what I can do:
 2. **Git Analysis**: I can look up commit history, file changes, and specific diffs for any module.
 3. **API Surface Review**: I can read `current.txt` files to explain the public API surface and signatures of a library.
 4. **Version History**: I can list the latest 5 released versions of a module using git tags.
-5. **Context Management**: I handle the heavy lifting of cloning and indexing the repo so you don't have to!
+5. **API Change Analysis**: I can compare the `current.txt` API files between two versions to tell you exactly what public signatures changed.
+6. **Context Management**: I handle the heavy lifting of cloning and indexing the repo so you don't have to!
 
 Which module would you like to start with?"""
 
@@ -168,7 +169,7 @@ def register_jetpack_wiz_agent(chassis: BaseAgentChassis):
         ping_phrases = ["is it done", "status", "check", "hello", "ping", "how is it going", "how's it going", "what's up", "hi", "what can you do", "help"]
         is_ping = any(phrase in payload.query.lower() for phrase in ping_phrases)
         if is_ping and not state.active_focus.module_path:
-            return JetpackWizResponse(message=f"The repository is fully downloaded and I'm ready to go!\n\n{CAPABILITIES_MSG}", is_interrupt=False)
+            return JetpackWizResponse(message=f"Hello! The repository is fully downloaded and I'm ready to go!\n\n{CAPABILITIES_MSG}", is_interrupt=False)
 
         if state.pending_interrupt:
             reply_text = payload.user_reply or payload.query
@@ -269,10 +270,14 @@ You must use the `summarize` action to output the final numbered list.
            a. Use `read_file` on `{state.active_focus.module_path}/build.gradle` (or .kts) to find the artifact prefix (e.g. `androidx.room_room-runtime-`).
            b. Use `run_git` with `tag -l "prefix*" --sort=-v:refname` to list the actual tags.
            c. ONLY THEN summarize the top 5 results. If you don't run `git tag`, you are hallucinating.
-        5. Focus: Answer the NEW User Query below. Do not get stuck retrying old failed commands.
-        6. Git Syntax: ALWAYS use `--` to separate paths (e.g. `["log", "--", "path"]`).
-        7. Failures: Do not apologize for tool failures. Fix and retry or summarize what you found.
-        8. ACTION ENUM: Your "action" MUST be EXACTLY one of: "run_git", "read_file", or "summarize". 
+        5. API Change Analysis: If the user asks "what has changed since the last version" or to "compare versions", you MUST NOT use `git diff` with git tags. AndroidX stores API versions as text files. Follow this sequence:
+           a. Use `run_git` with `ls-files` on the module's `api/` directory to see all the versioned `.txt` files (e.g. `1.10.0-beta01.txt`).
+           b. Use `read_file` on the two specific version files you want to compare.
+           c. Summarize the differences into a human-readable explanation followed by a clean, orderly list of added, removed, or changed signatures.
+        6. Focus: Answer the NEW User Query below. Do not get stuck retrying old failed commands.
+        7. Git Syntax: ALWAYS use `--` to separate paths (e.g. `["log", "--", "path"]`).
+        8. Failures: Do not apologize for tool failures. Fix and retry or summarize what you found.
+        9. ACTION ENUM: Your "action" MUST be EXACTLY one of: "run_git", "read_file", or "summarize". 
 
         Command History: {json.dumps(state.command_history, indent=2)}
         NEW User Query: {payload.query}
@@ -309,7 +314,18 @@ You must use the `summarize` action to output the final numbered list.
                 else:
                     break
             
-            final_summary_prompt = f"{system_prompt_base}\n\nHistory:\n{conversation_history}\n\nPlease provide a final response to the user's query: '{payload.query}' based on the facts found."
+            # If we exhaust triage steps, force a summary
+            final_summary_prompt = f"""You are the JetpackWiz Agent.
+            Your analysis steps are complete. Please provide a final response to the user's query: '{payload.query}' based on the facts found.
+
+            History of your actions and findings:
+            {conversation_history}
+
+            You MUST output pure JSON matching this exact schema:
+            {{
+            "summary": "Your final detailed answer to the user"
+            }}
+            """
             class FinalSummary(BaseModel): summary: str
             final_obj = await chassis.ask_structured(final_summary_prompt, FinalSummary)
             if chassis.state_store: await chassis.state_store.save_state(state_key, state)
