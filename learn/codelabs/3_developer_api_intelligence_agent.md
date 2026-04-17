@@ -6,7 +6,7 @@
 1. **Dynamically Clone** the repository to your local machine (using state management to check if it already exists).
 2. **Handle** the request asynchronously via a background queue so the UI doesn't freeze during the long download.
 3. **Index** the downloaded repository by storing module paths and descriptions into a vector database.
-4. **Translate** human shorthand ("Compose UI") into the exact repository path using semantic search against the indexed vector database. Ask the user if the found path was what the user meant.  
+4. **Translate** human shorthand ("Compose UI") into the exact modules using semantic search against the indexed vector database. Ask the user if the found path was what the user meant.  
 5. **Execute** real `git log` and `git diff` commands against the local code to analyze recent changes without blowing out the LLM context window.
 6. **Synthesize** the raw code diffs into a clear, human-readable summary.
 
@@ -74,6 +74,22 @@ By the end of this codelab, your Agent Studio UI should be able to handle comple
 - **You:** Show me the diff for the latest major refactor in Room.
 - **Agent:** The latest commit in `room/room-compiler` is massive (over 4,000 lines changed). Instead of showing you the raw diff, I ran a diff stat. It looks like they completely rewrote the `QueryProcessor.kt` and added 15 new test files. Would you like me to summarize just the changes in `QueryProcessor.kt`?
 
+### Useful Hints Before You Start
+
+**AndroidX is big**: so you may want to have the tooling be intelligent enough to sparsely download only what you need at the beginning.  Cloning the repo will likely take a significant amount of time and can possibly be inherently flaky.  You'll want to ensure that the agent generating  robust enough code to handle partial failures or network interruptions gracefully during the process. 
+- **asynchronous** logic is going to be necessary to prevent UI freezing
+- **retries** and backoff lostic is also something worth investing in 
+- **statefulness** operations against the repo (such as downloading and indexing) are costly.  Consider leveraging 'memory' to ensure you don't repeat unnecessary logic
+ 
+**AndroidX stores relevant API information** in the following ways:
+
+- **README.md** at the root of each submodule directory has human constructed write-up about the module.  That said it's not always accurate, sometimes outdated, and subject to the whim of the author
+- **api/current.txt**: lists the public API surface area and method signatures for a given module.
+- **gradle build files are rich content** for indexing and analytics.  Gradle details like the module name and description may be use ful 'indexing content' 
+
+**Vector Databases allow for semantic searches:** AI agents typically rely on using a 'vector database' which allows for 'meaning rich' searches.  The details of such is beyond this codelab but as a 'Technical Director' all you need to know is that you can give the vector database useful files that allows the agent to perform weighted searches on 'likeness of content' without depending on exact matches or custom fuzzy matching.  The mock infrastructure leverages ChromaDB. 
+
+
 ---
 
 ## 🧠 The Agent Builder Workflow: Observe, Think, Act, Verify
@@ -112,7 +128,17 @@ With your plan in place, instruct your AI CLI to build the agent layer-by-layer.
 * **The Layered Review:** As the AI generates the state, prompts, tools, and logic, review its work. Does the generated code actually address the constraints you planned for?
 * **The Course Correction:** If the CLI hallucinates or gets confused, how will you guide it back on track? 
 
-*Hint: Use the `adk-agent-builder` skill to guide your CLI through a structured generation process. Tell it: "Here is my architectural spec. Please activate the adk-agent-builder skill and walk me through building this agent layer-by-layer."*
+*Hints:* 
+- **Use the `adk-agent-builder`** skill to guide your CLI through a structured generation process. Tell it: "Here is my architectural spec. Please activate the adk-agent-builder skill and walk me through building this agent layer-by-layer."
+- **The process is NOT rigid.** Consider the agent a 'junior engineer with lots of smarts but possibly not great decision or architectural making'.  When it's working through each phase you can ask for explanations of it logic, challenge it's decisions, and ask it to revise decisions.
+- **Progressively ask it to update the specification and plan as needed:** any time you see that it's done something incorrect you find that the implementation is drifting from your initial architectural requirements. It will make adjustments to the plan and continue generating code based on your refined requirements.
+	- "how does the github download work? "
+	- "what are we indexing? why? Should we index the gradle builds, readme.md, and api/current.txt to make it a more rich search experience?"
+- **DO NOT allow the agent to write code without producing a plan:**  as the agent progresses it has skills guardrails, however sometimes it can get too eager to make code changes. You can ask it to revert and instead make a plan, create coverage tests, and then do the code.
+	- "you made code changes without explaining the plan, revert, and create a plan. you also forgot to use test coverage"
+- **Ask the agent to perform expensive MANUAL tests:**  mocked unit tests catches many regressions but it doesn't by nature test actual interactions with real external systems where many of the more difficult bugs can occur. Ask it to run a manual tests especially during the tool construction where possible complex deterministic logic needs to be correctly crafted.
+	- "run the tools against real jetpack repo. test that it correctly downloads the repo and that the indexing with chromadb actually works."
+
 
 *💡 Stuck? See the [reference solution for Phase 3](#solution-phase-3-act).*
 
