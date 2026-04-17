@@ -86,27 +86,21 @@ while true; do
     fi
 done
 
-# 2. Optional Extensions (Conductor)
+# 2. Extensions (Conductor)
 echo ""
-echo "🔌 Step 2: Optional Extensions"
-while true; do
-    read -p "Hackathon assumes we will be using the conductor extension. Install it now? [y/N]: " install_conductor || true
-    case $install_conductor in
-        [Yy]* ) 
-            echo "⏳ Installing Conductor extension in non-interactive mode..."
-            if command -v "$GEMINI_CMD" &> /dev/null; then
-                yes | "$GEMINI_CMD" extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
-            else
-                echo "⚠️  Skipping extension install because '$GEMINI_CMD' is not correctly resolving."
-                echo "   (Please run 'gemini extension install https://github.com/gemini-cli-extensions/conductor' manually later)."
-            fi
-            break;;
-        [Nn]* | "" ) 
-            echo "Skipping Conductor installation."
-            break;;
-        * ) echo "Please answer y or n.";;
-    esac
-done
+echo "🔌 Step 2: Setting up extensions..."
+if command -v "$GEMINI_CMD" &> /dev/null; then
+    echo "⏳ Checking for Conductor extension..."
+    if "$GEMINI_CMD" extension list 2>/dev/null | grep -qi "conductor"; then
+        echo "✅ Conductor extension is already installed."
+    else
+        echo "⏳ Installing Conductor extension..."
+        yes | "$GEMINI_CMD" extension install https://github.com/gemini-cli-extensions/conductor || echo "⚠️ Failed to install Conductor extension. Please install manually."
+    fi
+else
+    echo "⚠️  Skipping extension install because '$GEMINI_CMD' is not correctly resolving."
+    echo "   (Please run 'gemini extension install https://github.com/gemini-cli-extensions/conductor' manually later)."
+fi
 
 # 3. Clone or Pull Repo
 REPO_URL="https://github.com/imraytiong/agentic-dev.git"
