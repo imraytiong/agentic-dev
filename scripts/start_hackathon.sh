@@ -233,6 +233,8 @@ else
 fi
 
 eval "$ACTIVATE_CMD"
+echo "   Upgrading pip to ensure fast dependency resolution..."
+python3 -m pip install --upgrade pip
 echo "   Installing dependencies (this is safe to re-run)..."
 echo "   (You will see download progress bars below)"
 if [ -f "requirements.txt" ]; then
