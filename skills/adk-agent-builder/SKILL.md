@@ -58,5 +58,15 @@ After generating Layer 3 (`tools.py`) and Layer 4 (`agent.py`), you MUST PAUSE a
 *   **Security Context:** Every chassis method MUST receive the `context: AgentContext` object.
 *   **No Hardcoded Prompts:** Always use `template="prompt_name.jinja"`.
 
-## 10. Final Verification (Hallucination Check)
-Before declaring the task complete, silently audit your code against the Guardrails above. If you hardcoded a model or forgot the `AgentContext`, fix it. Finally, prompt the user to run `python agent.py` locally to verify success.
+## 10. End-to-End Trace Verification (MANDATORY)
+After the agent is built and passes the basic Hallucination Check, you MUST NOT declare the track complete. Instead, you must proactively guide the user through an **End-to-End Trace Verification** phase to prove the agent's logic works against complex, ambiguous edge cases.
+
+1.  **Propose Scenarios:** Suggest 3-5 complex, conversational prompt scenarios that test the limits of the agent's capabilities (e.g., ambiguous discovery, chained tool execution, error recovery, or multi-step analysis).
+2.  **Generate Trace Scripts:** For each scenario the user approves, write a Python trace script (similar to `test_agent_final_trace.py`) that bypasses the web UI and directly invokes the agent's routing loop (`chassis._consumers[0].func`).
+3.  **Execute and Pretty Print:** Run the trace script and output a **Pretty Printed Trace** to the user. The trace MUST clearly show:
+    *   The `USER` prompt.
+    *   The `AGENT THOUGHT PROCESS` (State checks, Tool executions, LLM decisions, and Prompts injected).
+    *   The `AGENT REPLY`.
+4.  **Review and Iterate:** Analyze the trace output with the user. If the LLM hallucinates a tool, gets stuck in a loop, or returns a poor summary, you must diagnose the prompt/logic failure, suggest a fix in `agent.py` or the `system_prompt.jinja`, apply the fix, and re-run the trace until the agent performs flawlessly.
+
+Only after the agent successfully navigates the complex trace scenarios can you declare the agent fully functional and complete the Conductor track.
