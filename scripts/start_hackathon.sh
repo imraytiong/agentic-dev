@@ -71,9 +71,38 @@ else
     echo "⚠️  Note: '$GEMINI_CMD' doesn't seem to be an executable path, but we will try using it."
 fi
 
-# 1. Prompt for and validate Gemini API Key
+# 1. Clone or Pull Repo
+REPO_URL="https://github.com/imraytiong/agentic-dev.git"
+REPO_DIR="agentic-dev"
+
 echo ""
-echo "🔑 Step 1: Gemini API Key Setup"
+echo "📂 Step 1: Fetching Repository..."
+
+# Check if we are already inside the repo safely
+if git rev-parse --is-inside-work-tree &> /dev/null; then
+    REPO_ROOT=$(git rev-parse --show-toplevel)
+    if [ "$(basename "$REPO_ROOT")" = "$REPO_DIR" ] || [ -f "$REPO_ROOT/scripts/start_hackathon.sh" ]; then
+        echo "   Already inside the repository. Pulling latest changes..."
+        cd "$REPO_ROOT"
+        git pull origin main || true
+    else
+        echo "   Cloning repository..."
+        git clone "$REPO_URL" "$REPO_DIR"
+        cd "$REPO_DIR"
+    fi
+elif [ -d "$REPO_DIR" ]; then
+    echo "   Directory $REPO_DIR already exists. Pulling latest changes..."
+    cd "$REPO_DIR"
+    git pull origin main || true
+else
+    echo "   Cloning repository..."
+    git clone "$REPO_URL" "$REPO_DIR"
+    cd "$REPO_DIR"
+fi
+
+# 2. Prompt for and validate Gemini API Key
+echo ""
+echo "🔑 Step 2: Gemini API Key Setup"
 
 EXISTING_KEY=""
 if [ -f .env ]; then
@@ -134,9 +163,9 @@ if [ -z "$VALID_KEY" ]; then
     done
 fi
 
-# 2. Extensions (Conductor)
+# 3. Extensions (Conductor)
 echo ""
-echo "🔌 Step 2: Setting up extensions..."
+echo "🔌 Step 3: Setting up extensions..."
 if command -v "$GEMINI_CMD" &> /dev/null; then
     echo "⏳ Checking for Conductor extension..."
     if "$GEMINI_CMD" extension list 2>/dev/null | grep -qi "conductor"; then
@@ -148,35 +177,6 @@ if command -v "$GEMINI_CMD" &> /dev/null; then
 else
     echo "⚠️  Skipping extension install because '$GEMINI_CMD' is not correctly resolving."
     echo "   (Please run 'gemini extension install https://github.com/gemini-cli-extensions/conductor' manually later)."
-fi
-
-# 3. Clone or Pull Repo
-REPO_URL="https://github.com/imraytiong/agentic-dev.git"
-REPO_DIR="agentic-dev"
-
-echo ""
-echo "📂 Step 3: Fetching Repository..."
-
-# Check if we are already inside the repo safely
-if git rev-parse --is-inside-work-tree &> /dev/null; then
-    REPO_ROOT=$(git rev-parse --show-toplevel)
-    if [ "$(basename "$REPO_ROOT")" = "$REPO_DIR" ] || [ -f "$REPO_ROOT/scripts/start_hackathon.sh" ]; then
-        echo "   Already inside the repository. Pulling latest changes..."
-        cd "$REPO_ROOT"
-        git pull origin main || true
-    else
-        echo "   Cloning repository..."
-        git clone "$REPO_URL" "$REPO_DIR"
-        cd "$REPO_DIR"
-    fi
-elif [ -d "$REPO_DIR" ]; then
-    echo "   Directory $REPO_DIR already exists. Pulling latest changes..."
-    cd "$REPO_DIR"
-    git pull origin main || true
-else
-    echo "   Cloning repository..."
-    git clone "$REPO_URL" "$REPO_DIR"
-    cd "$REPO_DIR"
 fi
 
 # 4. Environment Variables
