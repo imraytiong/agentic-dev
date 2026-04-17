@@ -72,38 +72,65 @@ fi
 # 1. Prompt for and validate Gemini API Key
 echo ""
 echo "🔑 Step 1: Gemini API Key Setup"
-echo "You need a valid Gemini API key to proceed."
-echo "Get one at: https://aistudio.google.com/app/apikey"
-VALID_KEY=""
-while true; do
-    read -s -p "Enter your Gemini API Key (or type 'q' to quit): " api_key || true
-    echo ""
-    
-    if [ "$api_key" = "q" ] || [ "$api_key" = "Q" ]; then
-        echo "Exiting setup."
-        exit 0
-    fi
-    
-    if [ -z "$api_key" ]; then
-        echo "❌ Key cannot be empty. Please try again."
-        continue
-    fi
 
-    echo "⏳ Validating key..."
-    # Test the key against the models endpoint
-    STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://generativelanguage.googleapis.com/v1beta/models?key=${api_key}")
+EXISTING_KEY=""
+if [ -f .env ]; then
+    EXISTING_KEY=$(grep "^GEMINI_API_KEY=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'" || true)
+fi
+
+VALID_KEY=""
+
+if [ -n "$EXISTING_KEY" ]; then
+    echo "⏳ Found an existing Gemini API Key in your .env file. Testing it..."
+    STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://generativelanguage.googleapis.com/v1beta/models?key=${EXISTING_KEY}")
     
     if [ "$STATUS_CODE" -eq 200 ]; then
-        echo "✅ API Key is valid!"
-        VALID_KEY="$api_key"
-        
-        # Export it temporarily so any gemini commands in this script work
-        export GEMINI_API_KEY="$api_key"
-        break
+        read -p "✅ Existing key is valid! Would you like to continue using this key? [Y/n]: " use_existing || true
+        if [[ "$use_existing" =~ ^[Nn] ]]; then
+            echo "   Proceeding to enter a new key..."
+        else
+            VALID_KEY="$EXISTING_KEY"
+            export GEMINI_API_KEY="$VALID_KEY"
+            echo "   Using existing key."
+        fi
     else
-        echo "❌ Invalid API Key (HTTP Status: $STATUS_CODE). Please check your key and try again."
+        echo "⚠️  Existing key is invalid or expired (HTTP Status: $STATUS_CODE). You will need a new one."
     fi
-done
+fi
+
+if [ -z "$VALID_KEY" ]; then
+    echo "You need a valid Gemini API key to proceed."
+    echo "Get one at: https://aistudio.google.com/app/apikey"
+    while true; do
+        read -s -p "Enter your Gemini API Key (or type 'q' to quit): " api_key || true
+        echo ""
+        
+        if [ "$api_key" = "q" ] || [ "$api_key" = "Q" ]; then
+            echo "Exiting setup."
+            exit 0
+        fi
+        
+        if [ -z "$api_key" ]; then
+            echo "❌ Key cannot be empty. Please try again."
+            continue
+        fi
+
+        echo "⏳ Validating key..."
+        # Test the key against the models endpoint
+        STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://generativelanguage.googleapis.com/v1beta/models?key=${api_key}")
+        
+        if [ "$STATUS_CODE" -eq 200 ]; then
+            echo "✅ API Key is valid!"
+            VALID_KEY="$api_key"
+            
+            # Export it temporarily so any gemini commands in this script work
+            export GEMINI_API_KEY="$api_key"
+            break
+        else
+            echo "❌ Invalid API Key (HTTP Status: $STATUS_CODE). Please check your key and try again."
+        fi
+    done
+fi
 
 # 2. Extensions (Conductor)
 echo ""
