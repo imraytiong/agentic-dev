@@ -127,7 +127,12 @@ REPO_DIR="agentic-dev"
 
 echo ""
 echo "📂 Step 3: Fetching Repository..."
-if [ -d "$REPO_DIR" ]; then
+
+# Check if we are already inside the repo
+if git rev-parse --is-inside-work-tree &> /dev/null && [ "$(basename "$(pwd)")" = "$REPO_DIR" ]; then
+    echo "   Already inside the $REPO_DIR repository. Pulling latest changes..."
+    git pull origin main
+elif [ -d "$REPO_DIR" ]; then
     echo "   Directory $REPO_DIR already exists. Pulling latest changes..."
     cd "$REPO_DIR"
     git pull origin main
@@ -141,8 +146,13 @@ fi
 echo ""
 echo "⚙️  Step 4: Setting up environment variables..."
 if [ ! -f .env ]; then
-    cp .env.example .env
-    echo "   Created .env from .env.example"
+    if [ -f .env.example ]; then
+        cp .env.example .env
+        echo "   Created .env from .env.example"
+    else
+        touch .env
+        echo "   Created new .env file"
+    fi
 fi
 
 # Inject the validated key into .env (works safely on Mac/Linux)
@@ -154,6 +164,13 @@ echo "   Injected validated Gemini API Key into .env"
 # 5. Python Virtual Environment
 echo ""
 echo "🐍 Step 5: Setting up Python Virtual Environment..."
+
+# If venv exists but activate script is missing, it might be corrupt. Remove it.
+if [ -d "venv" ] && [ ! -f "venv/bin/activate" ] && [ ! -f "venv/Scripts/activate" ]; then
+    echo "   Found a corrupt 'venv' directory. Recreating..."
+    rm -rf venv
+fi
+
 if [ ! -d "venv" ]; then
     python3 -m venv venv
     echo "   Created new virtual environment."
@@ -167,15 +184,21 @@ if [ -f "venv/bin/activate" ]; then
 elif [ -f "venv/Scripts/activate" ]; then
     ACTIVATE_CMD="source venv/Scripts/activate"
 else
-    echo "❌ Could not find virtual environment activation script."
+    echo "❌ Could not find virtual environment activation script in $(pwd)/venv"
+    echo "   Directory contents of venv:"
+    ls -la venv || true
     exit 1
 fi
 
 eval "$ACTIVATE_CMD"
 echo "   Installing dependencies (this is safe to re-run)..."
 echo "   (You will see download progress bars below)"
-pip install -r requirements.txt
-echo "   ✅ Dependencies installed successfully."
+if [ -f "requirements.txt" ]; then
+    pip install -r requirements.txt
+    echo "   ✅ Dependencies installed successfully."
+else
+    echo "   ⚠️ requirements.txt not found. Skipping pip install."
+fi
 
 # 6. Gemini CLI Initialization
 echo ""
@@ -183,8 +206,12 @@ echo "🤖 Step 6: Initializing Gemini CLI and Context..."
 if command -v "$GEMINI_CMD" &> /dev/null; then
     yes | "$GEMINI_CMD" init || true
     yes | "$GEMINI_CMD" git init || true
-    yes | "$GEMINI_CMD" context add SYSTEM_INSTRUCTIONS.md || true
-    yes | "$GEMINI_CMD" context add skills/adk-agent-builder/SKILL.md || true
+    if [ -f "SYSTEM_INSTRUCTIONS.md" ]; then
+        yes | "$GEMINI_CMD" context add SYSTEM_INSTRUCTIONS.md || true
+    fi
+    if [ -f "skills/adk-agent-builder/SKILL.md" ]; then
+        yes | "$GEMINI_CMD" context add skills/adk-agent-builder/SKILL.md || true
+    fi
     echo "   Gemini CLI initialized and Agent Builder skill loaded by default!"
 else
     echo "⚠️  Gemini CLI not perfectly resolved in PATH. Skipping CLI initialization."
@@ -197,7 +224,7 @@ echo "✅ Environment Ready! Dropping you into the terminal..."
 echo "======================================================================"
 
 if command -v "$GEMINI_CMD" &> /dev/null; then
-    exec bash --init-file <(echo "$ACTIVATE_CMD; $GEMINI_CMD")
+    exec bash --init-file <(echo "$ACTIVATE_CMD; clear; echo 'Environment activated! Type $GEMINI_CMD to start.'")
 else
-    exec bash --init-file <(echo "$ACTIVATE_CMD")
+    exec bash --init-file <(echo "$ACTIVATE_CMD; clear; echo 'Environment activated!'")
 fi
