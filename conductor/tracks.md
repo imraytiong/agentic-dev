@@ -12,3 +12,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [x] **Track: Fix Agent Studio UI**
   *Link: [./tracks/fix_studio_ui_20260411/](./tracks/fix_studio_ui_20260411/)*
+
+- [x] **Track: Build JetpackWiz Agent**
+  *Link: [./tracks/build_jetpack_wiz_20260414/](./tracks/build_jetpack_wiz_20260414/)*

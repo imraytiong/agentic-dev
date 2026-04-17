@@ -1,0 +1,9 @@
+agent:
+  name: "JetpackWiz"
+  model: "gemini-2.5-flash"
+  temperature: 0.2
+  repo_path: "/tmp/androidx-main"
+infrastructure:
+  state_store: "src.universal_core.mock_adapters.MockStateStore"
+  vector_store: "src.universal_core.mock_adapters.MockVectorStore"
+  message_broker: "src.universal_core.mock_adapters.MockMessageQueue"
