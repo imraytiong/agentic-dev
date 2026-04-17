@@ -62,7 +62,7 @@ After generating Layer 3 (`tools.py`) and Layer 4 (`agent.py`), you MUST PAUSE a
 After the agent is built and passes the basic Hallucination Check, you MUST NOT declare the track complete. Instead, you must proactively guide the user through an **End-to-End Trace Verification** phase to prove the agent's logic works against complex, ambiguous edge cases.
 
 1.  **Propose Scenarios:** Suggest 3-5 complex, conversational prompt scenarios that test the limits of the agent's capabilities (e.g., ambiguous discovery, chained tool execution, error recovery, or multi-step analysis).
-2.  **Generate Trace Scripts:** For each scenario the user approves, write a Python trace script (similar to `test_agent_final_trace.py`) that bypasses the web UI and directly invokes the agent's routing loop (`chassis._consumers[0].func`).
+2.  **Generate Trace Scripts:** For each scenario the user approves, write a Python trace script that bypasses the web UI and directly invokes the agent's routing loop (`chassis._consumers[0].func`). **CRITICAL:** These test scripts MUST be generated in the agent's dedicated test directory (e.g., `tests/test_agents/test_{agent_name}/`), NOT the project root directory. Ensure you include a `sys.path` patch at the top of the script (e.g., `sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))`) so it can be executed as a standalone script from its nested location.
 3.  **Execute and Pretty Print:** Run the trace script and output a **Pretty Printed Trace** to the user. The trace MUST clearly show:
     *   The `USER` prompt.
     *   The `AGENT THOUGHT PROCESS` (State checks, Tool executions, LLM decisions, and Prompts injected).
