@@ -25,6 +25,7 @@ Since we want to manually run the Sparky agent first, type `exit` in the Gemini 
 We are going to run Sparky using the `mock_infrastructure` flag. This bypasses the need for enterprise Redis/Postgres and spins everything up locally in memory.
 
 ```bash
+source venv/bin/activate
 python -m src.agents.hello_sparky.agent --mock
 ```
 

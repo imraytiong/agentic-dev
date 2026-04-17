@@ -157,5 +157,7 @@ If you get completely stuck or want to compare your implementation against a "go
 To view the completed code for this codelab, simply switch your branch in your terminal:
 ```bash
 git checkout solution-codelab2
+source venv/bin/activate
+python -m src.agents.hello_sparky.agent --mock
 ```
 *(You can easily switch back to your own work by running `git checkout main` or whichever branch you were working on!)*
