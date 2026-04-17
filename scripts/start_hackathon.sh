@@ -233,18 +233,17 @@ else
 fi
 
 eval "$ACTIVATE_CMD"
-echo "   Upgrading pip to ensure fast dependency resolution..."
-python3 -m pip install --upgrade pip
-echo "   Installing dependencies (this is safe to re-run)..."
-echo "   (You will see download progress bars below)"
+echo "   Installing 'uv' for lightning-fast dependency resolution..."
+python3 -m pip install --upgrade pip uv
+echo "   Installing dependencies using 'uv' (this is safe to re-run)..."
 if [ -f "requirements.txt" ]; then
-    pip install -r requirements.txt || {
+    uv pip install -r requirements.txt || {
         echo "❌ Failed to install dependencies."
         exit 1
     }
     echo "   ✅ Dependencies installed successfully."
 else
-    echo "   ⚠️ requirements.txt not found. Skipping pip install."
+    echo "   ⚠️ requirements.txt not found. Skipping dependency install."
 fi
 
 # 6. Gemini CLI Initialization
