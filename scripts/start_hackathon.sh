@@ -161,8 +161,17 @@ else
     echo "   Virtual environment already exists."
 fi
 
-# Activate and install
-source venv/bin/activate
+# Activate and install (Handle both Unix and Windows/GitBash paths)
+if [ -f "venv/bin/activate" ]; then
+    ACTIVATE_CMD="source venv/bin/activate"
+elif [ -f "venv/Scripts/activate" ]; then
+    ACTIVATE_CMD="source venv/Scripts/activate"
+else
+    echo "❌ Could not find virtual environment activation script."
+    exit 1
+fi
+
+eval "$ACTIVATE_CMD"
 echo "   Installing dependencies (this is safe to re-run)..."
 echo "   (You will see download progress bars below)"
 pip install -r requirements.txt
@@ -188,7 +197,7 @@ echo "✅ Environment Ready! Dropping you into the terminal..."
 echo "======================================================================"
 
 if command -v "$GEMINI_CMD" &> /dev/null; then
-    exec bash --init-file <(echo "source venv/bin/activate; $GEMINI_CMD")
+    exec bash --init-file <(echo "$ACTIVATE_CMD; $GEMINI_CMD")
 else
-    exec bash --init-file <(echo "source venv/bin/activate")
+    exec bash --init-file <(echo "$ACTIVATE_CMD")
 fi
