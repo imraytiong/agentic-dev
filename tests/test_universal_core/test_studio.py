@@ -1,6 +1,7 @@
 import pytest
 import json
 import logging
+from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 from src.universal_core.chassis import BaseAgentChassis
 
@@ -14,9 +15,16 @@ def chassis():
         },
         "infrastructure": {}
     }
-    # Initialize with enable_studio=True
-    c = BaseAgentChassis(config, mock_infrastructure=True, enable_studio=True)
-    return c
+    
+    # Isolate OpenTelemetry global singleton using unittest.mock.patch
+    with patch('src.universal_core.chassis.trace.get_tracer_provider') as mock_get_provider:
+        from opentelemetry.sdk.trace import TracerProvider
+        mock_provider = MagicMock(spec=TracerProvider)
+        mock_get_provider.return_value = mock_provider
+        
+        # Initialize with enable_studio=True
+        c = BaseAgentChassis(config, mock_infrastructure=True, enable_studio=True)
+        yield c
 
 @pytest.fixture
 def client(chassis):
