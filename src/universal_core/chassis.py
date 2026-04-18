@@ -340,13 +340,33 @@ class BaseAgentChassis:
                 return JSONResponse({})
             
             import os
+            import inspect
+            
             api_key = os.getenv("GEMINI_API_KEY", "")
             masked_key = f"{api_key[:4]}...{api_key[-4:]}" if len(api_key) > 8 else "Not Set or Too Short"
+            
+            # Dynamically parse tools if they are passed as function objects
+            raw_tools = chassis.config.get("agent", {}).get("tools", [])
+            processed_tools = []
+            for t in raw_tools:
+                if callable(t):
+                    try:
+                        processed_tools.append({
+                            "name": getattr(t, "__name__", str(t)),
+                            "description": (inspect.getdoc(t) or "").strip().split("\n")[0],
+                            "source": inspect.getsource(t)
+                        })
+                    except Exception:
+                        processed_tools.append({"name": getattr(t, "__name__", str(t))})
+                elif isinstance(t, dict):
+                    processed_tools.append(t)
+                else:
+                    processed_tools.append({"name": str(t)})
             
             return JSONResponse({
                 "model": getattr(chassis.llm_agent, "model", "Unknown"),
                 "system_prompt": chassis.config.get("agent", {}).get("system_prompt", ""),
-                "tools": chassis.config.get("agent", {}).get("tools", []),
+                "tools": processed_tools,
                 "skills": chassis.config.get("agent", {}).get("skills", []),
                 "api_key": masked_key
             })
