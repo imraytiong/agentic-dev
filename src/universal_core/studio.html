@@ -63,10 +63,10 @@
     </header>
 
     <!-- Main Split Layout -->
-    <div class="flex-1 flex overflow-hidden grid grid-cols-1 md:grid-cols-2">
+    <div x-ref="splitContainer" class="flex-1 flex flex-col md:flex-row overflow-hidden w-full" :class="{ 'cursor-col-resize select-none': isDragging }">
         
         <!-- Left Pane: Chat Interface -->
-        <div class="flex flex-col border-r border-gray-800 bg-gray-900 relative h-full">
+        <div :style="window.innerWidth >= 768 ? `width: ${leftWidth}%` : ''" class="flex flex-col border-b md:border-b-0 md:border-r border-gray-800 bg-gray-900 relative h-[50vh] md:h-full md:shrink-0 md:min-w-[20%] md:max-w-[80%]">
             <main id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
                 <div class="flex gap-4">
                     <div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">{{ agent_name_short }}</div>
@@ -92,8 +92,11 @@
             </footer>
         </div>
 
+        <!-- Resizer (Desktop Only) -->
+        <div @mousedown="startDrag" class="hidden md:block w-1.5 bg-gray-800 hover:bg-blue-500 active:bg-blue-600 cursor-col-resize z-50 shrink-0 transition-colors"></div>
+
         <!-- Right Pane: Developer Dashboard (Tabs Layout) -->
-        <div class="flex flex-col h-full bg-gray-950 overflow-hidden relative">
+        <div class="flex flex-col h-[50vh] md:h-full bg-gray-950 overflow-hidden relative flex-1 md:min-w-[20%]">
             
             <!-- Tabs Header -->
             <div class="flex border-b border-gray-800 bg-gray-900 shrink-0 px-2 pt-2 gap-2">
@@ -309,6 +312,8 @@
         // Alpine State
         document.addEventListener('alpine:init', () => {
             Alpine.data('studioState', () => ({
+                leftWidth: 50,
+                isDragging: false,
                 activeTab: 'trace',
                 config: {},
                 spans: [],
@@ -326,6 +331,30 @@
                             log.style.display = 'none';
                         }
                     });
+                },
+
+                startDrag(e) {
+                    this.isDragging = true;
+                    e.preventDefault(); // Prevent text selection
+                    
+                    const moveHandler = (e) => {
+                        if (!this.isDragging) return;
+                        const container = this.$refs.splitContainer;
+                        const containerRect = container.getBoundingClientRect();
+                        let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+                        if (newWidth < 20) newWidth = 20;
+                        if (newWidth > 80) newWidth = 80;
+                        this.leftWidth = newWidth;
+                    };
+                    
+                    const upHandler = () => {
+                        this.isDragging = false;
+                        document.removeEventListener('mousemove', moveHandler);
+                        document.removeEventListener('mouseup', upHandler);
+                    };
+                    
+                    document.addEventListener('mousemove', moveHandler);
+                    document.addEventListener('mouseup', upHandler);
                 },
 
                 exportLogs() {
