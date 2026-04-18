@@ -179,7 +179,18 @@
                         <div><span class="text-gray-500">Model:</span> <code class="text-blue-400 ml-1" x-text="config.model || 'Loading...'" data-testid="config-model"></code></div>
                         <div><span class="text-gray-500">API Key:</span> <code class="text-blue-400 ml-1" x-text="config.api_key || 'Not Set'"></code></div>
                         <div><span class="text-gray-500">Mock Engine:</span> <span class="text-emerald-400 ml-1 font-medium">Enabled</span></div>
-                        <div class="truncate" title="Tools"><span class="text-gray-500">Tools:</span> <code class="text-blue-400 ml-1" x-text="(config.tools && config.tools.length > 0) ? config.tools.map(t => typeof t === 'string' ? t : t.name).join(', ') : 'None'"></code></div>
+                        <div class="col-span-2 mt-2">
+                            <span class="text-gray-500 mb-1 block">Tools:</span>
+                            <ul class="list-disc list-inside text-blue-400 ml-2 marker:text-gray-600" x-show="config.tools && config.tools.length > 0">
+                                <template x-for="tool in config.tools" :key="typeof tool === 'string' ? tool : tool.name">
+                                    <li class="mb-1">
+                                        <code x-text="typeof tool === 'string' ? tool : tool.name"></code>
+                                        <span class="text-gray-500 text-[10px] ml-1" x-text="tool.description ? '- ' + tool.description : ''"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                            <span class="text-gray-500 italic ml-2" x-show="!config.tools || config.tools.length === 0">None</span>
+                        </div>
                     </div>
                     
                     
@@ -198,8 +209,11 @@
                             <template x-for="tool in config.tools" :key="tool.name || tool">
                                 <div class="bg-black/40 border border-gray-800 rounded-lg p-0 overflow-hidden">
                                     <div class="bg-gray-800/50 px-3 py-2 border-b border-gray-800 flex justify-between items-center">
-                                        <span class="text-xs font-mono text-blue-400" x-text="tool.name || tool"></span>
-                                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Python Source</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-mono text-blue-400" x-text="tool.name || tool"></span>
+                                            <span class="text-[10px] text-gray-500 italic truncate max-w-md" x-text="tool.description || ''"></span>
+                                        </div>
+                                        <span class="text-[10px] text-gray-500 uppercase tracking-widest shrink-0">Python Source</span>
                                     </div>
                                     <div class="p-3 overflow-x-auto">
                                         <pre class="text-[11px] font-mono text-gray-300 leading-relaxed"><code class="language-python" x-html="tool.source ? hljs.highlight(tool.source, {language: 'python'}).value : '# No source available'"></code></pre>
