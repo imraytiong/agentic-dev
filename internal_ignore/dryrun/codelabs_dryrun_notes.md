@@ -31,3 +31,4 @@ This document captures notes, friction points, and required revisions discovered
     2. Plan in the current branch.
     3. *Always* create and checkout a new feature branch before executing code generation.
 * **Result:** The safety net is now enforced by the AI, preventing accidental overwrites on the `main` branch.
+- **Mock Queue Upgrade Complete:** The `BaseAgentChassis` now fully supports `asyncio.Queue` in mock mode. This enables Codelab 3 participants to safely test long-running background tasks without needing a local Redis instance.

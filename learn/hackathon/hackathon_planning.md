@@ -52,9 +52,9 @@ The hackathon structure is guided by four progressive codelabs. These take devel
 * **Codelab 2: Upgrading Sparky (`learn/codelabs/2_upgrading_sparky.md`)**
   * *Focus:* Introduction to Agent-Driven Development.
   * *Goal:* Use the AI CLI to add a new tool (weather), update the Pydantic `AgentState` to remember the user's location, modify the Jinja prompt to handle tool failures via general intelligence, and establish Git versioning and TDD practices.
-* **Codelab 3: AndroidX Intelligence Agent (`learn/codelabs/3_androidx_intelligence_agent.md`)**
+* **Codelab 3: Developer API Intelligence Agent (`learn/codelabs/3_developer_api_intelligence_agent.md`)**
   * *Focus:* Advanced enterprise agent architecture.
-  * *Goal:* A team-based offline challenge to build a complex DevRel agent. Requires handling long-running tasks (Redis queues), semantic mapping of AndroidX modules, and querying Git/Web APIs while managing context limits.
+  * *Goal:* An individual offline challenge to build a complex API maintainer agent. Requires handling long-running tasks (Redis queues), semantic mapping of modules, and querying Git/Web APIs while managing context limits.
 * **Codelab 4: Capstone - Build Your Own Agent (`learn/codelabs/4_capstone_build_your_own.md`)**
   * *Focus:* End-to-end creation of a custom agent.
   * *Goal:* Use Gemini Web or Scribe for ideation, draft a formal `agent_spec_template.md`, and use the AI CLI to build, test, and deploy a brand new custom agent.
@@ -67,7 +67,7 @@ To keep the momentum going, the hackathon follows a structured 5-day timeline ma
   * *Late Morning:* **Codelab 1 (Hello Sparky)** - Running the mock infrastructure and interacting with the UI.
   * *Afternoon:* **Codelab 2 (Upgrading Sparky)** - Introduction to Agent-Driven Development and modifying an agent via the CLI.
 * **Tuesday (Day 2): The Enterprise Challenge**
-  * *All Day:* **Codelab 3 (AndroidX Intelligence Agent)** - Teams form and tackle the offline challenge. Focus on asynchronous Redis queues, semantic mapping, and Git/Doc intelligence.
+  * *All Day:* **Codelab 3 (Developer API Intelligence Agent)** - Developers tackle the offline challenge individually, collaborating in the open chat. Focus on asynchronous Redis queues, semantic mapping, and Git/Doc intelligence.
 * **Wednesday (Day 3): Ideation & Capstone Kickoff**
   * *Morning:* Finish Codelab 3 or tackle the Extra Credit missions.
   * *Afternoon:* **Codelab 4 (Capstone) Kickoff** - Ideation phase. Teams use LLMs to brainstorm, scope their custom agent idea, and write their `agent_spec_template.md`.
@@ -107,3 +107,6 @@ This file enforces that the AI:
 
 * **Idea 1:** Provide a "Pre-flight Check" script that participants can run to verify their `.env` and Gemini CLI are configured correctly before they write their first prompt.
 * **Idea 2:** ...
+### Improvements for Codelab 3 (Post-Dry Run Notes)
+- **Enhanced Observability:** We need to emphasize verbose logging heavily. The agent developer should add extensive `print()` or `logging` statements throughout their asynchronous tool execution (e.g., when cloning, parsing, or running vector searches) so the background queue progress is highly visible in the terminal.
+- **UI Feedback:** Consider adding a mechanism or guideline for passing intermediate status updates back to the UI (e.g., updating a "status" field in the state payload) so the user isn't left guessing while long-running tasks process.

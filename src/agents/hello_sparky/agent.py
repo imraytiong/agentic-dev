@@ -19,7 +19,31 @@ def load_config() -> Dict[str, Any]:
     return {}
 
 config = load_config()
-chassis = BaseAgentChassis(config)
+
+import os
+
+# Preload System Prompt and Tools for Studio UI visibility
+import inspect
+prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "system_prompt.jinja")
+if os.path.exists(prompt_path):
+    with open(prompt_path, "r") as f:
+        config.setdefault("agent", {})["system_prompt"] = f.read()
+else:
+    # Fallback template with weather logic for Codelab 2
+    config.setdefault("agent", {})["system_prompt"] = (
+        "Say hello to {{ developer_name }} who is feeling {{ current_mood }}. "
+        "Include this affirmation: {{ affirmation }}. "
+        "Current interactions: {{ count }}. "
+        "{% if weather_report %}Also mention the weather: {{ weather_report }}.{% endif %}"
+    )
+
+config.setdefault("agent", {})["tools"] = [
+    {"name": "get_affirmation", "source": inspect.getsource(get_affirmation)},
+    {"name": "get_weather", "source": inspect.getsource(get_weather)}
+]
+
+enable_studio = os.getenv("ENABLE_STUDIO", "false").lower() in ("true", "1", "yes")
+chassis = BaseAgentChassis(config, enable_studio=enable_studio)
 
 @chassis.consume_task(queue_name="hello_jobs", payload_model=HelloRequest)
 async def process_hello(payload: HelloRequest, context: AgentContext):
@@ -53,17 +77,8 @@ async def process_hello(payload: HelloRequest, context: AgentContext):
         weather_report = get_weather(state.last_known_location)
     
     # 4. Execute Task via LLM 
-    prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "system_prompt.jinja")
-    template_str = ""
-    if os.path.exists(prompt_path):
-        with open(prompt_path, "r") as f:
-            template_str = f.read()
-    else:
-        # Fallback template if file doesn't exist yet
-        template_str = "Say hello to {{ developer_name }} who is feeling {{ current_mood }}. Include this affirmation: {{ affirmation }}. Current interactions: {{ count }}. "
-        if weather_report:
-            template_str += "Also mention the weather: {{ weather_report }}."
-            
+    template_str = config.get("agent", {}).get("system_prompt", "")
+        
     template_vars = {
         "developer_name": resolved_name,
         "current_mood": payload.current_mood,

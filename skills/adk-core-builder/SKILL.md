@@ -1,39 +1,46 @@
-# ADK Core Builder Skill
+# ADK Core Builder
 
-You are acting as the Principal AI Framework Architect (Role 1). Your sole responsibility is to generate the "Universal Core" for a multi-agent distributed system based on the Google Agent Development Kit (ADK).
+## Description
+Guides the AI CLI to build or maintain the sealed Universal Core (chassis.py and interfaces.py) for the BaseAgentChassis. Enforces strict environment-agnostic rules, dynamic adapter loading (IoC), the Mock Infrastructure engine, and the AI Bridge Protocol.
 
-## The Prime Directive
-You are building the `src/universal_core/` directory (`chassis.py` and `interfaces.py`). This code must be 100% environment-agnostic. 
-**DO NOT** import or write code for `asyncpg`, `redis`, `sqlalchemy`, or any specific database. You must rely entirely on Abstract Base Classes and `importlib` dynamic loading.
+## Step 0: Context Awareness
+Check if `src/universal_core/chassis.py` already exists in the project.
+- **If YES (Maintenance Mode):** Skip the 5-layer plan. Apply only the requested patch. 
+- **If NO (Bootstrap Mode):** Execute the 5-layer plan.
 
-## Workflow: Observe -> Think -> Act -> Verify
+## CRITICAL: The AI Bridge & Git Workflow
+AI coding assistants often branch too early. You MUST execute the following exact `bash` commands in order so Gemini Scribe (on a different machine) can see your pre-flight message on `main`.
 
-### 1. OBSERVE
-Ask the user for the `Universal Core Architecture Spec` (located at `src/universal_core/universal_core_architecture_spec.md`). Do not proceed without it.
+**Before writing any code or analyzing, run this exact sequence:**
+```bash
+# 1. Stay on main
+git checkout main
 
-### 2. THINK (Planning Phase)
-Analyze the spec and use Conductor to propose a layer-by-layer build plan:
-1.  **Layer 1: Interfaces & Models (`src/universal_core/interfaces.py`)**: Define the ABCs (including `BaseFileStorage`), the `AgentContext` Pydantic model, and the `BaseMCPServer` interface.
-2.  **Layer 2: The Mock Engine & Studio**: Design the in-memory fallback classes (MockStateStore, MockMessageBroker) that will be used when `mock_infrastructure=True`. Design the embedded "Agent Studio" Web UI and the MCP SSE endpoint.
-3.  **Layer 3: The Chassis Class (`src/universal_core/chassis.py`)**: Define the `__init__` deep merge, the dynamic `importlib` adapter loader, the FastAPI app with file upload (`multipart/form-data`) and download (`GET /download/{file_id}`) support, and the `build_adk_agent` method.
-4.  **Layer 4: The Mega-Abstractions**: Write `execute_task`, `call_agent_sync`, and the `@consume_task` decorator.
-5.  **Layer 5: Testing**: Write a `pytest` suite ensuring the Mock Engine, Studio UI, MCP server, and decorators work entirely in RAM.
+# 2. Write your pre-flight plan and state the branch name you will use
+# (Write this to a new file in internal_ignore/inbox_scribe/)
 
-**PAUSE:** Wait for the Architect to approve the Conductor plan before generating code.
+# 3. Commit and push the message TO MAIN
+git add internal_ignore/inbox_scribe/
+git commit -m "chore: pre-flight plan"
+git push origin main
 
-### 3. ACT (Execution Phase)
-Generate the code strictly adhering to the plan. 
-*   **Sandbox Pause:** After generating Layer 4, pause and ask the Architect if they want to test the `@consume_task` decorator locally using the Mock Engine before proceeding to tests.
+# 4. NOW create and checkout the track branch
+git checkout -b track/<descriptive-name>
+```
 
-### 4. VERIFY (The Architect's Audit)
-Before marking the task complete, silently run this checklist:
-- [ ] Did I accidentally import `redis` or `asyncpg`? (If yes, rewrite using interfaces).
-- [ ] Does `execute_task` automatically inject `user_id` from the `AgentContext` into the template variables?
-- [ ] Does the `@consume_task` decorator automatically call `save_state` when the wrapped function returns?
-- [ ] Does `__init__` use `importlib` to dynamically load adapters based on the `fleet.yaml` config?
-- [ ] Does the Chassis expose a `GET /mcp/sse` endpoint for IDE integration?
-- [ ] Does the Chassis expose a `GET /studio` endpoint with a single-page chat UI when `mock_infrastructure=True`?
-- [ ] Does the FastAPI app accept `UploadFile` for multimodal support?
-- [ ] Does the FastAPI app expose a `GET /download/{file_id}` route and `BaseFileStorage` interface for outbound files?
+**5. THE ELEGANT PAUSE.** After creating the branch, you MUST output a polite, user-friendly status message to the terminal so the human knows what is happening. Say exactly this:
 
-If the audit passes, present the final core files to the Architect.
+"⏸️ **PAUSED FOR REVIEW**: I have pushed the pre-flight plan to `main` and checked out the new track branch. I am now waiting for Gemini Scribe to review the plan. Please provide the approval message when ready."
+
+CRITICAL: After printing the elegant pause message, simply end your response. DO NOT print "STOP GENERATING TEXT" or any other robotic halt commands. Just finish your reply naturally.
+
+## The 5-Layer Bootstrap Plan (Bootstrap Mode Only)
+1. **Contracts (`interfaces.py`)**: Abstract Base Classes for State, Queues, Vectors, Telemetry, MCP, FileStorage.
+2. **Core Object (`chassis.py`)**: Inversion of Control (IoC) dynamic adapter loading via `config.yaml`.
+3. **Mega-Abstractions**: FastAPI server, `/studio` UI, `/mcp/sse` endpoint, `/upload`, `/download`.
+4. **Decorators**: `@consume_task` for async Redis/Kafka listening.
+5. **Mock Engine**: `mock_infrastructure=True` logic to bypass external dependencies.
+
+## General Rules
+- NEVER hardcode Redis, Postgres, or Kafka. Use adapters.
+- ALWAYS use the Elegant Pause after completing a layer or waiting for review.
