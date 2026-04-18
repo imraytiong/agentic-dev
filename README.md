@@ -17,10 +17,14 @@ To instantly set up your local environment, clone the repo, and initialize your 
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/agentic-dev/main/scripts/start_hackathon.sh)"
 ```
 
-> **Note for Corporate Environments:** If your environment uses an alias for the Gemini CLI (e.g., `ai` instead of `gemini`), the script will attempt to detect it. If it fails, you can explicitly set it by running: `GEMINI_CMD=ai bash -c "..."`
+**What this script does:**
+* Creates and activates a Python virtual environment (`venv`).
+* Installs all required framework dependencies (`pip install -r requirements.txt`).
+* Checks your environment for the Gemini CLI (intelligently handling corporate aliases).
+* Automatically launches the CLI with the `adk-agent-builder` skill pinned and loaded.
 
 **Next Steps:**
-The setup script will automatically drop you directly into the Gemini CLI. The `adk-agent-builder` skill is already pinned and loaded for you globally, so you can immediately start directing your AI to build!
+The setup script will automatically drop you directly into the Gemini CLI. Because the builder skill is already loaded, you can immediately start directing your AI to build!
 
 ## System Architecture
 

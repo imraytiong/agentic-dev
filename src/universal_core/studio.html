@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Studio: {{ agent_name }}</title>
+    
+    <!-- CDN Dependencies -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 2rem;
+            bottom: -1rem;
+            left: 1.125rem;
+            width: 2px;
+            background-color: #374151;
+            z-index: 0;
+        }
+        .timeline-step:last-child .timeline-line::before {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 h-screen flex flex-col antialiased overflow-hidden" x-data="studioState()" x-cloak>
+    
+    <!-- Header -->
+    <header class="bg-gray-900 border-b border-gray-800 p-4 flex items-center justify-between shrink-0 z-10 relative shadow-md">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg text-sm">{{ agent_name_short }}</div>
+            <h1 class="text-xl font-semibold tracking-tight text-white">Agent Studio: {{ agent_name }}</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 text-xs">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span class="text-emerald-400 font-medium">Live</span>
+            </div>
+            <div class="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full border border-gray-700">Mock Mode</div>
+        </div>
+    </header>
+
+    <!-- Main Split Layout -->
+    <div x-ref="splitContainer" class="flex-1 flex flex-col md:flex-row overflow-hidden w-full" :class="{ 'cursor-col-resize select-none': isDragging }">
+        
+        <!-- Left Pane: Chat Interface -->
+        <div :style="window.innerWidth >= 768 ? `width: ${leftWidth}%` : ''" class="flex flex-col border-b md:border-b-0 md:border-r border-gray-800 bg-gray-900 relative h-[50vh] md:h-full md:shrink-0 md:min-w-[20%] md:max-w-[80%]">
+            <main id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">{{ agent_name_short }}</div>
+                    <div class="bg-gray-800 border border-gray-700 rounded-2xl rounded-tl-sm p-4 max-w-[85%] shadow-sm text-gray-200 leading-relaxed text-sm">
+                        <strong>System Ready</strong><br>
+                        Developer UI enabled. Ready for input.
+                    </div>
+                </div>
+            </main>
+
+            <div id="loading-indicator" class="hidden px-6 pb-2 text-sm text-gray-400 flex items-center gap-2">
+                <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Processing...
+            </div>
+
+            <footer class="bg-gray-900 border-t border-gray-800 p-4 shrink-0">
+                <form id="chat-form" class="relative flex items-end gap-2 bg-gray-950 rounded-xl border border-gray-700 p-2 shadow-inner focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+                    <textarea id="chat-input" name="message" rows="1" class="w-full bg-transparent text-gray-100 placeholder-gray-500 border-none focus:ring-0 resize-none py-2 px-2 text-[14px] leading-relaxed" placeholder="Type a message..."></textarea>
+                    <button type="submit" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors shrink-0 shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                    </button>
+                </form>
+            </footer>
+        </div>
+
+        <!-- Resizer (Desktop Only) -->
+        <div @mousedown="startDrag" class="hidden md:block w-1.5 bg-gray-800 hover:bg-blue-500 active:bg-blue-600 cursor-col-resize z-50 shrink-0 transition-colors"></div>
+
+        <!-- Right Pane: Developer Dashboard (Tabs Layout) -->
+        <div class="flex flex-col h-[50vh] md:h-full bg-gray-950 overflow-hidden relative flex-1 md:min-w-[20%]">
+            
+            <!-- Tabs Header -->
+            <div class="flex border-b border-gray-800 bg-gray-900 shrink-0 px-2 pt-2 gap-2">
+                <button @click="activeTab = 'trace'" class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2" :class="activeTab === 'trace' ? 'text-blue-400 border-blue-400 bg-gray-800' : 'text-gray-400 border-transparent hover:text-gray-300 hover:bg-gray-800/50'">Trace</button>
+                <button @click="activeTab = 'config'" class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2" :class="activeTab === 'config' ? 'text-blue-400 border-blue-400 bg-gray-800' : 'text-gray-400 border-transparent hover:text-gray-300 hover:bg-gray-800/50'">Config</button>
+                <button @click="activeTab = 'logs'" class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2" :class="activeTab === 'logs' ? 'text-blue-400 border-blue-400 bg-gray-800' : 'text-gray-400 border-transparent hover:text-gray-300 hover:bg-gray-800/50'">Live Logs</button>
+            </div>
+            
+            <!-- Tab Content: Trace & Config -->
+                        <!-- Tab Content: Trace -->
+            <div x-show="activeTab === 'trace'" class="flex-1 overflow-y-auto p-4 space-y-6" data-testid="telemetry-panel">
+                <section class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm" x-init="pollTelemetry()">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Execution Trace
+                        </h2>
+                        <div x-show="isPolling" class="flex gap-1">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                            <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 150ms"></span>
+                            <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 300ms"></span>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div x-show="spans.length === 0" class="text-center py-8 text-sm text-gray-500 italic">
+                        Waiting for first request...
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="relative pl-2" x-show="spans.length > 0">
+                        <template x-for="span in spans" :key="span.span_id">
+                            <div class="timeline-step relative pb-8 timeline-line group" data-testid="trace-step">
+                                <div class="flex items-start gap-4">
+                                    <!-- Step Icon/Dot -->
+                                    <div class="relative z-10 w-9 h-9 rounded-full flex items-center justify-center shrink-0 border-4 border-gray-900 shadow-sm transition-transform group-hover:scale-110"
+                                         :class="{
+                                            'bg-blue-500': span.type === 'user',
+                                            'bg-purple-500': span.type === 'llm',
+                                            'bg-green-500': span.type === 'tool',
+                                            'bg-red-500': span.type === 'error',
+                                            'bg-gray-600': !['user','llm','tool','error'].includes(span.type)
+                                         }">
+                                        <span class="text-white text-xs font-bold" x-text="span.type ? span.type.charAt(0).toUpperCase() : '?'"></span>
+                                    </div>
+                                    
+                                    <!-- Step Content -->
+                                    <div class="flex-1 min-w-0 bg-gray-800/50 border border-gray-800 rounded-lg p-3 hover:border-gray-700 transition-colors">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h3 class="text-sm font-medium text-gray-200 truncate" x-text="span.name"></h3>
+                                            <span class="text-xs text-gray-500 font-mono" x-text="span.duration_ms + 'ms'"></span>
+                                        </div>
+                                        
+                                        <!-- Attributes / Payloads (Collapsible) -->
+                                        <div x-data="{ open: false }" x-show="Object.keys(span.attributes || {}).length > 0">
+                                            <button @click="open = !open" class="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 mb-2">
+                                                <svg class="w-3 h-3 transition-transform" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                                <span x-text="open ? 'Hide Details' : 'View Payload'"></span>
+                                            </button>
+                                            <div x-show="open" class="text-xs font-mono bg-black/60 p-2 rounded border border-gray-800">
+                                                <pre class="whitespace-pre-wrap break-all"><code class="language-json" x-html="highlightJson(span.attributes)"></code></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Content: Config -->
+            <div x-show="activeTab === 'config'" x-cloak class="flex-1 overflow-y-auto p-4 space-y-6">
+                <section class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm" x-init="fetchConfig()">
+                    <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Configuration
+                    </h2>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4">
+                        <div><span class="text-gray-500">Model:</span> <code class="text-blue-400 ml-1" x-text="config.model || 'Loading...'" data-testid="config-model"></code></div>
+                        <div><span class="text-gray-500">API Key:</span> <code class="text-blue-400 ml-1" x-text="config.api_key || 'Not Set'"></code></div>
+                        <div><span class="text-gray-500">Mock Engine:</span> <span class="text-emerald-400 ml-1 font-medium">Enabled</span></div>
+                        <div class="truncate" title="Tools"><span class="text-gray-500">Tools:</span> <code class="text-blue-400 ml-1" x-text="(config.tools && config.tools.length > 0) ? config.tools.map(t => typeof t === 'string' ? t : t.name).join(', ') : 'None'"></code></div>
+                    </div>
+                    
+                    
+                    <!-- System Prompt (Markdown Formatted) -->
+                    <div class="mt-4">
+                        <div class="text-xs text-gray-500 mb-2 uppercase font-semibold">System Prompt</div>
+                        <div class="bg-black/40 border border-gray-800 rounded-lg p-4">
+                            <div class="prose prose-sm prose-invert max-w-none text-gray-300" x-html="config.system_prompt ? marked.parse(config.system_prompt) : '<span class=\'text-gray-500 italic\'>No system prompt configured.</span>'"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tools Section -->
+                    <div class="mt-6" x-show="config.tools && config.tools.length > 0">
+                        <div class="text-xs text-gray-500 mb-2 uppercase font-semibold">Registered Tools</div>
+                        <div class="space-y-4">
+                            <template x-for="tool in config.tools" :key="tool.name || tool">
+                                <div class="bg-black/40 border border-gray-800 rounded-lg p-0 overflow-hidden">
+                                    <div class="bg-gray-800/50 px-3 py-2 border-b border-gray-800 flex justify-between items-center">
+                                        <span class="text-xs font-mono text-blue-400" x-text="tool.name || tool"></span>
+                                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Python Source</span>
+                                    </div>
+                                    <div class="p-3 overflow-x-auto">
+                                        <pre class="text-[11px] font-mono text-gray-300 leading-relaxed"><code class="language-python" x-html="tool.source ? hljs.highlight(tool.source, {language: 'python'}).value : '# No source available'"></code></pre>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Content: Live Logs -->
+            <div x-show="activeTab === 'logs'" x-cloak class="flex-1 flex flex-col min-h-0 bg-[#0d1117]" data-testid="live-logs-container">
+                <div class="bg-gray-900 border-b border-gray-800 px-4 py-2 flex items-center justify-between shadow-sm z-10 shrink-0">
+                    <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                        Live Logs
+                    </h2>
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <input type="text" x-model="logFilter" placeholder="Search logs..." class="bg-gray-800 border border-gray-700 text-[10px] px-2 py-1 rounded w-32 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-200">
+                        </div>
+                        <button @click="autoScroll = !autoScroll" class="text-xs px-2 py-1 rounded transition-colors border whitespace-nowrap" :class="autoScroll ? 'bg-blue-900/30 text-blue-400 border-blue-800' : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700'">
+                            <span x-text="autoScroll ? '⏸ Pause' : '▶ Resume'"></span>
+                        </button>
+                        <button @click="exportLogs()" class="text-xs px-2 py-1 bg-gray-800 text-gray-400 border border-gray-700 rounded hover:bg-gray-700 transition-colors">
+                            Export
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="live-logs" 
+                     class="flex-1 overflow-y-auto p-4 font-mono text-[11px] leading-relaxed break-words"
+                     hx-get="/studio/api/logs" 
+                     hx-trigger="every 1s" 
+                     hx-swap="innerHTML"
+                     @htmx:after-swap="filterLogs(); if(autoScroll) { $el.scrollTop = $el.scrollHeight; }"
+                     x-init="$watch('logFilter', () => filterLogs())">
+                    <!-- Logs injected here via HTMX -->
+                    <div class="text-gray-500 italic">Connecting to log stream...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Client-side Logic -->
+    <script>
+        const form = document.getElementById('chat-form');
+        const input = document.getElementById('chat-input');
+        
+        // Handle Enter to submit (Shift+Enter for newline)
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+        });
+
+        // Simple chat logic mapped from original
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const history = document.getElementById('chat-history');
+            const loading = document.getElementById('loading-indicator');
+            
+            // Append User Message
+            history.insertAdjacentHTML('beforeend', `
+                <div class="flex gap-4 flex-row-reverse">
+                    <div class="px-2 py-1 h-10 bg-gray-700 border border-gray-600 rounded-full flex shrink-0 items-center justify-center text-gray-300 text-xs shadow">You</div>
+                    <div class="border rounded-2xl p-4 max-w-[85%] shadow-sm leading-relaxed bg-blue-600 text-white border-blue-500 rounded-tr-sm text-sm">
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `);
+            history.scrollTop = history.scrollHeight;
+            input.value = '';
+            loading.classList.remove('hidden');
+
+            try {
+                const formData = new FormData();
+                formData.append('message', message);
+                formData.append('user_id', 'studio_user');
+                formData.append('session_id', 'studio_session');
+                formData.append('tenant_id', 'local_dev');
+
+                const response = await fetch('/chat', { method: 'POST', body: formData });
+                const data = await response.json();
+                
+                // Append Agent Message
+                history.insertAdjacentHTML('beforeend', `
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">{{ agent_name_short }}</div>
+                        <div class="border rounded-2xl p-4 max-w-[85%] shadow-sm leading-relaxed bg-gray-800 text-gray-200 border-gray-700 rounded-tl-sm text-sm">
+                            ${(data.response || "Task completed.").replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+                `);
+            } catch (err) {
+                history.insertAdjacentHTML('beforeend', `<div class="text-red-400 text-sm text-center">Error communicating with agent.</div>`);
+            } finally {
+                loading.classList.add('hidden');
+                history.scrollTop = history.scrollHeight;
+            }
+        });
+
+        // Alpine State
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('studioState', () => ({
+                leftWidth: 50,
+                isDragging: false,
+                activeTab: 'trace',
+                config: {},
+                spans: [],
+                autoScroll: true,
+                isPolling: false,
+                logFilter: '',
+
+                filterLogs() {
+                    const logs = document.querySelectorAll('#live-logs > div');
+                    const term = this.logFilter.toLowerCase();
+                    logs.forEach(log => {
+                        if (log.textContent.toLowerCase().includes(term)) {
+                            log.style.display = '';
+                        } else {
+                            log.style.display = 'none';
+                        }
+                    });
+                },
+
+                startDrag(e) {
+                    this.isDragging = true;
+                    e.preventDefault(); // Prevent text selection
+                    
+                    const moveHandler = (e) => {
+                        if (!this.isDragging) return;
+                        const container = this.$refs.splitContainer;
+                        const containerRect = container.getBoundingClientRect();
+                        let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+                        if (newWidth < 20) newWidth = 20;
+                        if (newWidth > 80) newWidth = 80;
+                        this.leftWidth = newWidth;
+                    };
+                    
+                    const upHandler = () => {
+                        this.isDragging = false;
+                        document.removeEventListener('mousemove', moveHandler);
+                        document.removeEventListener('mouseup', upHandler);
+                    };
+                    
+                    document.addEventListener('mousemove', moveHandler);
+                    document.addEventListener('mouseup', upHandler);
+                },
+
+                exportLogs() {
+                    const logs = Array.from(document.querySelectorAll('#live-logs > div'))
+                        .map(div => div.textContent)
+                        .join('\n');
+                    const blob = new Blob([logs], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `agent_logs_${new Date().toISOString()}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                },
+                
+                async fetchConfig() {
+                    try {
+                        const res = await fetch('/studio/api/config');
+                        this.config = await res.json();
+                    } catch (e) { console.error("Failed to fetch config"); }
+                },
+
+                async pollTelemetry() {
+                    setInterval(async () => {
+                        this.isPolling = true;
+                        try {
+                            const res = await fetch('/studio/api/telemetry');
+                            const data = await res.json();
+                            
+                            // Basic diffing to avoid destroying state
+                            if (JSON.stringify(data) !== JSON.stringify(this.spans)) {
+                                this.spans = data;
+                            }
+                        } catch (e) {
+                            console.error("Telemetry error");
+                        } finally {
+                            setTimeout(() => this.isPolling = false, 500);
+                        }
+                    }, 2000);
+                },
+
+                highlightJson(obj) {
+                    if (!obj) return '';
+                    try {
+                        const str = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
+                        return hljs.highlight(str, {language: 'json'}).value;
+                    } catch(e) {
+                        return JSON.stringify(obj, null, 2);
+                    }
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
+</html>
