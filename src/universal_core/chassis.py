@@ -77,25 +77,35 @@ except ImportError:
             max_retries = 3
             base_delay = 2
             
-            for attempt in range(max_retries):
-                try:
-                    response = await acompletion(
-                        model=self.model,
-                        messages=[{"role": "user", "content": prompt}],
-                        temperature=self.temperature
-                    )
-                    return response.choices[0].message.content
-                except litellm.ServiceUnavailableError as e:
-                    if attempt < max_retries - 1:
-                        delay = base_delay * (2 ** attempt)
-                        logger.warning(f"LLM Service Unavailable. Retrying in {delay}s... (Attempt {attempt + 1}/{max_retries})")
-                        await asyncio.sleep(delay)
-                    else:
-                        logger.error(f"LLM Generation Error: Service Unavailable after {max_retries} attempts.")
+            tracer = trace.get_tracer(__name__) if OTEL_AVAILABLE else None
+            
+            with (tracer.start_as_current_span("LLM Generate") if tracer else __import__('contextlib').nullcontext()) as span:
+                if span:
+                    span.set_attribute("messages", json.dumps([{"role": "user", "content": prompt}]))
+                    span.set_attribute("model", self.model)
+                    
+                for attempt in range(max_retries):
+                    try:
+                        response = await acompletion(
+                            model=self.model,
+                            messages=[{"role": "user", "content": prompt}],
+                            temperature=self.temperature
+                        )
+                        result = response.choices[0].message.content
+                        if span:
+                            span.set_attribute("response", result)
+                        return result
+                    except litellm.ServiceUnavailableError as e:
+                        if attempt < max_retries - 1:
+                            delay = base_delay * (2 ** attempt)
+                            logger.warning(f"LLM Service Unavailable. Retrying in {delay}s... (Attempt {attempt + 1}/{max_retries})")
+                            await asyncio.sleep(delay)
+                        else:
+                            logger.error(f"LLM Generation Error: Service Unavailable after {max_retries} attempts.")
+                            raise e
+                    except Exception as e:
+                        logger.error(f"LLM Generation Error: {str(e)}")
                         raise e
-                except Exception as e:
-                    logger.error(f"LLM Generation Error: {str(e)}")
-                    raise e
                 
         async def ping(self):
             """Fast-fail probe test."""
@@ -203,8 +213,10 @@ class BaseAgentChassis:
             if OTEL_AVAILABLE:
                 self.studio_span_exporter = InMemorySpanExporter()
                 provider = trace.get_tracer_provider()
-                if isinstance(provider, trace_sdk.TracerProvider):
-                    provider.add_span_processor(SimpleSpanProcessor(self.studio_span_exporter))
+                if not isinstance(provider, trace_sdk.TracerProvider):
+                    provider = trace_sdk.TracerProvider()
+                    trace.set_tracer_provider(provider)
+                provider.add_span_processor(SimpleSpanProcessor(self.studio_span_exporter))
 
         self.app = FastAPI(title="BaseAgentChassis API")
         self.app.state.chassis = self
@@ -327,11 +339,16 @@ class BaseAgentChassis:
             if not chassis.enable_studio:
                 return JSONResponse({})
             
+            import os
+            api_key = os.getenv("GEMINI_API_KEY", "")
+            masked_key = f"{api_key[:4]}...{api_key[-4:]}" if len(api_key) > 8 else "Not Set or Too Short"
+            
             return JSONResponse({
                 "model": getattr(chassis.llm_agent, "model", "Unknown"),
                 "system_prompt": chassis.config.get("agent", {}).get("system_prompt", ""),
                 "tools": chassis.config.get("agent", {}).get("tools", []),
-                "skills": chassis.config.get("agent", {}).get("skills", [])
+                "skills": chassis.config.get("agent", {}).get("skills", []),
+                "api_key": masked_key
             })
 
         @self.app.get("/studio/api/telemetry")
@@ -446,23 +463,29 @@ class BaseAgentChassis:
                 return {"response": f"I received your message: '{message}'. No agents are currently registered to process it."}
             
             try:
-                # Get the first registered consumer as the target for the Studio UI
-                consumer = self._consumers[0]
-                target_func = consumer.func
-                payload_model = consumer.payload_model
-                
-                context = AgentContext(user_id=user_id, session_id=session_id, tenant_id=tenant_id)
-                
-                # Dynamically translate the raw chat message into the required structured payload
-                prompt = f"Extract the user's intent from the following chat message into the required JSON payload schema. If any required fields are missing from the user's message, infer them or provide reasonable placeholder defaults (e.g., 'Unknown', 'N/A', or a generic name)."
-                prompt += f"\nUser Message: {message}"
-                if file_id:
-                    prompt += f"\n[Attached File ID: {file_id}]"
+                tracer = trace.get_tracer(__name__) if OTEL_AVAILABLE else None
+                with (tracer.start_as_current_span("User Request") if tracer else __import__('contextlib').nullcontext()) as span:
+                    if span:
+                        span.set_attribute("message", message)
+                        if file_id: span.set_attribute("file_id", file_id)
+                        
+                    # Get the first registered consumer as the target for the Studio UI
+                    consumer = self._consumers[0]
+                    target_func = consumer.func
+                    payload_model = consumer.payload_model
                     
-                structured_payload = await self.ask_structured(prompt, payload_model)
-                
-                # Execute the target agent function directly
-                agent_response = await target_func(structured_payload, context)
+                    context = AgentContext(user_id=user_id, session_id=session_id, tenant_id=tenant_id)
+                    
+                    # Dynamically translate the raw chat message into the required structured payload
+                    prompt = f"Extract the user's intent from the following chat message into the required JSON payload schema. If any required fields are missing from the user's message, infer them or provide reasonable placeholder defaults (e.g., 'Unknown', 'N/A', or a generic name)."
+                    prompt += f"\nUser Message: {message}"
+                    if file_id:
+                        prompt += f"\n[Attached File ID: {file_id}]"
+                        
+                    structured_payload = await self.ask_structured(prompt, payload_model)
+                    
+                    # Execute the target agent function directly
+                    agent_response = await target_func(structured_payload, context)
                 
                 # Format the response back to the UI
                 if hasattr(agent_response, 'model_dump_json'):
@@ -550,17 +573,31 @@ class BaseAgentChassis:
         """
         if not jinja2:
             raise RuntimeError("jinja2 is required for execute_task.")
+            
+        tracer = trace.get_tracer(__name__) if OTEL_AVAILABLE else None
         
-        env = jinja2.Environment()
-        template = env.from_string(template_str)
-        
-        # Inject standard AgentContext variables
-        template_vars['user_id'] = context.user_id
-        template_vars['session_id'] = context.session_id
-        template_vars['tenant_id'] = context.tenant_id
-        
-        rendered_prompt = template.render(**template_vars)
-        return await self.ask_structured(rendered_prompt, response_model)
+        with (tracer.start_as_current_span("Execute Task") if tracer else __import__('contextlib').nullcontext()) as span:
+            if span:
+                # Store the template string in chassis config dynamically so the UI can read it
+                if not self.config.get("agent"): self.config["agent"] = {}
+                self.config["agent"]["system_prompt"] = template_str
+                
+                span.set_attribute("template_vars", json.dumps(template_vars, default=str))
+
+            env = jinja2.Environment()
+            template = env.from_string(template_str)
+            
+            # Inject standard AgentContext variables
+            template_vars['user_id'] = context.user_id
+            template_vars['session_id'] = context.session_id
+            template_vars['tenant_id'] = context.tenant_id
+            
+            rendered_prompt = template.render(**template_vars)
+            
+            result = await self.ask_structured(rendered_prompt, response_model)
+            if span:
+                span.set_attribute("result", json.dumps(result.model_dump(), default=str))
+            return result
 
     def consume_task(self, queue_name: str, payload_model: Type[T], max_retries: int = 3):
         """

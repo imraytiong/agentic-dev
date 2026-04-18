@@ -19,7 +19,21 @@ def load_config() -> Dict[str, Any]:
     return {}
 
 config = load_config()
-chassis = BaseAgentChassis(config)
+
+import os
+
+# Preload System Prompt and Tools for Studio UI visibility
+prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "system_prompt.jinja")
+if os.path.exists(prompt_path):
+    with open(prompt_path, "r") as f:
+        config.setdefault("agent", {})["system_prompt"] = f.read()
+else:
+    config.setdefault("agent", {})["system_prompt"] = "Say hello to {{ developer_name }} who is feeling {{ current_mood }}. Include this affirmation: {{ affirmation }}. Current interactions: {{ count }}"
+
+config.setdefault("agent", {})["tools"] = ["get_affirmation"]
+
+enable_studio = os.getenv("ENABLE_STUDIO", "false").lower() in ("true", "1", "yes")
+chassis = BaseAgentChassis(config, enable_studio=enable_studio)
 
 @chassis.consume_task(queue_name="hello_jobs", payload_model=HelloRequest)
 async def process_hello(payload: HelloRequest, context: AgentContext):
@@ -43,15 +57,7 @@ async def process_hello(payload: HelloRequest, context: AgentContext):
     affirmation = get_affirmation(payload.current_mood)
     
     # 4. Execute Task via LLM 
-    # (Loading prompt template - assuming it will be in the prompts directory created in Layer 5)
-    prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "system_prompt.jinja")
-    template_str = ""
-    if os.path.exists(prompt_path):
-        with open(prompt_path, "r") as f:
-            template_str = f.read()
-    else:
-        # Fallback template if file doesn't exist yet
-        template_str = "Say hello to {{ developer_name }} who is feeling {{ current_mood }}. Include this affirmation: {{ affirmation }}. Current interactions: {{ count }}"
+    template_str = config.get("agent", {}).get("system_prompt", "")
         
     template_vars = {
         "developer_name": payload.developer_name,
