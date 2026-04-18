@@ -2,8 +2,33 @@ import importlib
 import logging
 import json
 import asyncio
+import collections
+import pathlib
+import sys
 from typing import Dict, Any, Optional, Type, TypeVar
 from pydantic import BaseModel, ValidationError
+
+try:
+    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+    from opentelemetry import trace
+    import opentelemetry.sdk.trace as trace_sdk
+    OTEL_AVAILABLE = True
+except ImportError:
+    OTEL_AVAILABLE = False
+
+class MemoryLogHandler(logging.Handler):
+    def __init__(self, capacity=100):
+        super().__init__()
+        self.buffer = collections.deque(maxlen=capacity)
+        self.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    def emit(self, record):
+        self.buffer.append({
+            "level": record.levelname,
+            "message": self.format(record),
+            "time": record.created
+        })
+
 
 try:
     from dotenv import load_dotenv
@@ -17,8 +42,8 @@ except ImportError:
     jinja2 = None
 
 try:
-    from fastapi import FastAPI, UploadFile, File, HTTPException
-    from fastapi.responses import HTMLResponse, StreamingResponse
+    from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
+    from fastapi.responses import HTMLResponse, StreamingResponse, RedirectResponse, JSONResponse
 except ImportError:
     FastAPI = None
 
@@ -112,7 +137,7 @@ class BaseAgentChassis:
     Dynamically loads environment-specific infrastructure via Inversion of Control.
     """
 
-    def __init__(self, config: Dict[str, Any], mock_infrastructure: bool = False):
+    def __init__(self, config: Dict[str, Any], mock_infrastructure: bool = False, enable_studio: bool = False):
         """
         Initialize the Chassis. 
         `config` should be the merged configuration (e.g., fleet.yaml + config.yaml).
@@ -166,7 +191,23 @@ class BaseAgentChassis:
             logger.info("BaseAgentChassis initialized with dynamic infrastructure.")
 
         # 3. Initialize FastAPI App Embedded within the Chassis
+        self.enable_studio = enable_studio
+        self.studio_log_handler = None
+        self.studio_span_exporter = None
+        
+        if self.enable_studio:
+            self.studio_log_handler = MemoryLogHandler(capacity=100)
+            self.studio_log_handler.setLevel(logging.DEBUG)
+            logging.getLogger().addHandler(self.studio_log_handler)
+            
+            if OTEL_AVAILABLE:
+                self.studio_span_exporter = InMemorySpanExporter()
+                provider = trace.get_tracer_provider()
+                if isinstance(provider, trace_sdk.TracerProvider):
+                    provider.add_span_processor(SimpleSpanProcessor(self.studio_span_exporter))
+
         self.app = FastAPI(title="BaseAgentChassis API")
+        self.app.state.chassis = self
         self._register_routes()
         self._background_tasks = []
 
@@ -181,7 +222,7 @@ class BaseAgentChassis:
                 self._background_tasks.append(task)
             logger.info(f"Launched {len(self._consumers)} background consumers.")
 
-    def run_local(self, host: str = "0.0.0.0", port: int = 8000):
+    def run_local(self, host: str = "0.0.0.0", port: int = 8000, quiet: bool = False):
         """
         Boot the Uvicorn/FastAPI server to serve the chassis locally.
         This is a blocking call and should be the entry point for running the application.
@@ -193,6 +234,25 @@ class BaseAgentChassis:
         
         import os
         import sys
+        import argparse
+        
+        parser = argparse.ArgumentParser(description="Run BaseAgentChassis")
+        parser.add_argument("--quiet", "-q", action="store_true", help="Reduce console log output")
+        args, _ = parser.parse_known_args()
+        if args.quiet:
+            quiet = True
+
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.DEBUG)
+        console_handler = next((h for h in root_logger.handlers if isinstance(h, logging.StreamHandler)), None)
+        if not console_handler:
+            console_handler = logging.StreamHandler(sys.stdout)
+            root_logger.addHandler(console_handler)
+        
+        if quiet:
+            console_handler.setLevel(logging.INFO)
+        else:
+            console_handler.setLevel(logging.DEBUG)
 
         # Startup Logging for LLM Probe
         model_str = getattr(self.llm_agent, 'model', 'Unknown')
@@ -257,227 +317,108 @@ class BaseAgentChassis:
             logger.warning("FastAPI not installed. Routes will not be available.")
             return
 
+        @self.app.get("/")
+        async def root_redirect():
+            return RedirectResponse(url="/studio")
+
+        @self.app.get("/studio/api/config")
+        async def get_studio_config(request: Request):
+            chassis = request.app.state.chassis
+            if not chassis.enable_studio:
+                return JSONResponse({})
+            
+            return JSONResponse({
+                "model": getattr(chassis.llm_agent, "model", "Unknown"),
+                "system_prompt": chassis.config.get("agent", {}).get("system_prompt", ""),
+                "tools": chassis.config.get("agent", {}).get("tools", []),
+                "skills": chassis.config.get("agent", {}).get("skills", [])
+            })
+
+        @self.app.get("/studio/api/telemetry")
+        async def get_studio_telemetry(request: Request):
+            chassis = request.app.state.chassis
+            if not chassis.enable_studio or not chassis.studio_span_exporter:
+                return JSONResponse([])
+                
+            spans = chassis.studio_span_exporter.get_finished_spans()
+            spans = spans[-500:]
+            
+            serialized = []
+            for span in spans:
+                attributes = {}
+                if span.attributes:
+                    for k, v in span.attributes.items():
+                        try:
+                            attributes[k] = json.loads(v) if isinstance(v, str) and (v.startswith('{') or v.startswith('[')) else v
+                        except:
+                            attributes[k] = v
+                            
+                span_type = "unknown"
+                name_lower = span.name.lower()
+                if "user" in name_lower: span_type = "user"
+                elif "llm" in name_lower or "generate" in name_lower: span_type = "llm"
+                elif "tool" in name_lower: span_type = "tool"
+                
+                if not span.status.is_ok:
+                    span_type = "error"
+                    
+                duration_ms = (span.end_time - span.start_time) / 1000000 if span.end_time and span.start_time else 0
+                
+                serialized.append({
+                    "span_id": format(span.context.span_id, '016x'),
+                    "trace_id": format(span.context.trace_id, '032x'),
+                    "name": span.name,
+                    "type": span_type,
+                    "duration_ms": round(duration_ms, 2),
+                    "attributes": attributes
+                })
+                
+            return JSONResponse(serialized)
+
+        @self.app.get("/studio/api/logs")
+        async def get_studio_logs(request: Request):
+            chassis = request.app.state.chassis
+            if not chassis.enable_studio or not chassis.studio_log_handler:
+                return HTMLResponse("<div class='text-gray-500'>Logs disabled.</div>")
+                
+            import html as html_lib
+            html_fragments = []
+            for record in chassis.studio_log_handler.buffer:
+                level = record["level"]
+                msg = record["message"]
+                
+                color = "text-gray-400"
+                if level == "INFO": color = "text-blue-400"
+                elif level == "WARNING": color = "text-yellow-400"
+                elif level in ("ERROR", "CRITICAL"): color = "text-red-500 font-bold"
+                
+                msg_escaped = html_lib.escape(msg)
+                html_fragments.append(f"<div class='{color} mb-1'>{msg_escaped}</div>")
+                
+            if not html_fragments:
+                return HTMLResponse("<div class='text-gray-500 italic'>Waiting for first request...</div>")
+            return HTMLResponse("".join(html_fragments))
+
         @self.app.get("/studio", response_class=HTMLResponse)
-        async def get_studio():
+        async def get_studio(request: Request):
             """Returns the Agent Studio UI."""
+            chassis = request.app.state.chassis
+            if not chassis.enable_studio:
+                raise HTTPException(status_code=404, detail="Studio disabled.")
+                
             agent_name = self.config.get("agent", {}).get("name", "Agent")
             model_name = getattr(self.llm_agent, "model", "Unknown")
             
-            html_content = """
-            <!DOCTYPE html>
-            <html lang="en" class="dark">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Agent Studio: __AGENT_NAME__</title>
-                <script src="https://cdn.tailwindcss.com"></script>
-                <script>
-                    tailwind.config = {
-                        darkMode: 'class',
-                    }
-                </script>
-                <style>
-                    /* Custom scrollbar for webkit */
-                    ::-webkit-scrollbar { width: 8px; }
-                    ::-webkit-scrollbar-track { background: #1f2937; }
-                    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-                    ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-                </style>
-            </head>
-            <body class="bg-gray-900 text-gray-100 h-screen flex flex-col antialiased">
-                
-                <!-- Header -->
-                <header class="bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg text-sm">__AGENT_NAME_SHORT__</div>
-                        <h1 class="text-xl font-semibold tracking-tight text-white">Agent Studio: __AGENT_NAME__</h1>
-                    </div>
-                    <div class="text-sm text-gray-400 bg-gray-900 px-3 py-1 rounded-full border border-gray-700">v1.0</div>
-                </header>
-
-                <!-- Chat History -->
-                <main id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                    <!-- Initial Welcome Message -->
-                    <div class="flex gap-4">
-                        <div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">__AGENT_NAME_SHORT__</div>
-                        <div class="bg-gray-800 border border-gray-700 rounded-2xl rounded-tl-sm p-4 max-w-[85%] shadow-sm text-gray-200 leading-relaxed">
-                            <strong>System Note:</strong><br>
-                            Loaded Agent: <code>__AGENT_NAME__</code><br>
-                            Model: <code>__MODEL_NAME__</code><br>
-                            Status: Ready for input.
-                        </div>
-                    </div>
-                </main>
-
-                <!-- Loading Indicator (Hidden by default) -->
-                <div id="loading-indicator" class="hidden px-6 pb-2 text-sm text-gray-400 flex items-center gap-2">
-                    <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Agent is typing...
-                </div>
-
-                <!-- Input Area -->
-                <footer class="bg-gray-800 border-t border-gray-700 p-4 shrink-0">
-                    <div class="max-w-4xl mx-auto">
-                        <form id="chat-form" class="relative flex items-end gap-2 bg-gray-900 rounded-2xl border border-gray-700 p-2 shadow-inner focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
-                            
-                            <!-- File Upload Button -->
-                            <label for="file-upload" class="cursor-pointer p-3 text-gray-400 hover:text-blue-400 transition-colors rounded-xl hover:bg-gray-800 shrink-0 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 group-hover:scale-110 transition-transform">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
-                                </svg>
-                            </label>
-                            <input id="file-upload" type="file" name="file" class="hidden" accept="*/*" />
-                            
-                            <!-- Display selected filename -->
-                            <div id="file-name-display" class="hidden absolute -top-8 left-4 text-xs bg-blue-900 text-blue-200 px-3 py-1 rounded-full flex items-center gap-2 border border-blue-700 shadow-sm">
-                                <span id="file-name-text" class="truncate max-w-[200px]"></span>
-                                <button type="button" id="remove-file" class="hover:text-white">&times;</button>
-                            </div>
-
-                            <!-- Text Input -->
-                            <textarea id="chat-input" name="message" rows="1" class="w-full bg-transparent text-gray-100 placeholder-gray-500 border-none focus:ring-0 resize-none py-3 px-2 text-[15px] leading-relaxed" placeholder="Type a message..."></textarea>
-                            
-                            <!-- Submit Button -->
-                            <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 shadow-md">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                                </svg>
-                            </button>
-                        </form>
-                        <div class="text-center mt-3 text-xs text-gray-500">
-                            Running on BaseAgentChassis • Mock Infrastructure
-                        </div>
-                    </div>
-                </footer>
-
-                <script>
-                    const form = document.getElementById('chat-form');
-                    const input = document.getElementById('chat-input');
-                    const history = document.getElementById('chat-history');
-                    const loading = document.getElementById('loading-indicator');
-                    const fileUpload = document.getElementById('file-upload');
-                    const fileNameDisplay = document.getElementById('file-name-display');
-                    const fileNameText = document.getElementById('file-name-text');
-                    const removeFileBtn = document.getElementById('remove-file');
-                    
-                    const agentName = "__AGENT_NAME__";
-                    const agentNameShort = "__AGENT_NAME_SHORT__";
-
-                    // Auto-resize textarea
-                    input.addEventListener('input', function() {
-                        this.style.height = 'auto';
-                        this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
-                    });
-
-                    // Handle Enter to submit (Shift+Enter for newline)
-                    input.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            form.dispatchEvent(new Event('submit'));
-                        }
-                    });
-
-                    // File upload UI handling
-                    fileUpload.addEventListener('change', function() {
-                        if (this.files && this.files[0]) {
-                            fileNameText.textContent = this.files[0].name;
-                            fileNameDisplay.classList.remove('hidden');
-                        } else {
-                            fileNameDisplay.classList.add('hidden');
-                        }
-                    });
-
-                    removeFileBtn.addEventListener('click', function() {
-                        fileUpload.value = '';
-                        fileNameDisplay.classList.add('hidden');
-                    });
-
-                    // Basic Markdown Link Parser
-                    function parseMarkdownLinks(text) {
-                        return text.replace(/\\[(.*?)\\]\\((.*?)\\)/g, '<a href="$2" class="text-blue-400 hover:text-blue-300 font-medium underline decoration-blue-500/30 underline-offset-4" target="_blank">$1</a>');
-                    }
-
-                    // Append a message to the UI
-                    function appendMessage(text, isUser = false, fileName = null) {
-                        const div = document.createElement('div');
-                        div.className = "flex gap-4 " + (isUser ? "flex-row-reverse" : "");
-                        
-                        let avatar = isUser 
-                            ? `<div class="px-2 py-1 h-10 bg-gray-700 border border-gray-600 rounded-full flex shrink-0 items-center justify-center text-gray-300 text-xs shadow">You</div>`
-                            : `<div class="w-10 h-10 bg-blue-600 rounded-full flex shrink-0 items-center justify-center font-bold text-white text-xs shadow">${agentNameShort}</div>`;
-                            
-                        let bubbleClass = isUser
-                            ? "bg-blue-600 text-white border-blue-500 rounded-tr-sm"
-                            : "bg-gray-800 text-gray-200 border-gray-700 rounded-tl-sm";
-
-                        let fileAttachmentHtml = fileName ? `
-                            <div class="flex items-center gap-2 mb-2 p-2 rounded-lg bg-black/20 border border-black/10 text-sm">
-                                <span>📎</span> <span class="truncate opacity-90">${fileName}</span>
-                            </div>
-                        ` : "";
-
-                        let contentHtml = isUser ? text.replace(/\\n/g, '<br>') : parseMarkdownLinks(text.replace(/\\n/g, '<br>'));
-
-                        div.innerHTML = `
-                            ${avatar}
-                            <div class="border rounded-2xl p-4 max-w-[85%] shadow-sm leading-relaxed ${bubbleClass}">
-                                ${fileAttachmentHtml}
-                                <div>${contentHtml}</div>
-                            </div>
-                        `;
-                        history.appendChild(div);
-                        history.scrollTop = history.scrollHeight;
-                    }
-
-                    form.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const message = input.value.trim();
-                        const file = fileUpload.files[0];
-                        
-                        if (!message && !file) return;
-
-                        // UI Updates
-                        appendMessage(message || "(File Upload)", true, file ? file.name : null);
-                        input.value = '';
-                        input.style.height = 'auto';
-                        fileUpload.value = '';
-                        fileNameDisplay.classList.add('hidden');
-                        loading.classList.remove('hidden');
-
-                        try {
-                            const formData = new FormData();
-                            if (message) formData.append('message', message);
-                            if (file) formData.append('file', file);
-                            formData.append('user_id', 'studio_user');
-                            formData.append('session_id', 'studio_session');
-                            formData.append('tenant_id', 'local_dev');
-
-                            const response = await fetch('/chat', {
-                                method: 'POST',
-                                body: formData
-                            });
-
-                            if (!response.ok) throw new Error("Server Error");
-                            
-                            const data = await response.json();
-                            appendMessage(data.response || "Task completed.");
-
-                        } catch (err) {
-                            appendMessage("⚠️ Error communicating with agent.", false);
-                        } finally {
-                            loading.classList.add('hidden');
-                        }
-                    });
-                </script>
-            </body>
-            </html>
-            """
-            html_content = html_content.replace("__AGENT_NAME__", str(agent_name))
-            html_content = html_content.replace("__AGENT_NAME_SHORT__", str(agent_name)[:3].upper())
-            html_content = html_content.replace("__MODEL_NAME__", str(model_name))
+            template_path = pathlib.Path(__file__).parent / "studio.html"
+            try:
+                with open(template_path, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+            except FileNotFoundError:
+                raise HTTPException(status_code=500, detail="Studio template not found.")
+            
+            html_content = html_content.replace("{{ agent_name }}", str(agent_name))
+            html_content = html_content.replace("{{ agent_name_short }}", str(agent_name)[:3].upper())
+            html_content = html_content.replace("{{ model_name }}", str(model_name))
             
             return html_content
 
