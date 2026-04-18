@@ -38,8 +38,7 @@ else:
     )
 
 config.setdefault("agent", {})["tools"] = [
-    {"name": "get_affirmation", "description": (inspect.getdoc(get_affirmation) or "").split("\n")[0], "source": inspect.getsource(get_affirmation)},
-    {"name": "get_weather", "description": (inspect.getdoc(get_weather) or "").split("\n")[0], "source": inspect.getsource(get_weather)}
+    get_affirmation, get_weather
 ]
 
 enable_studio = os.getenv("ENABLE_STUDIO", "false").lower() in ("true", "1", "yes")
