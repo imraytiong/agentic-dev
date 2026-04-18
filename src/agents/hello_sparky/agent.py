@@ -32,7 +32,7 @@ else:
     config.setdefault("agent", {})["system_prompt"] = "Say hello to {{ developer_name }} who is feeling {{ current_mood }}. Include this affirmation: {{ affirmation }}. Current interactions: {{ count }}"
 
 config.setdefault("agent", {})["tools"] = [
-    {"name": "get_affirmation", "source": inspect.getsource(get_affirmation)}
+    {"name": "get_affirmation", "description": (inspect.getdoc(get_affirmation) or "").split("\n")[0], "source": inspect.getsource(get_affirmation)}
 ]
 
 enable_studio = os.getenv("ENABLE_STUDIO", "false").lower() in ("true", "1", "yes")
