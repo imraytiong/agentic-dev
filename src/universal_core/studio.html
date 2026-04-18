@@ -6,7 +6,8 @@
     <title>Agent Studio: {{ agent_name }}</title>
     
     <!-- CDN Dependencies -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
@@ -19,6 +20,7 @@
         }
     </script>
     <style>
+        [x-cloak] { display: none !important; }
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #1f2937; }
@@ -40,7 +42,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-100 h-screen flex flex-col antialiased overflow-hidden" x-data="studioState()">
+<body class="bg-gray-950 text-gray-100 h-screen flex flex-col antialiased overflow-hidden" x-data="studioState()" x-cloak>
     
     <!-- Header -->
     <header class="bg-gray-900 border-b border-gray-800 p-4 flex items-center justify-between shrink-0 z-10 relative shadow-md">
@@ -90,39 +92,19 @@
             </footer>
         </div>
 
-        <!-- Right Pane: Developer Dashboard (Strict Flexbox Column) -->
-        <div class="flex flex-col h-full bg-gray-950 overflow-hidden">
+        <!-- Right Pane: Developer Dashboard (Tabs Layout) -->
+        <div class="flex flex-col h-full bg-gray-950 overflow-hidden relative">
             
-            <!-- Top 60%: Configuration & Telemetry -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-6" style="flex-basis: 60%;" data-testid="telemetry-panel">
-                
-                <!-- Section A: Configuration -->
-                <section class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm" x-init="fetchConfig()">
-                    <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Configuration
-                    </h2>
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4">
-                        <div><span class="text-gray-500">Model:</span> <code class="text-blue-400 ml-1" x-text="config.model || 'Loading...'" data-testid="config-model"></code></div>
-                        <div><span class="text-gray-500">API Key:</span> <code class="text-blue-400 ml-1" x-text="config.api_key || 'Not Set'"></code></div>
-                        <div><span class="text-gray-500">Mock Engine:</span> <span class="text-emerald-400 ml-1 font-medium">Enabled</span></div>
-                        <div class="truncate" title="Tools"><span class="text-gray-500">Tools:</span> <code class="text-blue-400 ml-1" x-text="(config.tools && config.tools.length > 0) ? config.tools.join(', ') : 'None'"></code></div>
-                    </div>
-                    
-                    <!-- System Prompt (Collapsible) -->
-                    <div class="mt-4" x-data="{ expanded: false }">
-                        <div class="text-xs text-gray-500 mb-2 uppercase font-semibold">System Prompt</div>
-                        <div class="relative bg-black/40 border border-gray-800 rounded-lg p-3 text-sm font-mono text-gray-300">
-                            <div :class="expanded ? '' : 'line-clamp-3'" x-text="config.system_prompt || 'No system prompt configured.'"></div>
-                            <!-- Fade gradient overlay when collapsed -->
-                            <div x-show="!expanded && config.system_prompt" class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent rounded-b-lg flex items-end justify-center pb-1"></div>
-                            
-                            <button @click="expanded = !expanded" x-show="config.system_prompt" class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gray-800 border border-gray-700 text-xs px-3 py-1 rounded-full text-gray-300 hover:text-white shadow-lg transition-colors" x-text="expanded ? 'Show Less' : 'Show More'"></button>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section B: Execution Trace -->
+            <!-- Tabs Header -->
+            <div class="flex border-b border-gray-800 bg-gray-900 shrink-0 px-2 pt-2 gap-2">
+                <button @click="activeTab = 'trace'" class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2" :class="activeTab === 'trace' ? 'text-blue-400 border-blue-400 bg-gray-800' : 'text-gray-400 border-transparent hover:text-gray-300 hover:bg-gray-800/50'">Trace</button>
+                <button @click="activeTab = 'config'" class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2" :class="activeTab === 'config' ? 'text-blue-400 border-blue-400 bg-gray-800' : 'text-gray-400 border-transparent hover:text-gray-300 hover:bg-gray-800/50'">Config</button>
+                <button @click="activeTab = 'logs'" class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2" :class="activeTab === 'logs' ? 'text-blue-400 border-blue-400 bg-gray-800' : 'text-gray-400 border-transparent hover:text-gray-300 hover:bg-gray-800/50'">Live Logs</button>
+            </div>
+            
+            <!-- Tab Content: Trace & Config -->
+                        <!-- Tab Content: Trace -->
+            <div x-show="activeTab === 'trace'" class="flex-1 overflow-y-auto p-4 space-y-6" data-testid="telemetry-panel">
                 <section class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm" x-init="pollTelemetry()">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-2">
@@ -183,16 +165,67 @@
                 </section>
             </div>
 
-            <!-- Bottom 40%: Live Logs Console -->
-            <div class="h-[40%] border-t border-gray-800 flex flex-col bg-[#0d1117] shrink-0" data-testid="live-logs-container">
+            <!-- Tab Content: Config -->
+            <div x-show="activeTab === 'config'" x-cloak class="flex-1 overflow-y-auto p-4 space-y-6">
+                <section class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm" x-init="fetchConfig()">
+                    <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Configuration
+                    </h2>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4">
+                        <div><span class="text-gray-500">Model:</span> <code class="text-blue-400 ml-1" x-text="config.model || 'Loading...'" data-testid="config-model"></code></div>
+                        <div><span class="text-gray-500">API Key:</span> <code class="text-blue-400 ml-1" x-text="config.api_key || 'Not Set'"></code></div>
+                        <div><span class="text-gray-500">Mock Engine:</span> <span class="text-emerald-400 ml-1 font-medium">Enabled</span></div>
+                        <div class="truncate" title="Tools"><span class="text-gray-500">Tools:</span> <code class="text-blue-400 ml-1" x-text="(config.tools && config.tools.length > 0) ? config.tools.map(t => typeof t === 'string' ? t : t.name).join(', ') : 'None'"></code></div>
+                    </div>
+                    
+                    
+                    <!-- System Prompt (Markdown Formatted) -->
+                    <div class="mt-4">
+                        <div class="text-xs text-gray-500 mb-2 uppercase font-semibold">System Prompt</div>
+                        <div class="bg-black/40 border border-gray-800 rounded-lg p-4">
+                            <div class="prose prose-sm prose-invert max-w-none text-gray-300" x-html="config.system_prompt ? marked.parse(config.system_prompt) : '<span class=\'text-gray-500 italic\'>No system prompt configured.</span>'"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tools Section -->
+                    <div class="mt-6" x-show="config.tools && config.tools.length > 0">
+                        <div class="text-xs text-gray-500 mb-2 uppercase font-semibold">Registered Tools</div>
+                        <div class="space-y-4">
+                            <template x-for="tool in config.tools" :key="tool.name || tool">
+                                <div class="bg-black/40 border border-gray-800 rounded-lg p-0 overflow-hidden">
+                                    <div class="bg-gray-800/50 px-3 py-2 border-b border-gray-800 flex justify-between items-center">
+                                        <span class="text-xs font-mono text-blue-400" x-text="tool.name || tool"></span>
+                                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Python Source</span>
+                                    </div>
+                                    <div class="p-3 overflow-x-auto">
+                                        <pre class="text-[11px] font-mono text-gray-300 leading-relaxed"><code class="language-python" x-html="tool.source ? hljs.highlight(tool.source, {language: 'python'}).value : '# No source available'"></code></pre>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Content: Live Logs -->
+            <div x-show="activeTab === 'logs'" x-cloak class="flex-1 flex flex-col min-h-0 bg-[#0d1117]" data-testid="live-logs-container">
                 <div class="bg-gray-900 border-b border-gray-800 px-4 py-2 flex items-center justify-between shadow-sm z-10 shrink-0">
                     <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                         Live Logs
                     </h2>
-                    <button @click="autoScroll = !autoScroll" class="text-xs px-2 py-1 rounded transition-colors border" :class="autoScroll ? 'bg-blue-900/30 text-blue-400 border-blue-800' : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700'">
-                        <span x-text="autoScroll ? '⏸ Pause Scroll' : '▶ Resume Scroll'"></span>
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <input type="text" x-model="logFilter" placeholder="Search logs..." class="bg-gray-800 border border-gray-700 text-[10px] px-2 py-1 rounded w-32 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-200">
+                        </div>
+                        <button @click="autoScroll = !autoScroll" class="text-xs px-2 py-1 rounded transition-colors border whitespace-nowrap" :class="autoScroll ? 'bg-blue-900/30 text-blue-400 border-blue-800' : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700'">
+                            <span x-text="autoScroll ? '⏸ Pause' : '▶ Resume'"></span>
+                        </button>
+                        <button @click="exportLogs()" class="text-xs px-2 py-1 bg-gray-800 text-gray-400 border border-gray-700 rounded hover:bg-gray-700 transition-colors">
+                            Export
+                        </button>
+                    </div>
                 </div>
                 
                 <div id="live-logs" 
@@ -200,7 +233,8 @@
                      hx-get="/studio/api/logs" 
                      hx-trigger="every 1s" 
                      hx-swap="innerHTML"
-                     @htmx:after-swap="if(autoScroll) { $el.scrollTop = $el.scrollHeight; }">
+                     @htmx:after-swap="filterLogs(); if(autoScroll) { $el.scrollTop = $el.scrollHeight; }"
+                     x-init="$watch('logFilter', () => filterLogs())">
                     <!-- Logs injected here via HTMX -->
                     <div class="text-gray-500 italic">Connecting to log stream...</div>
                 </div>
@@ -275,10 +309,39 @@
         // Alpine State
         document.addEventListener('alpine:init', () => {
             Alpine.data('studioState', () => ({
+                activeTab: 'trace',
                 config: {},
                 spans: [],
                 autoScroll: true,
                 isPolling: false,
+                logFilter: '',
+
+                filterLogs() {
+                    const logs = document.querySelectorAll('#live-logs > div');
+                    const term = this.logFilter.toLowerCase();
+                    logs.forEach(log => {
+                        if (log.textContent.toLowerCase().includes(term)) {
+                            log.style.display = '';
+                        } else {
+                            log.style.display = 'none';
+                        }
+                    });
+                },
+
+                exportLogs() {
+                    const logs = Array.from(document.querySelectorAll('#live-logs > div'))
+                        .map(div => div.textContent)
+                        .join('\n');
+                    const blob = new Blob([logs], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `agent_logs_${new Date().toISOString()}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                },
                 
                 async fetchConfig() {
                     try {

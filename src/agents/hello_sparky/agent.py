@@ -23,6 +23,7 @@ config = load_config()
 import os
 
 # Preload System Prompt and Tools for Studio UI visibility
+import inspect
 prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "system_prompt.jinja")
 if os.path.exists(prompt_path):
     with open(prompt_path, "r") as f:
@@ -30,7 +31,9 @@ if os.path.exists(prompt_path):
 else:
     config.setdefault("agent", {})["system_prompt"] = "Say hello to {{ developer_name }} who is feeling {{ current_mood }}. Include this affirmation: {{ affirmation }}. Current interactions: {{ count }}"
 
-config.setdefault("agent", {})["tools"] = ["get_affirmation"]
+config.setdefault("agent", {})["tools"] = [
+    {"name": "get_affirmation", "source": inspect.getsource(get_affirmation)}
+]
 
 enable_studio = os.getenv("ENABLE_STUDIO", "false").lower() in ("true", "1", "yes")
 chassis = BaseAgentChassis(config, enable_studio=enable_studio)
