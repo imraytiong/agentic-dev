@@ -14,7 +14,15 @@ python-multipart
 pydantic
 jinja2
 
-# Testing & Observability
+# Infrastructure Adapters (Role 2 Mandates)
+asyncpg
+redis[hiredis]
+
+# Testing & Observability (Test Lead Mandates)
 pytest
 pytest-asyncio
 arize-phoenix
+testcontainers[postgres]
+testcontainers[redis]
+toxiproxy-python
+vcrpy

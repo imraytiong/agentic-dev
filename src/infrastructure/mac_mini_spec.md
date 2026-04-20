@@ -89,9 +89,9 @@ Before adapter code is written, the environment must be defined.
 ---
 
 ## 5. Execution Plan
-- [ ] **Phase 1:** Create `compose.yaml` for Postgres/Redis OCI containers (via OrbStack), including the zero-touch DBA `init.sql` script.
-- [ ] **Phase 1.5:** Create `mac_agent_sandbox.sb` profile for native macOS process isolation, and the `Makefile` DevEx wrapper.
-- [ ] **Phase 2:** Implement Test Fixtures (Testcontainers + Toxiproxy + Local LLM Stub).
+- [x] **Phase 1:** Create `compose.yaml` for Postgres/Redis OCI containers (via OrbStack), including the zero-touch DBA `init.sql` script.
+- [x] **Phase 1.5:** Create `mac_agent_sandbox.sb` profile for native macOS process isolation, and the `Makefile` DevEx wrapper.
+- [x] **Phase 2:** Implement Test Fixtures (Testcontainers + Toxiproxy + Local LLM Stub).
 - [ ] **Phase 3:** Implement and test the Redis Message Broker Adapter (proving idempotency and fault tolerance).
 - [ ] **Phase 4:** Implement and test the Postgres State/Vector Adapter (proving concurrency and fault tolerance).
 - [ ] **Phase 5:** Update Chassis IoC to load the new operational adapters.
