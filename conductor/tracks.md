@@ -11,4 +11,4 @@ This file tracks all major tracks for the project. Each track has its own detail
   *Link: [./tracks/build_sparky_20260411/](./tracks/build_sparky_20260411/)*
 
 - [x] **Track: Fix Agent Studio UI**
-  *Link: [./tracks/fix_studio_ui_20260411/](./tracks/fix_studio_ui_20260411/)*
+  *Link: [./tracks/fix_studio_ui_20260411/](./tracks/fix_studio_ui_20260411/)*\n- [ ] **Track: Mac Mini Local Infrastructure (Phase 1 & 1.5)**\n  *Link: [./tracks/mac_mini_infra_20260419/](./tracks/mac_mini_infra_20260419/)*\n
