@@ -94,4 +94,4 @@ Before adapter code is written, the environment must be defined.
 - [x] **Phase 2:** Implement Test Fixtures (Testcontainers + Toxiproxy + Local LLM Stub).
 - [x] **Phase 3:** Implement and test the Redis Message Broker Adapter (proving idempotency and fault tolerance).
 - [x] **Phase 4:** Implement and test the Postgres State/Vector Adapter (proving concurrency and fault tolerance).
-- [ ] **Phase 5:** Update Chassis IoC to load the new operational adapters.
+- [x] **Phase 5:** Update Chassis IoC to load the new operational adapters.

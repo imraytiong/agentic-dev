@@ -156,17 +156,27 @@ class BaseAgentChassis:
         self.config = config
         self.infrastructure_config = self.config.get("infrastructure", {})
         
-        # 1. Instantiate the ADK LlmAgent
+        # 1. Instantiate the ADK LlmAgent (Legacy/Fallback)
         agent_config = self.config.get("agent", {})
         self.llm_agent = LlmAgent(**agent_config)
         
         # Check environment variable override
         import os
+        
+        # Determine environment mode
+        adk_env = os.getenv("ADK_ENV", "").lower()
+        
         if os.getenv("MOCK_INFRASTRUCTURE", "").lower() in ("true", "1", "yes"):
             mock_infrastructure = True
 
-        # 2. Load infrastructure adapters
-        if mock_infrastructure:
+        if not adk_env:
+            if mock_infrastructure:
+                adk_env = "mock"
+            else:
+                adk_env = "dynamic"
+
+        # 2. Load infrastructure adapters based on ADK_ENV
+        if adk_env == "mock":
             logger.info("Initializing Chassis with MOCK infrastructure.")
             from .mock_adapters import (
                 MockStateStore, MockMessageQueue, MockVectorStore, 
@@ -178,7 +188,42 @@ class BaseAgentChassis:
             self.file_storage = MockFileStorage(self.config)
             self.telemetry = MockTelemetry(self.config)
             self.mcp_server = MockMCPServer(self.config)
+            self.llm_provider = self.llm_agent # Use legacy agent for mock fallback
+            
+        elif adk_env == "mac_local":
+            logger.info("Initializing Chassis with MAC_LOCAL adapters.")
+            db_host = os.getenv("DB_HOST")
+            pg_user = os.getenv("POSTGRES_USER")
+            pg_pass = os.getenv("POSTGRES_PASSWORD")
+            pg_db = os.getenv("POSTGRES_DB", "agentic_dev")
+            redis_host = os.getenv("REDIS_HOST")
+            budget = os.getenv("LITELLM_BUDGET")
+            
+            if not all([db_host, pg_user, pg_pass, redis_host]):
+                raise ValueError("Missing required environment variables for mac_local env (DB_HOST, POSTGRES_USER, POSTGRES_PASSWORD, REDIS_HOST).")
+                
+            pg_conn = f"postgresql://{pg_user}:{pg_pass}@{db_host}:5432/{pg_db}"
+            redis_conn = f"redis://{redis_host}:6379/0"
+            budget_limit = float(budget) if budget else 0.0
+
+            from infrastructure.adapters.postgres_adapter import PostgresAdapter
+            from infrastructure.adapters.redis_adapter import RedisAdapter
+            from infrastructure.adapters.litellm_adapter import LiteLLMAdapter
+
+            pg_adapter = PostgresAdapter(connection_string=pg_conn)
+            self.state_store = pg_adapter
+            self.vector_store = pg_adapter
+            self.message_broker = RedisAdapter(connection_string=redis_conn)
+            self.llm_provider = LiteLLMAdapter(budget_limit=budget_limit)
+            
+            # Fill remaining with mocks
+            from .mock_adapters import MockFileStorage, MockTelemetry, MockMCPServer
+            self.file_storage = MockFileStorage(self.config)
+            self.telemetry = MockTelemetry(self.config)
+            self.mcp_server = MockMCPServer(self.config)
+            
         else:
+            logger.info("Initializing Chassis with dynamic infrastructure from config.")
             self.state_store: Optional[BaseStateStore] = self._load_adapter(
                 "state_store", BaseStateStore
             )
@@ -197,8 +242,8 @@ class BaseAgentChassis:
             self.mcp_server: Optional[BaseMCPServer] = self._load_adapter(
                 "mcp_server", BaseMCPServer
             )
-
-            logger.info("BaseAgentChassis initialized with dynamic infrastructure.")
+            # Not loading LLMProvider dynamically yet as it might not be supported in existing config schema
+            self.llm_provider = self.llm_agent
 
         # 3. Initialize FastAPI App Embedded within the Chassis
         self.enable_studio = enable_studio
