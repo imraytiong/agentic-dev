@@ -58,3 +58,5 @@ We are executing Layer 2 (Environment Manifests) of the ADK Infrastructure proto
 - Run `make run-sandboxed ARGS="infrastructure/verify_sandbox.py"` to prove the sandbox functions correctly.
 - Run `pytest tests/infrastructure/test_mac_mini_adapters.py` to prove automated fixture setup, chaos recovery, and VCR.py integration.
 - Prove that the agent cleanly blocks LLM requests once the local `LITELLM_BUDGET` threshold is hit.
+## Sandbox Fixes
+- Added pyenv paths for Python executable
