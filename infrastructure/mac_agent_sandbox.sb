@@ -28,11 +28,18 @@
     (subpath "/usr/bin")
     (subpath "/usr/sbin")
     (subpath "/System/Library")
+    (subpath "/System/Library/Frameworks/Python.framework")
     (subpath "/Library/Frameworks")
     (subpath "/Library/Python")
+    (subpath "/usr/local/Cellar/python")
     (subpath "/Library/Managed Preferences")
     (subpath "/private/var/db/timezone")
     (subpath "/private/var/db/mds")
+    (subpath (param "VENV_PATH")) 
+    ;; Allow Pyenv python execution
+    (subpath "/Users/raytiongai/.pyenv")
+    (subpath "/Users/raytiongai/.pyenv/shims")
+    (subpath "/Users/raytiongai/.pyenv/versions")
 )
 
 ;; Project Root Access (Read-Only by default)

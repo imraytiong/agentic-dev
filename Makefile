@@ -16,7 +16,7 @@ run-sandboxed:
 	DB_HOST=localhost \
 	REDIS_HOST=localhost \
 	LITELLM_BUDGET=1.00 \
-	sandbox-exec -f infrastructure/mac_agent_sandbox.sb python $(ARGS)
+	sandbox-exec -D VENV_PATH=$(PWD)/venv -f infrastructure/mac_agent_sandbox.sb python $(ARGS)
 
 # Container Expert Mandate: Run tests OUTSIDE the sandbox to allow testcontainers 
 # to access the OrbStack/Docker socket.
