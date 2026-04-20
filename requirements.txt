@@ -26,3 +26,4 @@ testcontainers[postgres]
 testcontainers[redis]
 toxiproxy-python
 vcrpy
+psycopg2-binary
