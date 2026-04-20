@@ -64,6 +64,12 @@ class BaseTelemetry(ABC):
         """Record a telemetry metric."""
         pass
 
+class ILLMProvider(ABC):
+    @abstractmethod
+    async def generate_content(self, model: str, messages: List[Dict[str, str]], **kwargs) -> Any:
+        """Executes a prompt against an LLM and returns the completion."""
+        pass
+
 class BaseMCPServer(ABC):
     @abstractmethod
     async def start_sse_stream(self) -> Any:

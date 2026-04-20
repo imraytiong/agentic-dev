@@ -27,3 +27,4 @@ testcontainers[redis]
 toxiproxy-python
 vcrpy
 psycopg2-binary
+pgvector

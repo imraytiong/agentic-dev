@@ -1,4 +1,3 @@
-import os
 import json
 import logging
 import asyncio
@@ -16,10 +15,12 @@ class RedisAdapterError(Exception):
     pass
 
 class RedisAdapter(BaseMessageBroker):
-    def __init__(self, connection_string: str = None):
-        self.connection_string = connection_string or f"redis://{os.getenv('REDIS_HOST', 'localhost')}:6379/0"
+    def __init__(self, connection_string: str):
+        # Architect Mandate: No os.getenv or fallbacks. Strictly injected.
+        if not connection_string:
+            raise ValueError("connection_string is mandatory for RedisAdapter")
+        self.connection_string = connection_string
         self._client: Optional[redis.Redis] = None
-        # Used for simple pub/sub, though Streams might be better for queues
         self._pubsub = None
 
     async def connect(self):
@@ -46,7 +47,6 @@ class RedisAdapter(BaseMessageBroker):
                 "context": context.model_dump()
             }
             # Use Redis Streams (XADD) for durable task queues
-            # Using '*' for auto-generated ID
             await self._client.xadd(queue_name, {"message": json.dumps(message_data)})
         except RedisError as e:
             raise RedisAdapterError(f"Redis error publishing message: {e}")
@@ -65,13 +65,12 @@ class RedisAdapter(BaseMessageBroker):
 
         try:
             # Block and wait for a message from the stream
-            # '>' means get new messages not delivered to other consumers in group
             messages = await self._client.xreadgroup(
                 consumer_group,
                 consumer_name,
                 {queue_name: ">"},
                 count=1,
-                block=block # Block for specified milliseconds
+                block=block
             )
             
             if messages:
@@ -80,8 +79,7 @@ class RedisAdapter(BaseMessageBroker):
                 
                 parsed_data = json.loads(message_data[b'message'].decode('utf-8'))
                 
-                # Acknowledge the message immediately for simplicity, 
-                # but in real robust systems, ACK happens after processing.
+                # Acknowledge the message
                 await self._client.xack(queue_name, consumer_group, message_id)
                 
                 return parsed_data, message_id

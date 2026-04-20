@@ -1,10 +1,10 @@
-import os
 import json
 import logging
 from typing import Type, TypeVar, List, Optional
 from pydantic import BaseModel
 import asyncpg
 from asyncpg.pool import Pool
+import pgvector.asyncpg
 
 from universal_core.interfaces import BaseStateStore, BaseVectorStore
 
@@ -17,20 +17,25 @@ class PostgresAdapterError(Exception):
     pass
 
 class PostgresAdapter(BaseStateStore, BaseVectorStore):
-    def __init__(self, connection_string: str = None):
-        # CTO Mandate: connection defaults
-        self.connection_string = connection_string or f"postgresql://{os.getenv('POSTGRES_USER', 'devuser')}:{os.getenv('POSTGRES_PASSWORD', 'devpassword')}@{os.getenv('DB_HOST', 'localhost')}:5432/{os.getenv('POSTGRES_DB', 'agentic_dev')}"
+    def __init__(self, connection_string: str):
+        # Architect Mandate: No os.getenv or fallbacks. Strictly injected.
+        if not connection_string:
+            raise ValueError("connection_string is mandatory for PostgresAdapter")
+        self.connection_string = connection_string
         self._pool: Optional[Pool] = None
 
     async def connect(self):
         if not self._pool:
             try:
-                # DBA Mandate: robust connection pooling
+                # DBA Mandate: explicitly define connection limits
                 self._pool = await asyncpg.create_pool(
                     self.connection_string,
                     min_size=1,
-                    max_size=int(os.getenv('MAX_CONNECTIONS', '100'))
+                    max_size=20
                 )
+                # DBA Mandate: Register pgvector type immediately
+                async with self._pool.acquire() as conn:
+                    await pgvector.asyncpg.register_vector(conn)
             except Exception as e:
                 raise PostgresAdapterError(f"Failed to connect to database: {e}")
 
@@ -81,12 +86,6 @@ class PostgresAdapter(BaseStateStore, BaseVectorStore):
     # --- BaseVectorStore Implementation ---
 
     async def add_documents(self, documents: list[str], metadatas: list[dict], ids: list[str], embeddings: list[list[float]] = None) -> None:
-        """
-        Note: The BaseVectorStore interface might not explicitly take embeddings.
-        If it doesn't, we'd need an embedding provider. For the sake of the adapter,
-        we assume embeddings are provided or we can just store the documents as state
-        and use pgvector directly.
-        """
         await self.connect()
         if not embeddings or len(embeddings) != len(documents):
             raise PostgresAdapterError("Embeddings must be provided for pgvector.")
@@ -101,13 +100,13 @@ class PostgresAdapter(BaseStateStore, BaseVectorStore):
                     SET data = EXCLUDED.data, metadata = EXCLUDED.metadata, embedding = EXCLUDED.embedding, updated_at = NOW();
                 """
                 
-                # Format records for execute_many
+                # DBA Mandate: Strict parameterization for vector arrays
                 records = []
                 for i in range(len(documents)):
                     data_json = json.dumps({"document": documents[i]})
                     metadata_json = json.dumps(metadatas[i] if metadatas else {})
-                    vector_str = f"[{','.join(map(str, embeddings[i]))}]"
-                    records.append((ids[i], data_json, metadata_json, vector_str))
+                    # Passing the list directly as asyncpg handles vector conversion if registered
+                    records.append((ids[i], data_json, metadata_json, embeddings[i]))
                     
                 await conn.executemany(query, records)
         except asyncpg.PostgresError as e:
@@ -116,21 +115,17 @@ class PostgresAdapter(BaseStateStore, BaseVectorStore):
             raise PostgresAdapterError(f"Unexpected error adding documents: {e}")
 
     async def semantic_search(self, query_embedding: list[float], limit: int = 5) -> List[dict]:
-        """
-        Assuming semantic search takes an embedding directly since we don't have an embedding interface here.
-        """
         await self.connect()
         try:
             async with self._pool.acquire() as conn:
-                vector_str = f"[{','.join(map(str, query_embedding))}]"
-                # HNSW cosine distance operator is <=>
+                # DBA Mandate: Properly cast parameterized queries
                 sql = """
                     SELECT id, key, data, metadata
                     FROM state_records
                     ORDER BY embedding <=> $1::vector
                     LIMIT $2;
                 """
-                rows = await conn.fetch(sql, vector_str, limit)
+                rows = await conn.fetch(sql, query_embedding, limit)
                 results = []
                 for row in rows:
                     results.append({
