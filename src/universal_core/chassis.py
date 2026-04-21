@@ -178,7 +178,7 @@ class BaseAgentChassis:
 
         # 2. Load infrastructure adapters based on ADK_ENV
         if adk_env == "mock":
-            logger.info("Initializing Chassis with MOCK infrastructure.")
+            logger.info("Initializing Chassis with MOCK infrastructure (Real LLM).")
             
             # Inject mock paths into config
             self.infrastructure_config = {
@@ -187,8 +187,7 @@ class BaseAgentChassis:
                 "vector_store": "src.infrastructure.adapters.mock_adapters.MockVectorStore",
                 "file_storage": "src.infrastructure.adapters.mock_adapters.MockFileStorage",
                 "telemetry": "src.infrastructure.adapters.mock_adapters.MockTelemetry",
-                "mcp_server": "src.infrastructure.adapters.mock_adapters.MockMCPServer",
-                "llm_provider": "src.infrastructure.adapters.mock_adapters.MockLLMProvider"
+                "mcp_server": "src.infrastructure.adapters.mock_adapters.MockMCPServer"
             }
             
             # Load via standard switchboard
@@ -198,7 +197,12 @@ class BaseAgentChassis:
             self.message_broker = self._load_adapter("message_broker", BaseMessageBroker)
             self.telemetry = self._load_adapter("telemetry", BaseTelemetry)
             self.mcp_server = self._load_adapter("mcp_server", BaseMCPServer)
-            self.llm_provider = self.llm_agent if not self._load_adapter("llm_provider", ILLMProvider) else self._load_adapter("llm_provider", ILLMProvider)
+            
+            # User Directive: Use REAL LLM for mock infra
+            budget = os.getenv("LITELLM_BUDGET")
+            budget_limit = float(budget) if budget else 0.0
+            from src.infrastructure.adapters.litellm_adapter import LiteLLMAdapter
+            self.llm_provider = LiteLLMAdapter(budget_limit=budget_limit)
             
         elif adk_env == "mac_local":
             logger.info("Initializing Chassis with MAC_LOCAL adapters.")

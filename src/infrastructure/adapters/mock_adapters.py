@@ -23,13 +23,6 @@ from src.universal_core.interfaces import (
     AgentContext
 )
 
-class MockLLMProvider(ILLMProvider):
-    def __init__(self, config=None):
-        self.config = config
-
-    async def generate_content(self, model: str, messages: List[Dict[str, str]], **kwargs) -> Any:
-        return {"choices": [{"message": {"content": "Franky Online"}}]}
-
 import copy
 
 class MockStateStore(BaseStateStore):

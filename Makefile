@@ -69,5 +69,7 @@ else
 test-e2e:
 	PYTHONPATH=src \
 	ADK_ENV=$(ADK_ENV) \
+	LITELLM_BUDGET=1.00 \
+	GEMINI_API_KEY=$(GEMINI_API_KEY) \
 	$(VENV_PATH)/bin/python -m src.agents.franky.agent
 endif
