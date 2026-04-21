@@ -30,16 +30,20 @@ class MockLLMProvider(ILLMProvider):
     async def generate_content(self, model: str, messages: List[Dict[str, str]], **kwargs) -> Any:
         return {"choices": [{"message": {"content": "Franky Online"}}]}
 
+import copy
+
 class MockStateStore(BaseStateStore):
     def __init__(self, config=None):
         self.config = config
         self._store: Dict[str, dict] = {}
 
     async def save_state(self, key: str, state: BaseModel) -> None:
-        self._store[key] = state.model_dump()
+        self._store[key] = copy.deepcopy(state.model_dump())
 
     async def load_state(self, key: str, state_model: Type[BaseModel]) -> BaseModel:
-        data = self._store.get(key, {})
+        if key not in self._store:
+            raise KeyError(f"State not found for key: {key}")
+        data = copy.deepcopy(self._store[key])
         return state_model(**data)
 
 class MockMessageQueue(BaseMessageBroker):
@@ -87,35 +91,37 @@ class MockVectorStore(BaseVectorStore):
             elif i == 3:
                 logger.info(f"MockVectorStore: ... and {len(documents) - 3} more documents.")
                 
-        self.collection.add(
-            documents=documents,
-            metadatas=metadatas,
-            ids=ids
-        )
+        # Support true vector contract if embeddings are provided
+        if embeddings:
+            self.collection.add(
+                documents=documents,
+                metadatas=metadatas,
+                ids=ids,
+                embeddings=embeddings
+            )
+        else:
+            self.collection.add(
+                documents=documents,
+                metadatas=metadatas,
+                ids=ids
+            )
         logger.info(f"MockVectorStore: Successfully completed indexing {len(documents)} documents.")
 
     async def semantic_search(self, query: Any, limit: int = 5) -> List[dict]:
         logger.info(f"MockVectorStore: Executing semantic search (limit={limit})")
         
-        # Mocks ignore custom large embeddings and just do a blanket fetch
-        if not isinstance(query, str):
-            results = self.collection.get(limit=limit)
-            
-            # Reformat get() results to match query() structure
-            matches = []
-            if results and results["documents"]:
-                for i in range(len(results["documents"])):
-                    matches.append({
-                        "key": results["ids"][i],
-                        "data": {"document": results["documents"][i]},
-                        "metadata": results["metadatas"][i] if results["metadatas"] else {}
-                    })
-            return matches
-        
-        results = self.collection.query(
-            query_texts=[query],
-            n_results=limit
-        )
+        if isinstance(query, str):
+            results = self.collection.query(
+                query_texts=[query],
+                n_results=limit
+            )
+        elif isinstance(query, list):
+            results = self.collection.query(
+                query_embeddings=[query],
+                n_results=limit
+            )
+        else:
+            raise ValueError("Query must be a string or a list of floats (embedding).")
         
         matches = []
         if results and results["documents"] and results["documents"][0]:
@@ -124,7 +130,11 @@ class MockVectorStore(BaseVectorStore):
             ids = results["ids"][0]
             
             for doc, meta, doc_id in zip(docs, metas, ids):
-                matches.append(DocumentResult(id=doc_id, document=doc, metadata=meta or {}))
+                matches.append({
+                    "key": doc_id,
+                    "data": {"document": doc},
+                    "metadata": meta or {}
+                })
                 
         logger.info(f"MockVectorStore: Found {len(matches)} matches for semantic search.")
         return matches

@@ -2,6 +2,10 @@ from abc import ABC, abstractmethod
 from typing import Type, List, TypeVar, Optional, Any, Dict
 from pydantic import BaseModel
 
+class UnsupportedCapabilityError(NotImplementedError):
+    """Raised when an adapter cannot fulfill an expected contract (CTO Mandate)."""
+    pass
+
 T = TypeVar('T', bound=BaseModel)
 
 class AgentContext(BaseModel):

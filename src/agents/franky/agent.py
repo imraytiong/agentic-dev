@@ -1,15 +1,14 @@
-import logging
 import os
 import sys
 import uuid
+import time
 import yaml
 import asyncio
+import logging
 from typing import Dict, Any
 from pydantic import BaseModel
 from src.universal_core.chassis import BaseAgentChassis
 from src.universal_core.interfaces import AgentContext
-
-logger = logging.getLogger(__name__)
 
 # Basic models for state/broker diagnostics
 class FrankyState(BaseModel):
@@ -32,16 +31,22 @@ def load_config() -> Dict[str, Any]:
 config = load_config()
 chassis = BaseAgentChassis(config, enable_studio=False)
 
+def log_success(step: int, component: str, latency_ms: float):
+    print(f"[DIAGNOSTIC] STEP={step} COMPONENT={component} STATUS=PASS LATENCY={latency_ms:.2f}ms")
+
+def log_error(step: int, component: str, exception: Exception):
+    print(f"[DIAGNOSTIC_ERROR] STEP={step} COMPONENT={component} EXCEPTION={type(exception).__name__} MESSAGE=\"{str(exception)}\"")
+
 async def run_diagnostics():
-    logger.info("Starting Franky E2E Diagnostics...")
+    print("[DIAGNOSTIC] STATUS=STARTING")
     context = AgentContext(user_id="franky_admin", session_id=str(uuid.uuid4()), tenant_id="system")
     
+    # Step 1: LLM/FinOps Assertion
+    step = 1
+    component = "LLM"
+    start_time = time.time()
     try:
-        # Step 1: LLM/FinOps Assertion
-        logger.info("Step 1: LLM/FinOps Probe")
         prompt = "You are a diagnostic tool. Reply with exactly two words: 'Franky Online'"
-        
-        # Directly utilize the ILLMProvider interface to assert low-token execution
         response = await chassis.llm_provider.generate_content(
             model=config["agent"].get("model", "gemini-2.5-flash"),
             messages=[{"role": "user", "content": prompt}],
@@ -49,24 +54,27 @@ async def run_diagnostics():
             temperature=config["agent"].get("temperature", 0.0)
         )
         
-        # Depending on LiteLLM version/adapter, extract text safely
         try:
             content = response.choices[0].message.content.strip()
-            # Loose assertion since models sometimes add punctuation
             assert "Franky Online" in content, f"Expected 'Franky Online', got '{content}'"
-            logger.info("✅ Step 1 Passed: LLM Online")
         except AttributeError:
-            # Fallback for dict-like response or mock
             if isinstance(response, dict) and "choices" in response:
                 content = response["choices"][0]["message"]["content"].strip()
                 assert "Franky Online" in content, f"Expected 'Franky Online', got '{content}'"
-                logger.info("✅ Step 1 Passed: LLM Online (Dict Parse)")
             else:
-                # If using standard LlmAgent Wrapper or Mocks
-                logger.info(f"✅ Step 1 Passed: LLM Fallback (Mock/Wrapper) - Response: {str(response)}")
+                 pass # Fallback for legacy wrapper
+                 
+        latency = (time.time() - start_time) * 1000
+        log_success(step, component, latency)
+    except Exception as e:
+        log_error(step, component, e)
+        sys.exit(1)
 
-        # Step 2: State JSONB Assertion
-        logger.info("Step 2: State JSONB Probe")
+    # Step 2: State JSONB Assertion
+    step = 2
+    component = "STATE_STORE"
+    start_time = time.time()
+    try:
         diag_id = str(uuid.uuid4())
         state_key = f"franky_state_{diag_id}"
         state_data = FrankyState(id=diag_id, message="Diagnostic Data")
@@ -76,11 +84,19 @@ async def run_diagnostics():
         
         assert loaded_state.id == diag_id, f"State ID mismatch: {loaded_state.id} != {diag_id}"
         assert loaded_state.message == "Diagnostic Data", f"State Message mismatch"
-        logger.info("✅ Step 2 Passed: State Store Online")
+        
+        latency = (time.time() - start_time) * 1000
+        log_success(step, component, latency)
+    except Exception as e:
+        log_error(step, component, e)
+        sys.exit(1)
 
-        # Step 3: Vector Assertion
-        logger.info("Step 3: Vector Probe")
-        embedding = [0.1] * 1536  # Standard size for text-embedding-ada-002 / models
+    # Step 3: Vector Assertion
+    step = 3
+    component = "VECTOR_STORE"
+    start_time = time.time()
+    try:
+        embedding = [0.1] * 1536
         vec_id = f"vec_{diag_id}"
         
         await chassis.vector_store.add_documents(
@@ -93,50 +109,61 @@ async def run_diagnostics():
         results = await chassis.vector_store.semantic_search(embedding, limit=1)
         assert len(results) > 0, "No vector results returned"
         assert results[0]["key"] == vec_id, f"Vector ID mismatch: {results[0]['key']} != {vec_id}"
-        logger.info("✅ Step 3 Passed: Vector Store Online")
+        
+        latency = (time.time() - start_time) * 1000
+        log_success(step, component, latency)
+    except Exception as e:
+        log_error(step, component, e)
+        sys.exit(1)
 
-        # Step 4: Message Broker Assertion
-        logger.info("Step 4: Message Broker Probe")
+    # Step 4: Message Broker Assertion
+    step = 4
+    component = "MESSAGE_BROKER"
+    start_time = time.time()
+    try:
         queue_name = f"franky_diag_queue_{diag_id}"
         payload = FrankyPayload(diagnostic_id=diag_id, data="Diagnostic Ping")
         
         await chassis.message_broker.publish(queue_name, payload, context)
         
-        # We need a small delay/timeout mechanism for listening if running in real queue
-        result = await asyncio.wait_for(chassis.message_broker.listen(queue_name, consumer_group="franky_group", consumer_name="franky_consumer"), timeout=5.0)
+        result = await asyncio.wait_for(
+            chassis.message_broker.listen(queue_name, consumer_group="franky_group", consumer_name="franky_consumer"), 
+            timeout=5.0
+        )
         
-        assert result is not None, "Message broker timed out or returned None"
+        assert result is not None, "Message broker returned None"
         if isinstance(result, tuple):
             msg_data, msg_id = result
-            # Depending on JSON parsing
             assert msg_data["payload"]["diagnostic_id"] == diag_id, f"Broker Payload ID mismatch: {msg_data['payload']}"
         else:
-             # Mock adapter might just return dict directly
              assert result["payload"]["diagnostic_id"] == diag_id, f"Broker Payload ID mismatch (Mock)"
              
-        logger.info("✅ Step 4 Passed: Message Broker Online")
-
-    except AssertionError as e:
-        logger.critical(f"❌ DIAGNOSTIC ASSERTION FAILED: {str(e)}")
-        sys.exit(1)
-    except asyncio.TimeoutError:
-        logger.critical("❌ DIAGNOSTIC TIMED OUT: Message Broker did not return message.")
+        latency = (time.time() - start_time) * 1000
+        log_success(step, component, latency)
+    except asyncio.TimeoutError as e:
+        log_error(step, component, Exception("Message Broker Listen Timed Out"))
         sys.exit(1)
     except Exception as e:
-        logger.critical(f"❌ CRITICAL DIAGNOSTIC FAILURE: {str(e)}")
+        log_error(step, component, e)
         sys.exit(1)
-    finally:
-        # Clean teardown
-        logger.info("Closing connections...")
-        # Close specific adapters if they have connections to release (mac_local)
-        if hasattr(chassis.state_store, "close"):
-            await getattr(chassis.state_store, "close")()
-        if hasattr(chassis.message_broker, "close"):
-            await getattr(chassis.message_broker, "close")()
-            
-    logger.info("🎉 Franky E2E Diagnostics Complete. All systems nominal.")
+
+    # Clean teardown
+    print("[DIAGNOSTIC] STATUS=TEARDOWN")
+    if hasattr(chassis.state_store, "close"):
+        await getattr(chassis.state_store, "close")()
+    if hasattr(chassis.message_broker, "close"):
+        await getattr(chassis.message_broker, "close")()
+        
+    print("[DIAGNOSTIC] STATUS=COMPLETE EXIT_CODE=0")
     sys.exit(0)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # Disable global logging to keep standard output perfectly clean for CLI parsers
+    logging.getLogger("src.universal_core.chassis").setLevel(logging.CRITICAL)
+    logging.getLogger("src.infrastructure.adapters.mock_adapters").setLevel(logging.CRITICAL)
+    logging.getLogger("src.infrastructure.adapters.postgres_adapter").setLevel(logging.CRITICAL)
+    logging.getLogger("src.infrastructure.adapters.redis_adapter").setLevel(logging.CRITICAL)
+    logging.getLogger("src.infrastructure.adapters.litellm_adapter").setLevel(logging.CRITICAL)
+    logging.getLogger("LiteLLM").setLevel(logging.CRITICAL)
+    
     asyncio.run(run_diagnostics())
