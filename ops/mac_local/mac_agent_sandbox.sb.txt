@@ -1,0 +1,53 @@
+(version 1)
+(deny default)
+
+;; Standard process allowances
+(allow process-fork)
+(allow process-exec)
+(allow sysctl-read)
+(allow file-read-metadata)
+(allow mach-lookup)
+
+;; --- Network Mandates ---
+;; Allow communicating with the system DNS responder
+(allow network-outbound (literal "/private/var/run/mDNSResponder"))
+
+;; Allow binding to local ports (for uvicorn server)
+(allow network-bind)
+
+;; Explicit TCP outbound for Postgres (5432), Redis (6379), and HTTPS/Cloud APIs (443)
+(allow network-outbound
+    (remote tcp "*:5432")
+    (remote tcp "*:6379")
+    (remote tcp "*:443")
+    (remote tcp "*:80")
+    (remote tcp "localhost:*")
+)
+
+;; --- Filesystem Mandates ---
+
+;; OS & System Library Access
+;; dyld4 and APFS cryptexes require complex global read access to boot processes.
+;; We allow global read, but explicitly DENY access to the User directory to enforce the sandbox.
+(allow file-read*)
+(deny file-read* (subpath "/Users"))
+
+;; Re-allow explicit read access required for the Agent to run (Portable Params)
+(allow file-read*
+    (subpath (param "PYENV_ROOT"))
+    (subpath (param "PROJECT_ROOT"))
+)
+
+;; Explicit Write access within project (Portable Boundaries)
+(allow file-write*
+    (subpath (string-append (param "PROJECT_ROOT") "/.data"))
+    (subpath (string-append (param "PROJECT_ROOT") "/tmp"))
+    (subpath (string-append (param "PROJECT_ROOT") "/chroma_db"))
+)
+
+;; Necessary macOS temp and device access
+(allow file-read* file-write*
+    (subpath "/private/var/folders")
+    (subpath "/private/tmp")
+    (subpath "/dev")
+)

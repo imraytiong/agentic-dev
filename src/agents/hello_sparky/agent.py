@@ -10,7 +10,7 @@ import yaml
 logger = logging.getLogger(__name__)
 
 # Assuming config is loaded from the agent's directory for local dev
-config_path = os.path.join(os.path.dirname(__file__), "config.yaml")
+config_path = os.path.join(os.path.dirname(__file__), "agent.yaml")
 
 def load_config() -> Dict[str, Any]:
     if os.path.exists(config_path):

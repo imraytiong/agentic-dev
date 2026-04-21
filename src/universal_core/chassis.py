@@ -178,7 +178,7 @@ class BaseAgentChassis:
         # 2. Load infrastructure adapters based on ADK_ENV
         if adk_env == "mock":
             logger.info("Initializing Chassis with MOCK infrastructure.")
-            from .mock_adapters import (
+            from src.infrastructure.adapters.mock_adapters import (
                 MockStateStore, MockMessageQueue, MockVectorStore, 
                 MockFileStorage, MockTelemetry, MockMCPServer
             )
@@ -206,9 +206,9 @@ class BaseAgentChassis:
             redis_conn = f"redis://{redis_host}:6379/0"
             budget_limit = float(budget) if budget else 0.0
 
-            from infrastructure.adapters.postgres_adapter import PostgresAdapter
-            from infrastructure.adapters.redis_adapter import RedisAdapter
-            from infrastructure.adapters.litellm_adapter import LiteLLMAdapter
+            from src.infrastructure.adapters.postgres_adapter import PostgresAdapter
+            from src.infrastructure.adapters.redis_adapter import RedisAdapter
+            from src.infrastructure.adapters.litellm_adapter import LiteLLMAdapter
 
             pg_adapter = PostgresAdapter(connection_string=pg_conn)
             self.state_store = pg_adapter
@@ -217,7 +217,7 @@ class BaseAgentChassis:
             self.llm_provider = LiteLLMAdapter(budget_limit=budget_limit)
             
             # Fill remaining with mocks
-            from .mock_adapters import MockFileStorage, MockTelemetry, MockMCPServer
+            from src.infrastructure.adapters.mock_adapters import MockFileStorage, MockTelemetry, MockMCPServer
             self.file_storage = MockFileStorage(self.config)
             self.telemetry = MockTelemetry(self.config)
             self.mcp_server = MockMCPServer(self.config)
