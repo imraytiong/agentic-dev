@@ -31,8 +31,8 @@ run-sandboxed:
 	DB_HOST=localhost \
 	REDIS_HOST=localhost \
 	LITELLM_BUDGET=1.00 \
-	POSTGRES_USER=postgres \
-	POSTGRES_PASSWORD=postgres \
+	POSTGRES_USER=devuser \
+	POSTGRES_PASSWORD=devpassword \
 	GEMINI_API_KEY=$(GEMINI_API_KEY) \
 	sandbox-exec \
 		-D PROJECT_ROOT=$(PROJECT_ROOT) \
@@ -57,8 +57,8 @@ test-e2e:
 	DB_HOST=localhost \
 	REDIS_HOST=localhost \
 	LITELLM_BUDGET=1.00 \
-	POSTGRES_USER=postgres \
-	POSTGRES_PASSWORD=postgres \
+	POSTGRES_USER=devuser \
+	POSTGRES_PASSWORD=devpassword \
 	GEMINI_API_KEY=$(GEMINI_API_KEY) \
 	sandbox-exec \
 		-D PROJECT_ROOT=$(PROJECT_ROOT) \
