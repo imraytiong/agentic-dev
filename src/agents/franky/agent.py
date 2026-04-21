@@ -67,12 +67,8 @@ async def run_diagnostics():
         latency = (time.time() - start_time) * 1000
         log_success(step, component, latency)
     except Exception as e:
-        # Ignore LLM auth errors for local infra test since we inject a fake key
-        if "APIConnectionError" in str(e) or "DefaultCredentialsError" in str(e) or "LiteLLMAdapterError" in str(e):
-            print(f"[DIAGNOSTIC] STEP=1 COMPONENT=LLM STATUS=SKIPPED REASON=\"Missing Valid API Key\"")
-        else:
-            log_error(step, component, e)
-            sys.exit(1)
+        log_error(step, component, e)
+        sys.exit(1)
     step = 2
     component = "STATE_STORE"
     start_time = time.time()
