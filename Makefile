@@ -1,7 +1,7 @@
 .PHONY: up down run-sandboxed test
 
-# Default arguments for run-sandboxed
-ARGS ?= main.py
+# Default agent module fallback
+AGENT ?= src.agents.hello_sparky.agent
 
 up:
 	docker compose up -d
@@ -10,7 +10,7 @@ down:
 	docker compose down
 
 # Architect & CTO Mandate: Strict environment injection and sandbox execution
-# Only used for running the agent in production-like local sandbox
+# Refactored for Portability (No hardcoded absolute paths)
 run-sandboxed:
 	PYTHONPATH=src \
 	ADK_ENV=mac_local \
@@ -19,7 +19,12 @@ run-sandboxed:
 	LITELLM_BUDGET=1.00 \
 	POSTGRES_USER=postgres \
 	POSTGRES_PASSWORD=postgres \
-	sandbox-exec -D VENV_PATH=$(PWD)/venv -f infrastructure/mac_agent_sandbox.sb venv/bin/python -m src.agents.hello_sparky.agent
+	sandbox-exec \
+		-D PROJECT_ROOT=$(shell pwd) \
+		-D PYENV_ROOT=$(HOME)/.pyenv \
+		-D VENV_PATH=$(shell pwd)/venv \
+		-f infrastructure/mac_agent_sandbox.sb \
+		venv/bin/python -m $(AGENT)
 
 # Container Expert Mandate: Run tests OUTSIDE the sandbox to allow testcontainers 
 # to access the OrbStack/Docker socket.

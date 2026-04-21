@@ -32,17 +32,17 @@
 (allow file-read*)
 (deny file-read* (subpath "/Users"))
 
-;; Re-allow explicit read access required for the Agent to run
+;; Re-allow explicit read access required for the Agent to run (Portable Params)
 (allow file-read*
-    (subpath "/Users/raytiongai/.pyenv")
-    (subpath "/Users/raytiongai/projects/agentic-dev")
+    (subpath (param "PYENV_ROOT"))
+    (subpath (param "PROJECT_ROOT"))
 )
 
-;; Explicit Write access within project
+;; Explicit Write access within project (Portable Boundaries)
 (allow file-write*
-    (subpath "/Users/raytiongai/projects/agentic-dev/.data")
-    (subpath "/Users/raytiongai/projects/agentic-dev/tmp")
-    (subpath "/Users/raytiongai/projects/agentic-dev/chroma_db")
+    (subpath (string-append (param "PROJECT_ROOT") "/.data"))
+    (subpath (string-append (param "PROJECT_ROOT") "/tmp"))
+    (subpath (string-append (param "PROJECT_ROOT") "/chroma_db"))
 )
 
 ;; Necessary macOS temp and device access
