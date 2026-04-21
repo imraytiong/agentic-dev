@@ -29,3 +29,8 @@ We currently have a root `infrastructure/` folder for manifests and a `src/infra
 - Move `mac_agent_sandbox.sb`, `db_init/01_init.sql`, and `verify_sandbox.py` into `ops/mac_local/`.
 - Update the `Makefile` and `compose.yaml` to point to these new paths (e.g., `sandbox-exec -f ops/mac_local/mac_agent_sandbox.sb`).
 - This cleanly separates Python adapter code (`src/infrastructure`) from OS/deployment manifests (`ops/`).
+## 6. Relocate Mock Adapters (Architectural Purity)
+The Universal Core must not contain concrete implementations.
+- Move all mock adapter classes (e.g., `MockStateStore`, `MockMessageQueue`, `MockLLMProvider`) out of `src/universal_core/`.
+- Relocate them to `src/infrastructure/adapters/mock_adapters.py` (or equivalent).
+- Update `src/universal_core/chassis.py` to import these mocks from the `infrastructure/adapters` boundary when `ADK_ENV=mock`.
