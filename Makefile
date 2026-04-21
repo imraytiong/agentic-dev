@@ -33,7 +33,6 @@ run-sandboxed:
 	LITELLM_BUDGET=1.00 \
 	POSTGRES_USER=devuser \
 	POSTGRES_PASSWORD=devpassword \
-	GEMINI_API_KEY=$(GEMINI_API_KEY) \
 	sandbox-exec \
 		-D PROJECT_ROOT=$(PROJECT_ROOT) \
 		-D PYENV_ROOT=$(PYENV_ROOT) \
@@ -59,12 +58,12 @@ test-e2e:
 	LITELLM_BUDGET=1.00 \
 	POSTGRES_USER=devuser \
 	POSTGRES_PASSWORD=devpassword \
-	GEMINI_API_KEY=$(GEMINI_API_KEY) \
 	sandbox-exec \
 		-D PROJECT_ROOT=$(PROJECT_ROOT) \
 		-D PYENV_ROOT=$(PYENV_ROOT) \
 		-D VENV_PATH=$(VENV_PATH) \
 		-f ops/mac_local/mac_agent_sandbox.sb \
+		env GEMINI_API_KEY=$(GEMINI_API_KEY) \
 		$(VENV_PATH)/bin/python -m src.agents.franky.agent
 else
 test-e2e:
