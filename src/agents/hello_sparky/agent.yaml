@@ -9,9 +9,9 @@ agent:
 # When running in production, the fleet.yaml should override this section to provide 
 # the actual paths to the Postgres and Redis adapters in the Universal Core.
 infrastructure:
-  state_store: "src.universal_core.mock_adapters.MockStateStore"
-  message_broker: "src.universal_core.mock_adapters.MockMessageBroker"
-  vector_store: "src.universal_core.mock_adapters.MockVectorStore"
-  file_storage: "src.universal_core.mock_adapters.MockFileStorage"
-  telemetry: "src.universal_core.mock_adapters.MockTelemetry"
-  mcp_server: "src.universal_core.mock_adapters.MockMCPServer"
+  state_store: "src.infrastructure.adapters.mock_adapters.MockStateStore"
+  message_broker: "src.infrastructure.adapters.mock_adapters.MockMessageQueue"
+  vector_store: "src.infrastructure.adapters.mock_adapters.MockVectorStore"
+  file_storage: "src.infrastructure.adapters.mock_adapters.MockFileStorage"
+  telemetry: "src.infrastructure.adapters.mock_adapters.MockTelemetry"
+  mcp_server: "src.infrastructure.adapters.mock_adapters.MockMCPServer"

@@ -178,16 +178,24 @@ class BaseAgentChassis:
         # 2. Load infrastructure adapters based on ADK_ENV
         if adk_env == "mock":
             logger.info("Initializing Chassis with MOCK infrastructure.")
-            from src.infrastructure.adapters.mock_adapters import (
-                MockStateStore, MockMessageQueue, MockVectorStore, 
-                MockFileStorage, MockTelemetry, MockMCPServer
-            )
-            self.state_store = MockStateStore(self.config)
-            self.message_broker = MockMessageQueue(self.config)
-            self.vector_store = MockVectorStore(self.config)
-            self.file_storage = MockFileStorage(self.config)
-            self.telemetry = MockTelemetry(self.config)
-            self.mcp_server = MockMCPServer(self.config)
+            
+            # Inject mock paths into config
+            self.infrastructure_config = {
+                "state_store": "src.infrastructure.adapters.mock_adapters.MockStateStore",
+                "message_broker": "src.infrastructure.adapters.mock_adapters.MockMessageQueue",
+                "vector_store": "src.infrastructure.adapters.mock_adapters.MockVectorStore",
+                "file_storage": "src.infrastructure.adapters.mock_adapters.MockFileStorage",
+                "telemetry": "src.infrastructure.adapters.mock_adapters.MockTelemetry",
+                "mcp_server": "src.infrastructure.adapters.mock_adapters.MockMCPServer"
+            }
+            
+            # Load via standard switchboard
+            self.state_store = self._load_adapter("state_store", BaseStateStore)
+            self.vector_store = self._load_adapter("vector_store", BaseVectorStore)
+            self.file_storage = self._load_adapter("file_storage", BaseFileStorage)
+            self.message_broker = self._load_adapter("message_broker", BaseMessageBroker)
+            self.telemetry = self._load_adapter("telemetry", BaseTelemetry)
+            self.mcp_server = self._load_adapter("mcp_server", BaseMCPServer)
             self.llm_provider = self.llm_agent # Use legacy agent for mock fallback
             
         elif adk_env == "mac_local":
@@ -216,11 +224,14 @@ class BaseAgentChassis:
             self.message_broker = RedisAdapter(connection_string=redis_conn)
             self.llm_provider = LiteLLMAdapter(budget_limit=budget_limit)
             
-            # Fill remaining with mocks
-            from src.infrastructure.adapters.mock_adapters import MockFileStorage, MockTelemetry, MockMCPServer
-            self.file_storage = MockFileStorage(self.config)
-            self.telemetry = MockTelemetry(self.config)
-            self.mcp_server = MockMCPServer(self.config)
+            # Fill remaining with mocks via injection
+            self.infrastructure_config["file_storage"] = "src.infrastructure.adapters.mock_adapters.MockFileStorage"
+            self.infrastructure_config["telemetry"] = "src.infrastructure.adapters.mock_adapters.MockTelemetry"
+            self.infrastructure_config["mcp_server"] = "src.infrastructure.adapters.mock_adapters.MockMCPServer"
+            
+            self.file_storage = self._load_adapter("file_storage", BaseFileStorage)
+            self.telemetry = self._load_adapter("telemetry", BaseTelemetry)
+            self.mcp_server = self._load_adapter("mcp_server", BaseMCPServer)
             
         else:
             logger.info("Initializing Chassis with dynamic infrastructure from config.")
