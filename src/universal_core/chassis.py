@@ -124,6 +124,7 @@ from .interfaces import (
     BaseMessageBroker,
     BaseTelemetry,
     BaseMCPServer,
+    ILLMProvider,
     AgentContext
 )
 
@@ -186,7 +187,8 @@ class BaseAgentChassis:
                 "vector_store": "src.infrastructure.adapters.mock_adapters.MockVectorStore",
                 "file_storage": "src.infrastructure.adapters.mock_adapters.MockFileStorage",
                 "telemetry": "src.infrastructure.adapters.mock_adapters.MockTelemetry",
-                "mcp_server": "src.infrastructure.adapters.mock_adapters.MockMCPServer"
+                "mcp_server": "src.infrastructure.adapters.mock_adapters.MockMCPServer",
+                "llm_provider": "src.infrastructure.adapters.mock_adapters.MockLLMProvider"
             }
             
             # Load via standard switchboard
@@ -196,7 +198,7 @@ class BaseAgentChassis:
             self.message_broker = self._load_adapter("message_broker", BaseMessageBroker)
             self.telemetry = self._load_adapter("telemetry", BaseTelemetry)
             self.mcp_server = self._load_adapter("mcp_server", BaseMCPServer)
-            self.llm_provider = self.llm_agent # Use legacy agent for mock fallback
+            self.llm_provider = self.llm_agent if not self._load_adapter("llm_provider", ILLMProvider) else self._load_adapter("llm_provider", ILLMProvider)
             
         elif adk_env == "mac_local":
             logger.info("Initializing Chassis with MAC_LOCAL adapters.")

@@ -19,8 +19,16 @@ from src.universal_core.interfaces import (
     BaseFileStorage,
     BaseTelemetry,
     BaseMCPServer,
+    ILLMProvider,
     AgentContext
 )
+
+class MockLLMProvider(ILLMProvider):
+    def __init__(self, config=None):
+        self.config = config
+
+    async def generate_content(self, model: str, messages: List[Dict[str, str]], **kwargs) -> Any:
+        return {"choices": [{"message": {"content": "Franky Online"}}]}
 
 class MockStateStore(BaseStateStore):
     def __init__(self, config=None):
@@ -54,7 +62,7 @@ class MockMessageQueue(BaseMessageBroker):
             "context": context.model_dump()
         })
 
-    async def listen(self, queue_name: str) -> Any:
+    async def listen(self, queue_name: str, **kwargs) -> Any:
         q = self._get_queue(queue_name)
         return await q.get()
 
@@ -69,7 +77,7 @@ class MockVectorStore(BaseVectorStore):
         self.collection = self.client.get_or_create_collection(f"mock_collection_{uuid.uuid4().hex}")
         logger.info("MockVectorStore: Initialized ephemeral ChromaDB client.")
 
-    async def add_documents(self, documents: list[str], metadatas: list[dict], ids: list[str]) -> None:
+    async def add_documents(self, documents: list[str], metadatas: list[dict], ids: list[str], embeddings: list[list[float]] = None) -> None:
         logger.info(f"MockVectorStore: Indexing {len(documents)} documents into in-memory ChromaDB...")
         
         # Log a few details for observability (useful for Codelab 3)
@@ -86,8 +94,23 @@ class MockVectorStore(BaseVectorStore):
         )
         logger.info(f"MockVectorStore: Successfully completed indexing {len(documents)} documents.")
 
-    async def semantic_search(self, query: str, limit: int = 5) -> List[BaseModel]:
-        logger.info(f"MockVectorStore: Executing semantic search for: '{query}' (limit={limit})")
+    async def semantic_search(self, query: Any, limit: int = 5) -> List[dict]:
+        logger.info(f"MockVectorStore: Executing semantic search (limit={limit})")
+        
+        # Mocks ignore custom large embeddings and just do a blanket fetch
+        if not isinstance(query, str):
+            results = self.collection.get(limit=limit)
+            
+            # Reformat get() results to match query() structure
+            matches = []
+            if results and results["documents"]:
+                for i in range(len(results["documents"])):
+                    matches.append({
+                        "key": results["ids"][i],
+                        "data": {"document": results["documents"][i]},
+                        "metadata": results["metadatas"][i] if results["metadatas"] else {}
+                    })
+            return matches
         
         results = self.collection.query(
             query_texts=[query],

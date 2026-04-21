@@ -1,0 +1,14 @@
+agent:
+  name: "Franky"
+  description: "Synthetic Diagnostic Agent for ADK Infrastructure Validation."
+  model: "gemini-2.5-flash"
+  temperature: 0.0
+  max_tokens: 10
+
+infrastructure:
+  state_store: "src.infrastructure.adapters.mock_adapters.MockStateStore"
+  message_broker: "src.infrastructure.adapters.mock_adapters.MockMessageQueue"
+  vector_store: "src.infrastructure.adapters.mock_adapters.MockVectorStore"
+  file_storage: "src.infrastructure.adapters.mock_adapters.MockFileStorage"
+  telemetry: "src.infrastructure.adapters.mock_adapters.MockTelemetry"
+  mcp_server: "src.infrastructure.adapters.mock_adapters.MockMCPServer"
