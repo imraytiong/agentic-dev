@@ -17,3 +17,6 @@
 ## 💡 How to Resume
 In the new Gemini Scribe session, simply say:
 > *"Please read `internal_ignore/session_handoff.md` and let's start the Codelab 3 Checkpoint 1 dry run."*
+
+## 🏁 Post-Hackathon Updates
+* **Mac Mini Infrastructure:** The `mac_mini_infra_20260419` track has been finalized and validated. The Seatbelt sandbox is fully secured, and the `feat/mac-mini-infra` branch is queued for merge into main.

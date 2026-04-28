@@ -1,3 +1,6 @@
+---
+status: completed
+---
 # Track: Mac Mini Local Infrastructure (Phase 1 & 1.5)
 
 - [Plan](./plan.md)
