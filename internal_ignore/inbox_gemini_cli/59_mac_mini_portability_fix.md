@@ -8,7 +8,7 @@
 ### Mandates:
 
 **1. Make the Sandbox 100% Portable (No Hardcoded Paths)**
-The `mac_agent_sandbox.sb` currently hardcodes `/Users/raytiongai/projects/agentic-dev` and `/Users/raytiongai/.pyenv`. This breaks if the folder is moved.
+The `mac_agent_sandbox.sb` currently hardcodes `/Users/raytiongai/projects/adk-harness` and `/Users/raytiongai/.pyenv`. This breaks if the folder is moved.
 *   **Action:** Update the `Makefile`'s `run-sandboxed` target to dynamically calculate and pass these paths using the `-D` flag:
     *   `-D PROJECT_ROOT=$(shell pwd)`
     *   `-D PYENV_ROOT=$(HOME)/.pyenv`

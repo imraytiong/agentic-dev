@@ -16,7 +16,7 @@ Both environments cleanly passed all 4 diagnostic probes (LLM/FinOps, State Stor
 
 ### Execution Log:
 ```text
-PYTHONPATH=src ADK_ENV=mock /Users/raytiongai/projects/agentic-dev/venv/bin/python -m src.agents.franky.agent
+PYTHONPATH=src ADK_ENV=mock /Users/raytiongai/projects/adk-harness/venv/bin/python -m src.agents.franky.agent
 
 [DIAGNOSTIC] STATUS=STARTING
 [DIAGNOSTIC] STEP=1 COMPONENT=LLM STATUS=PASS LATENCY=0.00ms
@@ -48,12 +48,12 @@ LITELLM_BUDGET=1.00 \
 POSTGRES_USER=devuser \
 POSTGRES_PASSWORD=devpassword \
 sandbox-exec \
-        -D PROJECT_ROOT=/Users/raytiongai/projects/agentic-dev \
+        -D PROJECT_ROOT=/Users/raytiongai/projects/adk-harness \
         -D PYENV_ROOT=/Users/raytiongai/.pyenv \
-        -D VENV_PATH=/Users/raytiongai/projects/agentic-dev/venv \
+        -D VENV_PATH=/Users/raytiongai/projects/adk-harness/venv \
         -f ops/mac_local/mac_agent_sandbox.sb \
         env GEMINI_API_KEY=******** \
-        /Users/raytiongai/projects/agentic-dev/venv/bin/python -m src.agents.franky.agent
+        /Users/raytiongai/projects/adk-harness/venv/bin/python -m src.agents.franky.agent
 
 [DIAGNOSTIC] STATUS=STARTING
 [DIAGNOSTIC] STEP=1 COMPONENT=LLM STATUS=PASS LATENCY=728.58ms

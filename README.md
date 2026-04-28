@@ -1,34 +1,12 @@
 # AI Agent Engineering Framework
 
 ## Overview
-This repository is a framework and playbook for building distributed AI agents using the Google Agent Development Kit (ADK) and Python. 
-
-It is designed for **Agent-Driven Development**. If you are comfortable with Git, the command line, and prompt engineering (using tools like Gemini CLI or Antigravity) but have zero familiarity with developing AI agents, this repo will kick-start that process. We provide the architectural guardrails, playbooks, and AI instructions needed to safely direct your AI assistants to write the code for you.
-
-## ⚠️ Prerequisites
-Before running the quick start script, you **must** have the following installed on your machine:
-1. **Python 3** (and `venv` module)
-2. **Gemini CLI** (e.g., `npm install -g @google/generative-ai-cli` or your internal equivalent)
-
-## Quick Start
-To instantly set up your local environment, clone the repo, and initialize your AI CLI with the correct guardrails, run this single command in your terminal:
-
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/agentic-dev/main/scripts/start_hackathon.sh)"
-```
-
-**What this script does:**
-* Creates and activates a Python virtual environment (`venv`).
-* Installs all required framework dependencies (`pip install -r requirements.txt`).
-* Checks your environment for the Gemini CLI (intelligently handling corporate aliases).
-* Automatically launches the CLI with the `adk-agent-builder` skill pinned and loaded.
-
-**Next Steps:**
-The setup script will automatically drop you directly into the Gemini CLI. Because the builder skill is already loaded, you can immediately start directing your AI to build!
-
+This is a harness and playbook for building AI agents using the Google Agent Development Kit (ADK) and Python.   It includes a ready to use in-memory mock infrastructure that you can run right away without having to set any infrastructure up. 
+## Agentic Driven Development
+This harness was built around the concept of specification driven development. The harness itself was developed using Gemini CLI, a custom skill, and a process that centered around defining specifications.  Similarly the repo provides an [adk-agent-builder](skills/adk-agent-builder/SKILL.md) skill  that provides guardrails and procedures for your agent tool of choice to build agents starting with a well defined specification.
 ## System Architecture
 
-The codebase relies on a Hexagonal (Ports & Adapters) architecture that allows us to maintain an open-source core while building proprietary logic safely on top of it.
+The codebase provides architecture that allows agent developers to focus on the agent prompts, tools, and agent logic.  Adapters can be built and swapped for specific deployment infrastructure independent of the agent so long it provides capabilities per the adapter contract defined. 
 
 ```mermaid
 flowchart TD
@@ -79,34 +57,39 @@ flowchart TD
 *   **[skills/](skills/)** — Pre-packaged AI CLI instructions (`SKILL.md` files). Load these into your AI coding assistant to enforce our architectural rules during code generation.
 *   **[internal_ignore/](internal_ignore/)** — **Safe to ignore.** For the curious: this contains internal workspace files, architectural decision logs, and hackathon planning scratchpads for the core maintainers. 
 
-## Where to Start
+## Setting up your environment
+Before running the quick start script, you **must** have the following installed on your machine:
+-  **Python 3** 
+- **Gemini CLI** 
 
-Depending on what you want to build, choose your role and follow the entry point:
+To  set up your local environment, clone the repo, and initialize your AI tool of choice with the correct guardrails, run this single command in your terminal:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/adk-harness/main/scripts/start_hackathon.sh)"
+```
 
+**What this script does:**
+* Checks your environment for Gemini CLI and Python3 
+* Checks your Gemini API Key is valid
+* Creates and activates a Python virtual environment (`venv`).
+* Installs Gemini CLI Conductor extension
+* Installs all required framework dependencies (`pip install -r requirements.txt`).
+## Start building
+Or alternatively you can start building right away. Alternatively if you prefer a guided learning pathway check out the [learning-guide](learn/learning-guide.md) for progressive codelabs if you prefer a more guided approach.
 ### 1. Agent Developers
 *Your focus: Writing business logic, tools, and prompts. You do not need to worry about infrastructure.*
 *   [Concepts](developer_guides/agent_developers/1_agent_concepts.md)
 *   [Start Building](developer_guides/agent_developers/2_agent_builder_playbook.md)
 *   [Code Reference](developer_guides/agent_developers/3_code_reference.md)
 *   [Deep Topics (Homework)](developer_guides/agent_developers/4_agent_deep_topics.md)
-
 ### 2. Infrastructure Developers
-*Your focus: Deployments, containers, adapters, and mapping the environment (Docker/K3s).*
+*Your focus: If you're looking to developer additional connectors so that you can use this harness your specific deployment needs start here:
 *   [Concepts](developer_guides/infrastructure_developers/1_infrastructure_concepts.md)
 *   [Start Building](developer_guides/infrastructure_developers/2_infrastructure_playbook.md)
 *   [Code Reference](developer_guides/infrastructure_developers/3_core_internals_reference.md)
 *   [Deep Topics (Homework)](developer_guides/infrastructure_developers/4_infrastructure_deep_topics.md)
-
 ### 3. Architecture Developers
-*Your focus: Maintaining the sealed Universal Core (`BaseAgentChassis`), system contracts, and boundaries.*
+*Your focus: If you want to contribute to the harness infrastructure or fork it for your own needs start here:
 *   [Concepts](developer_guides/architecture_developers/1_architecture_concepts.md)
 *   [Start Building](developer_guides/architecture_developers/2_architecture_playbook.md)
 *   [Code Reference](developer_guides/architecture_developers/3_architecture_reference.md)
 *   [Deep Topics (Homework)](developer_guides/architecture_developers/4_architecture_deep_topics.md)
-
-### Codelabs
-We have prepared a set of Codelabs to get you up to speed quickly:
-* [Codelab 1: Hello Sparky!](learn/codelabs/1_hello_sparky.md) - Environment setup and running your first agent.
-* [Codelab 2: Upgrading Sparky](learn/codelabs/2_upgrading_sparky.md) - Adding tools and modifying agent behavior using the AI CLI.
-* [Codelab 3: Developer API Intelligence Agent](learn/codelabs/3_developer_api_intelligence_agent.md) - Advanced challenge to build a real-world code repo assistant.
-* [Codelab 4: Capstone - Build Your Own Agent](learn/codelabs/4_capstone_build_your_own.md) - Take a rough idea, create a spec, and direct the CLI to build your custom agent

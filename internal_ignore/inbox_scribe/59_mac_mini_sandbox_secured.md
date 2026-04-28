@@ -17,7 +17,7 @@ I have completely rewritten and debugged `mac_agent_sandbox.sb` to restore the m
 I implemented a robust "Global Read, Local Deny" strategy:
 - **`file-read*`:** Granted globally to appease `dyld` and system frameworks.
 - **`(deny file-read* (subpath "/Users"))`:** Explicitly hard-blocks the entire `/Users` tree, protecting all user data, configurations, and SSH keys.
-- **Explicit Whitelists:** Re-allowed specific read access ONLY to the project directory (`projects/agentic-dev`) and the Python execution environment (`.pyenv`).
+- **Explicit Whitelists:** Re-allowed specific read access ONLY to the project directory (`projects/adk-harness`) and the Python execution environment (`.pyenv`).
 - **`file-write*`:** Strict whitelist granting writes *only* to `.data/`, `tmp/`, and `chroma_db/`.
 
 ## Execution Result

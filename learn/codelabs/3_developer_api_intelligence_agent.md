@@ -189,7 +189,7 @@ Reference [Gemini Web discussion](https://gemini.google.com/share/866045485d31) 
 
 ## 1.0 System Overview
 * **1.1 System Objective:** Build an interactive AI agent capable of cloning, navigating, and summarizing the AndroidX/Jetpack monolithic repository. The agent must handle long-running I/O tasks asynchronously, translate human-readable framework concepts into exact repository paths, and strictly manage its context window when analyzing massive code diffs.
-* **1.2 Architectural Framework:** The agent must be built upon the `agentic-dev` Hexagonal Architecture framework utilizing Python.
+* **1.2 Architectural Framework:** The agent must be built upon the `adk-harness` Hexagonal Architecture framework utilizing Python.
 
 ## 2.0 Environment & Storage Strategy
 * **2.1 Execution Environment:** The agent will operate uncontainerized, as the deployment environment itself is already a containerized execution space.
@@ -197,7 +197,7 @@ Reference [Gemini Web discussion](https://gemini.google.com/share/866045485d31) 
 * **2.3 Repository Clone Strategy:** The agent must utilize `git clone --filter=blob:none` combined with `git sparse-checkout` to manage the repository footprint and download times.
 
 ## 3.0 State Management Schema
-* **3.1 State Storage Mechanism:** The agent must utilize the native memory storage mechanism provided by the `agentic-dev` framework to maintain state, allowing for asynchronous pausing, resuming, and follow-up queries without losing context across sessions.
+* **3.1 State Storage Mechanism:** The agent must utilize the native memory storage mechanism provided by the `adk-harness` framework to maintain state, allowing for asynchronous pausing, resuming, and follow-up queries without losing context across sessions.
 * **3.2 Active Focus State Object:** The state must track `active_focus`, a JSON object containing the `module_path`, `current_files_in_context`, and `head_sha`.
 * **3.3 Command History Array:** The state must track `command_history`, an array of the last 5 executed tool calls to prevent the agent from entering infinite execution loops.
 * **3.4 Cached Summaries Ledger:** The state must track `cached_summaries`, a key-value store mapping commit hashes or file paths to LLM-generated summaries. This prevents raw diffs from re-entering the prompt on subsequent conversational turns.
@@ -207,7 +207,7 @@ Reference [Gemini Web discussion](https://gemini.google.com/share/866045485d31) 
 * **4.1 Tool: `resolve_module_path`**
     * **4.1.1 Purpose:** Translates lazy human references (e.g., "Room DB", "Compose UI") into concrete AndroidX directory paths.
     * **4.1.2 Execution Constraint:** The agent MUST call this tool before executing any Git commands if the exact repository path is unknown.
-    * **4.1.3 Implementation Directive:** Utilize the `agentic-dev` framework's built-in vector capabilities to embed and perform semantic searches against the parsed `settings.gradle` or directory tree map.
+    * **4.1.3 Implementation Directive:** Utilize the `adk-harness` framework's built-in vector capabilities to embed and perform semantic searches against the parsed `settings.gradle` or directory tree map.
     * **4.1.4 Expected Output:** The tool must return an array of the top 3 to 5 path candidates alongside their confidence scores.
 * **4.2 Tool: `run_git_command`**
     * **4.2.1 Purpose:** Safely executes Git commands against the local sparse checkout.
@@ -229,7 +229,7 @@ Reference [Gemini Web discussion](https://gemini.google.com/share/866045485d31) 
     * **5.2.4 Step 3 State Rehydration:** Upon receiving the user's reply, the framework rehydrates the agent's state, injects the selected path, and resumes execution.
 
 ## 6.0 Implementation Tasks for the AI Assistant
-* **6.1 Interrupt Hooking Task:** Review the `BaseAgentChassis` in the `agentic-dev` core. Determine how to implement the `YieldToUser` interrupt pattern within the existing event loop.
+* **6.1 Interrupt Hooking Task:** Review the `BaseAgentChassis` in the `adk-harness` core. Determine how to implement the `YieldToUser` interrupt pattern within the existing event loop.
 * **6.2 Mock Injection Task:** Structure the `run_git_command` tool so it can seamlessly read from local mock fixtures during unit testing instead of invoking the actual `subprocess.run`.
 * **6.3 Post-Clone Indexing Task:** Write a post-clone hook script that extracts the AndroidX directory map and loads it into the framework's vector store to power the `resolve_module_path` tool.
 ```

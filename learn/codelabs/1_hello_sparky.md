@@ -15,12 +15,12 @@
 We have automated the entire environment setup. Open your terminal and run the bootstrap script:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/agentic-dev/main/scripts/start_hackathon.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/imraytiong/adk-harness/main/scripts/start_hackathon.sh)"
 ```
 *What this does: Clones the repo, copies your `.env`, builds your Python virtual environment, installs the dependencies, initializes your AI CLI with the correct context, and drops you directly into the Gemini CLI.*
 
 ## Step 2: Exit the CLI (For Now)
-Since we want to manually run the Sparky agent first, type `exit` in the Gemini CLI. You will still be inside the `agentic-dev` directory with your Python virtual environment activated!
+Since we want to manually run the Sparky agent first, type `exit` in the Gemini CLI. You will still be inside the `adk-harness` directory with your Python virtual environment activated!
 
 - Control + C twice will exit the CLI. 
 
