@@ -19,8 +19,11 @@ from src.universal_core.interfaces import (
     BaseFileStorage,
     BaseTelemetry,
     BaseMCPServer,
+    ILLMProvider,
     AgentContext
 )
+
+import copy
 
 class MockStateStore(BaseStateStore):
     def __init__(self, config=None):
@@ -28,10 +31,12 @@ class MockStateStore(BaseStateStore):
         self._store: Dict[str, dict] = {}
 
     async def save_state(self, key: str, state: BaseModel) -> None:
-        self._store[key] = state.model_dump()
+        self._store[key] = copy.deepcopy(state.model_dump())
 
     async def load_state(self, key: str, state_model: Type[BaseModel]) -> BaseModel:
-        data = self._store.get(key, {})
+        if key not in self._store:
+            raise KeyError(f"State not found for key: {key}")
+        data = copy.deepcopy(self._store[key])
         return state_model(**data)
 
 class MockMessageQueue(BaseMessageBroker):
@@ -54,7 +59,7 @@ class MockMessageQueue(BaseMessageBroker):
             "context": context.model_dump()
         })
 
-    async def listen(self, queue_name: str) -> Any:
+    async def listen(self, queue_name: str, **kwargs) -> Any:
         q = self._get_queue(queue_name)
         return await q.get()
 
@@ -69,7 +74,7 @@ class MockVectorStore(BaseVectorStore):
         self.collection = self.client.get_or_create_collection(f"mock_collection_{uuid.uuid4().hex}")
         logger.info("MockVectorStore: Initialized ephemeral ChromaDB client.")
 
-    async def add_documents(self, documents: list[str], metadatas: list[dict], ids: list[str]) -> None:
+    async def add_documents(self, documents: list[str], metadatas: list[dict], ids: list[str], embeddings: list[list[float]] = None) -> None:
         logger.info(f"MockVectorStore: Indexing {len(documents)} documents into in-memory ChromaDB...")
         
         # Log a few details for observability (useful for Codelab 3)
@@ -79,20 +84,37 @@ class MockVectorStore(BaseVectorStore):
             elif i == 3:
                 logger.info(f"MockVectorStore: ... and {len(documents) - 3} more documents.")
                 
-        self.collection.add(
-            documents=documents,
-            metadatas=metadatas,
-            ids=ids
-        )
+        # Support true vector contract if embeddings are provided
+        if embeddings:
+            self.collection.add(
+                documents=documents,
+                metadatas=metadatas,
+                ids=ids,
+                embeddings=embeddings
+            )
+        else:
+            self.collection.add(
+                documents=documents,
+                metadatas=metadatas,
+                ids=ids
+            )
         logger.info(f"MockVectorStore: Successfully completed indexing {len(documents)} documents.")
 
-    async def semantic_search(self, query: str, limit: int = 5) -> List[BaseModel]:
-        logger.info(f"MockVectorStore: Executing semantic search for: '{query}' (limit={limit})")
+    async def semantic_search(self, query: Any, limit: int = 5) -> List[dict]:
+        logger.info(f"MockVectorStore: Executing semantic search (limit={limit})")
         
-        results = self.collection.query(
-            query_texts=[query],
-            n_results=limit
-        )
+        if isinstance(query, str):
+            results = self.collection.query(
+                query_texts=[query],
+                n_results=limit
+            )
+        elif isinstance(query, list):
+            results = self.collection.query(
+                query_embeddings=[query],
+                n_results=limit
+            )
+        else:
+            raise ValueError("Query must be a string or a list of floats (embedding).")
         
         matches = []
         if results and results["documents"] and results["documents"][0]:
@@ -101,7 +123,11 @@ class MockVectorStore(BaseVectorStore):
             ids = results["ids"][0]
             
             for doc, meta, doc_id in zip(docs, metas, ids):
-                matches.append(DocumentResult(id=doc_id, document=doc, metadata=meta or {}))
+                matches.append({
+                    "key": doc_id,
+                    "data": {"document": doc},
+                    "metadata": meta or {}
+                })
                 
         logger.info(f"MockVectorStore: Found {len(matches)} matches for semantic search.")
         return matches

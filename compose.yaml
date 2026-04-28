@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: agentic_dev
     volumes:
       - ./.data/postgres:/var/lib/postgresql/data
-      - ./infrastructure/db_init:/docker-entrypoint-initdb.d
+      - ./ops/mac_local/db_init:/docker-entrypoint-initdb.d
     # DBA Mandate: Exact syntax for Mac Mini unified memory tuning
     command: ["postgres", "-c", "shared_buffers=1GB", "-c", "work_mem=64MB", "-c", "max_connections=100"]
     healthcheck:

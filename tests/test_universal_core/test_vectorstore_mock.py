@@ -1,5 +1,5 @@
 import pytest
-from src.universal_core.mock_adapters import MockVectorStore
+from src.infrastructure.adapters.mock_adapters import MockVectorStore
 
 @pytest.mark.asyncio
 async def test_mock_vectorstore_add_and_search():

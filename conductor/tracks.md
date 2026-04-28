@@ -1,3 +1,6 @@
+---
+status: completed
+---
 # Project Tracks
 
 This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
@@ -13,5 +16,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Fix Agent Studio UI**
   *Link: [./tracks/fix_studio_ui_20260411/](./tracks/fix_studio_ui_20260411/)*
 
-- [x] **Track: Mac Mini Local Infrastructure (Phase 1 & 1.5)**
+- [x] **Track: Mac Mini Local Infrastructure (Phase 1 & 1.5 & 2 & 3 & 4 & 5 & 6)**
   *Link: [./tracks/mac_mini_infra_20260419/](./tracks/mac_mini_infra_20260419/)*
