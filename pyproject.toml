@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adk-harness"
+version = "0.1.0"
+description = "Universal Core and Operational Adapters for the ADK Platform"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "google-adk",
+    "litellm",
+    "python-dotenv",
+    "chromadb",
+    "fastapi",
+    "uvicorn",
+    "sse-starlette",
+    "python-multipart",
+    "pydantic",
+    "jinja2",
+    "asyncpg",
+    "redis[hiredis]",
+    "pgvector"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "arize-phoenix",
+    "testcontainers[postgres]",
+    "testcontainers[redis]",
+    "toxiproxy-python",
+    "vcrpy",
+    "psycopg2-binary"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["universal_core*", "infrastructure*", "agents*"]
